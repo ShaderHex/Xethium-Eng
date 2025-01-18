@@ -6,14 +6,25 @@
 
 void Renderer::Loop() {
     ClearBackground(RAYWHITE);
+    DrawCircle(400, 300, 100, RED);
+}
 
-        DrawRectangle(100, 100, 100, 100, RED);
+void Renderer::imguiLoop(RenderTexture2D target) {
+    rlImGuiBegin(); 
+#ifdef IMGUI_HAS_DOCK
+		ImGui::DockSpaceOverViewport(0,  NULL, ImGuiDockNodeFlags_PassthruCentralNode);
+#endif
 
-        rlImGuiBegin();
-        if (ImGui::Begin("Window")) {
-            ImGui::Text("A window");
+        if (ImGui::Begin("Raylib Drawing inside ImGui", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            rlImGuiImage(&target.texture);
         }
         ImGui::End();
-        rlImGuiEnd();
 
+        if (ImGui::Begin("Component")) {
+            ImGui::Text("Entity");
+        }
+        ImGui::End();
+
+    rlImGuiEnd();
 }

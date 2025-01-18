@@ -4,13 +4,13 @@ int main() {
     Application app;
 
     if (!app.Init()) {
-        return -1; // Failed to initialize
+        return -1; 
     }
 
     while (!WindowShouldClose()) {
-        app.Render(); // Run the render loop
+        app.Render(); 
     }
 
-    CloseWindow(); // Cleanup
+    app.CleanUp();
     return 0;
 }
