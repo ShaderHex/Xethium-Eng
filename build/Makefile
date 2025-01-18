@@ -246,54 +246,6 @@ update_mappings/fast:
 	$(MAKE) $(MAKESILENT) -f external/raylib/raylib/external/glfw/src/CMakeFiles/update_mappings.dir/build.make external/raylib/raylib/external/glfw/src/CMakeFiles/update_mappings.dir/build
 .PHONY : update_mappings/fast
 
-external/imgui/backends/imgui_impl_glfw.o: external/imgui/backends/imgui_impl_glfw.cpp.o
-.PHONY : external/imgui/backends/imgui_impl_glfw.o
-
-# target to build an object file
-external/imgui/backends/imgui_impl_glfw.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o
-.PHONY : external/imgui/backends/imgui_impl_glfw.cpp.o
-
-external/imgui/backends/imgui_impl_glfw.i: external/imgui/backends/imgui_impl_glfw.cpp.i
-.PHONY : external/imgui/backends/imgui_impl_glfw.i
-
-# target to preprocess a source file
-external/imgui/backends/imgui_impl_glfw.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.i
-.PHONY : external/imgui/backends/imgui_impl_glfw.cpp.i
-
-external/imgui/backends/imgui_impl_glfw.s: external/imgui/backends/imgui_impl_glfw.cpp.s
-.PHONY : external/imgui/backends/imgui_impl_glfw.s
-
-# target to generate assembly for a file
-external/imgui/backends/imgui_impl_glfw.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.s
-.PHONY : external/imgui/backends/imgui_impl_glfw.cpp.s
-
-external/imgui/backends/imgui_impl_opengl3.o: external/imgui/backends/imgui_impl_opengl3.cpp.o
-.PHONY : external/imgui/backends/imgui_impl_opengl3.o
-
-# target to build an object file
-external/imgui/backends/imgui_impl_opengl3.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o
-.PHONY : external/imgui/backends/imgui_impl_opengl3.cpp.o
-
-external/imgui/backends/imgui_impl_opengl3.i: external/imgui/backends/imgui_impl_opengl3.cpp.i
-.PHONY : external/imgui/backends/imgui_impl_opengl3.i
-
-# target to preprocess a source file
-external/imgui/backends/imgui_impl_opengl3.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.i
-.PHONY : external/imgui/backends/imgui_impl_opengl3.cpp.i
-
-external/imgui/backends/imgui_impl_opengl3.s: external/imgui/backends/imgui_impl_opengl3.cpp.s
-.PHONY : external/imgui/backends/imgui_impl_opengl3.s
-
-# target to generate assembly for a file
-external/imgui/backends/imgui_impl_opengl3.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.s
-.PHONY : external/imgui/backends/imgui_impl_opengl3.cpp.s
-
 external/imgui/imgui.o: external/imgui/imgui.cpp.o
 .PHONY : external/imgui/imgui.o
 
@@ -390,6 +342,78 @@ external/imgui/imgui_widgets.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.s
 .PHONY : external/imgui/imgui_widgets.cpp.s
 
+external/rlimgui/rlImGui.o: external/rlimgui/rlImGui.cpp.o
+.PHONY : external/rlimgui/rlImGui.o
+
+# target to build an object file
+external/rlimgui/rlImGui.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o
+.PHONY : external/rlimgui/rlImGui.cpp.o
+
+external/rlimgui/rlImGui.i: external/rlimgui/rlImGui.cpp.i
+.PHONY : external/rlimgui/rlImGui.i
+
+# target to preprocess a source file
+external/rlimgui/rlImGui.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.i
+.PHONY : external/rlimgui/rlImGui.cpp.i
+
+external/rlimgui/rlImGui.s: external/rlimgui/rlImGui.cpp.s
+.PHONY : external/rlimgui/rlImGui.s
+
+# target to generate assembly for a file
+external/rlimgui/rlImGui.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.s
+.PHONY : external/rlimgui/rlImGui.cpp.s
+
+src/Core/Application.o: src/Core/Application.cpp.o
+.PHONY : src/Core/Application.o
+
+# target to build an object file
+src/Core/Application.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/src/Core/Application.cpp.o
+.PHONY : src/Core/Application.cpp.o
+
+src/Core/Application.i: src/Core/Application.cpp.i
+.PHONY : src/Core/Application.i
+
+# target to preprocess a source file
+src/Core/Application.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/src/Core/Application.cpp.i
+.PHONY : src/Core/Application.cpp.i
+
+src/Core/Application.s: src/Core/Application.cpp.s
+.PHONY : src/Core/Application.s
+
+# target to generate assembly for a file
+src/Core/Application.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/src/Core/Application.cpp.s
+.PHONY : src/Core/Application.cpp.s
+
+src/Core/Renderer.o: src/Core/Renderer.cpp.o
+.PHONY : src/Core/Renderer.o
+
+# target to build an object file
+src/Core/Renderer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o
+.PHONY : src/Core/Renderer.cpp.o
+
+src/Core/Renderer.i: src/Core/Renderer.cpp.i
+.PHONY : src/Core/Renderer.i
+
+# target to preprocess a source file
+src/Core/Renderer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/src/Core/Renderer.cpp.i
+.PHONY : src/Core/Renderer.cpp.i
+
+src/Core/Renderer.s: src/Core/Renderer.cpp.s
+.PHONY : src/Core/Renderer.s
+
+# target to generate assembly for a file
+src/Core/Renderer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/src/Core/Renderer.cpp.s
+.PHONY : src/Core/Renderer.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -433,12 +457,6 @@ help:
 	@echo "... glfw"
 	@echo "... raylib"
 	@echo "... xethium"
-	@echo "... external/imgui/backends/imgui_impl_glfw.o"
-	@echo "... external/imgui/backends/imgui_impl_glfw.i"
-	@echo "... external/imgui/backends/imgui_impl_glfw.s"
-	@echo "... external/imgui/backends/imgui_impl_opengl3.o"
-	@echo "... external/imgui/backends/imgui_impl_opengl3.i"
-	@echo "... external/imgui/backends/imgui_impl_opengl3.s"
 	@echo "... external/imgui/imgui.o"
 	@echo "... external/imgui/imgui.i"
 	@echo "... external/imgui/imgui.s"
@@ -451,6 +469,15 @@ help:
 	@echo "... external/imgui/imgui_widgets.o"
 	@echo "... external/imgui/imgui_widgets.i"
 	@echo "... external/imgui/imgui_widgets.s"
+	@echo "... external/rlimgui/rlImGui.o"
+	@echo "... external/rlimgui/rlImGui.i"
+	@echo "... external/rlimgui/rlImGui.s"
+	@echo "... src/Core/Application.o"
+	@echo "... src/Core/Application.i"
+	@echo "... src/Core/Application.s"
+	@echo "... src/Core/Renderer.o"
+	@echo "... src/Core/Renderer.i"
+	@echo "... src/Core/Renderer.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

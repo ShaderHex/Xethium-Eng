@@ -148,12 +148,12 @@ CMakeFiles/xethium.dir/all: external/raylib/raylib/CMakeFiles/raylib.dir/all
 CMakeFiles/xethium.dir/all: external/raylib/raylib/external/glfw/src/CMakeFiles/glfw.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/xethium.dir/build.make CMakeFiles/xethium.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=33,34,35,36,37,38,39,40 "Built target xethium"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=33,34,35,36,37,38,39,40,41 "Built target xethium"
 .PHONY : CMakeFiles/xethium.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/xethium.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles 39
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles 40
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/xethium.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles 0
 .PHONY : CMakeFiles/xethium.dir/rule

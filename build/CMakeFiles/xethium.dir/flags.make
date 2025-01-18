@@ -5,13 +5,13 @@
 # compile CXX with /usr/bin/c++
 C_DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP
 
-C_INCLUDES = -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src/external/glfw/include
+C_INCLUDES = -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends -I/home/ausr/Documents/Projects/xeth/xeth/external/rlimgui -I/home/ausr/Documents/Projects/xeth/xeth/src -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src/external/glfw/include
 
 C_FLAGS = 
 
 CXX_DEFINES = -DGRAPHICS_API_OPENGL_33 -DPLATFORM_DESKTOP
 
-CXX_INCLUDES = -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src/external/glfw/include
+CXX_INCLUDES = -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui -I/home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends -I/home/ausr/Documents/Projects/xeth/xeth/external/rlimgui -I/home/ausr/Documents/Projects/xeth/xeth/src -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src -I/home/ausr/Documents/Projects/xeth/xeth/external/raylib/src/external/glfw/include
 
 CXX_FLAGS = -std=gnu++17
 

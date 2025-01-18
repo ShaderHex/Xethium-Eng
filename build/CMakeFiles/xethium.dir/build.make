@@ -83,10 +83,38 @@ CMakeFiles/xethium.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/src/main.cpp -o CMakeFiles/xethium.dir/src/main.cpp.s
 
+CMakeFiles/xethium.dir/src/Core/Application.cpp.o: CMakeFiles/xethium.dir/flags.make
+CMakeFiles/xethium.dir/src/Core/Application.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/src/Core/Application.cpp
+CMakeFiles/xethium.dir/src/Core/Application.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/xethium.dir/src/Core/Application.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/src/Core/Application.cpp.o -MF CMakeFiles/xethium.dir/src/Core/Application.cpp.o.d -o CMakeFiles/xethium.dir/src/Core/Application.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/src/Core/Application.cpp
+
+CMakeFiles/xethium.dir/src/Core/Application.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/xethium.dir/src/Core/Application.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ausr/Documents/Projects/xeth/xeth/src/Core/Application.cpp > CMakeFiles/xethium.dir/src/Core/Application.cpp.i
+
+CMakeFiles/xethium.dir/src/Core/Application.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/src/Core/Application.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/src/Core/Application.cpp -o CMakeFiles/xethium.dir/src/Core/Application.cpp.s
+
+CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o: CMakeFiles/xethium.dir/flags.make
+CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/src/Core/Renderer.cpp
+CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o -MF CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o.d -o CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/src/Core/Renderer.cpp
+
+CMakeFiles/xethium.dir/src/Core/Renderer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/xethium.dir/src/Core/Renderer.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ausr/Documents/Projects/xeth/xeth/src/Core/Renderer.cpp > CMakeFiles/xethium.dir/src/Core/Renderer.cpp.i
+
+CMakeFiles/xethium.dir/src/Core/Renderer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/src/Core/Renderer.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/src/Core/Renderer.cpp -o CMakeFiles/xethium.dir/src/Core/Renderer.cpp.s
+
 CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o: CMakeFiles/xethium.dir/flags.make
 CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui.cpp
 CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o -MF CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o.d -o CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui.cpp
 
 CMakeFiles/xethium.dir/external/imgui/imgui.cpp.i: cmake_force
@@ -100,7 +128,7 @@ CMakeFiles/xethium.dir/external/imgui/imgui.cpp.s: cmake_force
 CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o: CMakeFiles/xethium.dir/flags.make
 CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_draw.cpp
 CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o -MF CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o.d -o CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_draw.cpp
 
 CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.i: cmake_force
@@ -114,7 +142,7 @@ CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.s: cmake_force
 CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o: CMakeFiles/xethium.dir/flags.make
 CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_tables.cpp
 CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o -MF CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o.d -o CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_tables.cpp
 
 CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.i: cmake_force
@@ -128,7 +156,7 @@ CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.s: cmake_force
 CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o: CMakeFiles/xethium.dir/flags.make
 CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_widgets.cpp
 CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o -MF CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o.d -o CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_widgets.cpp
 
 CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.i: cmake_force
@@ -139,43 +167,30 @@ CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/external/imgui/imgui_widgets.cpp -o CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.s
 
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o: CMakeFiles/xethium.dir/flags.make
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_glfw.cpp
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o -MF CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o.d -o CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_glfw.cpp
+CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o: CMakeFiles/xethium.dir/flags.make
+CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/rlimgui/rlImGui.cpp
+CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o -MF CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o.d -o CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/rlimgui/rlImGui.cpp
 
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_glfw.cpp > CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.i
+CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ausr/Documents/Projects/xeth/xeth/external/rlimgui/rlImGui.cpp > CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.i
 
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_glfw.cpp -o CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.s
-
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o: CMakeFiles/xethium.dir/flags.make
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o: /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_opengl3.cpp
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o: CMakeFiles/xethium.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o -MF CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o.d -o CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o -c /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_opengl3.cpp
-
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_opengl3.cpp > CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.i
-
-CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/external/imgui/backends/imgui_impl_opengl3.cpp -o CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.s
+CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ausr/Documents/Projects/xeth/xeth/external/rlimgui/rlImGui.cpp -o CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.s
 
 # Object files for target xethium
 xethium_OBJECTS = \
 "CMakeFiles/xethium.dir/src/main.cpp.o" \
+"CMakeFiles/xethium.dir/src/Core/Application.cpp.o" \
+"CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o" \
 "CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o" \
 "CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o" \
 "CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o" \
 "CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o" \
-"CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o" \
-"CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o"
+"CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o"
 
 # External object files for target xethium
 xethium_EXTERNAL_OBJECTS = \
@@ -204,12 +219,13 @@ xethium_EXTERNAL_OBJECTS = \
 "/home/ausr/Documents/Projects/xeth/xeth/build/external/raylib/raylib/external/glfw/src/CMakeFiles/glfw.dir/posix_poll.c.o"
 
 xethium: CMakeFiles/xethium.dir/src/main.cpp.o
+xethium: CMakeFiles/xethium.dir/src/Core/Application.cpp.o
+xethium: CMakeFiles/xethium.dir/src/Core/Renderer.cpp.o
 xethium: CMakeFiles/xethium.dir/external/imgui/imgui.cpp.o
 xethium: CMakeFiles/xethium.dir/external/imgui/imgui_draw.cpp.o
 xethium: CMakeFiles/xethium.dir/external/imgui/imgui_tables.cpp.o
 xethium: CMakeFiles/xethium.dir/external/imgui/imgui_widgets.cpp.o
-xethium: CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_glfw.cpp.o
-xethium: CMakeFiles/xethium.dir/external/imgui/backends/imgui_impl_opengl3.cpp.o
+xethium: CMakeFiles/xethium.dir/external/rlimgui/rlImGui.cpp.o
 xethium: external/raylib/raylib/external/glfw/src/CMakeFiles/glfw.dir/context.c.o
 xethium: external/raylib/raylib/external/glfw/src/CMakeFiles/glfw.dir/init.c.o
 xethium: external/raylib/raylib/external/glfw/src/CMakeFiles/glfw.dir/input.c.o
@@ -241,7 +257,7 @@ xethium: /usr/lib64/libOpenGL.so
 xethium: /usr/lib64/libGLX.so
 xethium: /usr/lib64/libGLU.so
 xethium: CMakeFiles/xethium.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX executable xethium"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/ausr/Documents/Projects/xeth/xeth/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable xethium"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/xethium.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
