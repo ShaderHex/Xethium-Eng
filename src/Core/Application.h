@@ -9,6 +9,6 @@ private:
 public:
     bool Init();
     void Render();
-    void SetupDocking();
+    void SetupDocking(int currentWindowWidth, int currentWindowHeight);
     void CleanUp();
 };

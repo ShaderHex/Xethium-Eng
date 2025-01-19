@@ -14,9 +14,16 @@ void Renderer::Loop() {
 
 void Renderer::imguiLoop(RenderTexture2D target) {
     rlImGuiBegin(); 
-    if (!initialized) { 
-        app->SetupDocking();
-        initialized = true;
+    int currentWindowWidth = GetScreenWidth();
+    int currentWindowHeight = GetScreenHeight();
+
+    static int lastWindowWidth = currentWindowWidth;
+    static int lastWindowHeight = currentWindowHeight;
+
+    if (currentWindowWidth != lastWindowWidth || currentWindowHeight != lastWindowHeight) {
+        app->SetupDocking(currentWindowWidth, currentWindowHeight);
+        lastWindowWidth = currentWindowWidth; 
+        lastWindowHeight = currentWindowHeight;
     }
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -40,7 +47,7 @@ void Renderer::imguiLoop(RenderTexture2D target) {
     ImGui::End();
 
     if (ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        rlImGuiImage(&target.texture);
+        rlImGuiImage(&target.texture); 
     }
     ImGui::End();
 
@@ -48,6 +55,7 @@ void Renderer::imguiLoop(RenderTexture2D target) {
         ImGui::Text("Entity");
     }
     ImGui::End();
+    
     rlImGuiEnd();
-
 }
+
