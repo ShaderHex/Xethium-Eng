@@ -9,5 +9,6 @@ private:
 public:
     bool Init();
     void Render();
+    void SetupDocking();
     void CleanUp();
 };

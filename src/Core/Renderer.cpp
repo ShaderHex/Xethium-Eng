@@ -2,7 +2,10 @@
 #include "rlImGui.h"
 #include "imgui.h"
 #include "Renderer.h"
+#include "Application.h"
 #include "iostream"
+
+static bool initialized = false;
 
 void Renderer::Loop() {
     ClearBackground(RAYWHITE);
@@ -11,20 +14,40 @@ void Renderer::Loop() {
 
 void Renderer::imguiLoop(RenderTexture2D target) {
     rlImGuiBegin(); 
-#ifdef IMGUI_HAS_DOCK
-		ImGui::DockSpaceOverViewport(0,  NULL, ImGuiDockNodeFlags_PassthruCentralNode);
-#endif
+    if (!initialized) { 
+        app->SetupDocking();
+        initialized = true;
+    }
 
-        if (ImGui::Begin("Raylib Drawing inside ImGui", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            rlImGuiImage(&target.texture);
-        }
-        ImGui::End();
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
+    ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
+    ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
-        if (ImGui::Begin("Component")) {
-            ImGui::Text("Entity");
-        }
-        ImGui::End();
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                                     ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    window_flags |= ImGuiWindowFlags_NoBackground;
+
+    ImGui::Begin("DockSpace", nullptr, window_flags);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0, 0), ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGui::End();
+
+    if (ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        rlImGuiImage(&target.texture);
+    }
+    ImGui::End();
+
+    if (ImGui::Begin("Components")) {
+        ImGui::Text("Entity");
+    }
+    ImGui::End();
     rlImGuiEnd();
+
 }
