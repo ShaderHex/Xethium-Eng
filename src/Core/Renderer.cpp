@@ -15,13 +15,6 @@ void Renderer::Loop() {
     BeginMode3D(camera->camera);
     ClearBackground(DARKGRAY);
     DrawCube({0, 0, 0}, 2.0f, 2.0f, 2.0f, RED);
-    
-    std::cout << "Position: (" 
-              << camera->camera.position.x << ", " 
-              << camera->camera.position.y << ", " 
-              << camera->camera.position.z << ")" 
-              << std::endl;    
-    
     EndMode3D();
 }
 

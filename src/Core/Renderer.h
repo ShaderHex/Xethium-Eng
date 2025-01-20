@@ -13,5 +13,5 @@ public:
     void SetCamera(CameraWrapper* cam) { camera = cam; }
     void Loop();
     void imguiInit();
-    void imguiLoop(RenderTexture2D target);\
+    void imguiLoop(RenderTexture2D target);
 };
