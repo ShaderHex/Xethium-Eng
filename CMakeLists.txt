@@ -7,6 +7,7 @@ set(SOURCES
     src/main.cpp
     src/Core/Application.cpp
     src/Core/Renderer.cpp
+    src/Camera/Camera.cpp
 )
 
 set(RLIMGUI_SOURCES
