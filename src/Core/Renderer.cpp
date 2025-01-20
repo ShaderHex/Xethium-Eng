@@ -12,6 +12,20 @@ void Renderer::Loop() {
     DrawCircle(400, 300, 100, RED);
 }
 
+void Renderer::imguiInit() {
+    rlImGuiBegin(); 
+
+    int currentWindowWidth = GetScreenWidth();
+    int currentWindowHeight = GetScreenHeight();
+
+    static int lastWindowWidth = currentWindowWidth;
+    static int lastWindowHeight = currentWindowHeight;
+    app->SetupDocking(currentWindowWidth, currentWindowHeight);
+    
+    rlImGuiEnd();
+
+}
+
 void Renderer::imguiLoop(RenderTexture2D target) {
     rlImGuiBegin(); 
     int currentWindowWidth = GetScreenWidth();
@@ -19,7 +33,7 @@ void Renderer::imguiLoop(RenderTexture2D target) {
 
     static int lastWindowWidth = currentWindowWidth;
     static int lastWindowHeight = currentWindowHeight;
-
+    
     if (currentWindowWidth != lastWindowWidth || currentWindowHeight != lastWindowHeight) {
         app->SetupDocking(currentWindowWidth, currentWindowHeight);
         lastWindowWidth = currentWindowWidth; 
@@ -58,4 +72,3 @@ void Renderer::imguiLoop(RenderTexture2D target) {
     
     rlImGuiEnd();
 }
-

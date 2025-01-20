@@ -22,6 +22,7 @@ bool Application::Init() {
 #ifdef IMGUI_HAS_DOCK
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
 #endif
+    renderer.imguiInit();
     
     std::cout<<"Init docking done\n";
     return true;

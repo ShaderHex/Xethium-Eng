@@ -1,3 +1,4 @@
+// Renderer.h
 #pragma once
 #include "raylib.h"
 
@@ -8,5 +9,6 @@ private:
     Application* app;
 public:
     void Loop();
+    void imguiInit();
     void imguiLoop(RenderTexture2D target);
 };
