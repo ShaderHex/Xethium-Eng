@@ -13,11 +13,10 @@ void imguiTheme();
 
 bool Application::Init() {
     SetTraceLogLevel(LOG_NONE);
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
     InitWindow(screenWidth, screenHeight, "Xethium");
 
     rlImGuiSetup(true); 
-    std::cout << "calling cam init\n";
     
     camera = new CameraWrapper();
     camera->Init();
@@ -26,14 +25,12 @@ bool Application::Init() {
 
     target = LoadRenderTexture(screenWidth, screenHeight);
     
-    std::cout << "Init docking\n";
 
 #ifdef IMGUI_HAS_DOCK
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
 #endif
     imguiTheme();
     renderer.imguiInit();
-    std::cout << "Init docking done\n";
     return true;
 }
 
