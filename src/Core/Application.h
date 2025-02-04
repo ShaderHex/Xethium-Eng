@@ -1,4 +1,3 @@
-// Application.h
 #pragma once
 #include "Renderer.h"
 #include "raylib.h"
