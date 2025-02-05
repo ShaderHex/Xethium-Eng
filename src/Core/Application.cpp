@@ -14,7 +14,7 @@ void imguiTheme();
 bool Application::Init() {
     SetTraceLogLevel(LOG_NONE);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
-    InitWindow(screenWidth, screenHeight, "Xethium");
+    InitWindow(screenWidth, screenHeight, "Xethium - [DEBUG]");
 
     rlImGuiSetup(true); 
     
@@ -57,7 +57,7 @@ void Application::SetupDocking(int currentWindowWidth, int currentWindowHeight) 
 
     ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
     ImGui::DockBuilderRemoveNode(dockspace_id);
-    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_None);
+    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_NoUndocking | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
     
     ImGui::DockBuilderSetNodeSize(dockspace_id, ImVec2(currentWindowWidth, currentWindowHeight));
 

@@ -74,23 +74,30 @@ void Renderer::imguiLoop(RenderTexture2D target) {
     ImGui::PopStyleVar(3);
 
     ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
-    ImGui::DockSpace(dockspace_id, ImVec2(0, 0), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    ImGui::DockSpace(dockspace_id, ImVec2(0, 0), 
+    ImGuiDockNodeFlags_PassthruCentralNode | 
+    ImGuiDockNodeFlags_NoUndocking // Lock docking
+);
     ImGui::End();
 
-    if (ImGui::Begin("Viewport")) {
+    if (ImGui::Begin("Viewport", nullptr, 
+        ImGuiWindowFlags_NoMove | 
+        ImGuiWindowFlags_NoResize)) 
+    {
         rlImGuiImage(&target.texture); 
     }
     ImGui::End();
 
-    if (ImGui::Begin("Components")) {
-        ImGui::Text("Components");
-    }
+    if (ImGui::Begin("Components", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
+    ImGui::Text("Components");
+}
     ImGui::End();
-    if (ImGui::Begin("Inspector")) {
+    if (ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
         ImGui::Text("Inspector");
     }
     ImGui::End();
-    if (ImGui::Begin("File Manager")) {
+    if (ImGui::Begin("File Manager",nullptr,  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
         ImGui::Text("Entity");
     }
     ImGui::End();
