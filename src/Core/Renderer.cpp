@@ -77,7 +77,7 @@ void Renderer::imguiLoop(RenderTexture2D target) {
 
     ImGui::DockSpace(dockspace_id, ImVec2(0, 0), 
     ImGuiDockNodeFlags_PassthruCentralNode | 
-    ImGuiDockNodeFlags_NoUndocking // Lock docking
+    ImGuiDockNodeFlags_NoUndocking
 );
     ImGui::End();
 
