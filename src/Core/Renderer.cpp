@@ -5,6 +5,13 @@
 #include "Application.h"
 #include "iostream"
 #include "imgui_impl_raylib.h"
+#include <cstdint>
+
+Vector3 CubePos;
+
+void Renderer::Init() {
+    CubePos = {0, 0, 0};
+}
 
 void Renderer::Loop() {
     if (!camera) {
@@ -14,7 +21,7 @@ void Renderer::Loop() {
 
     BeginMode3D(camera->camera);
     ClearBackground(DARKGRAY);
-    DrawCube({0, 0, 0}, 2.0f, 2.0f, 2.0f, RED);
+    DrawCube(CubePos, 2.0f, 2.0f, 2.0f, RED);
     EndMode3D();
 }
 
@@ -82,19 +89,32 @@ void Renderer::imguiLoop(RenderTexture2D target) {
     ImGui::End();
 
     if (ImGui::Begin("Viewport", nullptr, 
-        ImGuiWindowFlags_NoMove | 
-        ImGuiWindowFlags_NoResize)) 
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) 
     {
-        rlImGuiImage(&target.texture); 
+        ImVec2 viewportSize = ImGui::GetContentRegionAvail();
+        
+        viewportSize.x = std::max(viewportSize.x, 1.0f);
+        viewportSize.y = std::max(viewportSize.y, 1.0f);
+
+        if (target.texture.id > 0) {
+            rlImGuiImageRect(
+                &target.texture, 
+                viewportSize.x, 
+                viewportSize.y,
+                Rectangle{0, 0, (float)target.texture.width, -(float)target.texture.height}
+            );
+        }
     }
     ImGui::End();
-
     if (ImGui::Begin("Components", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
     ImGui::Text("Components");
 }
     ImGui::End();
     if (ImGui::Begin("Inspector", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {
         ImGui::Text("Inspector");
+        if (ImGui::CollapsingHeader("Position")) {
+            ImGui::DragFloat3("Object Position", &CubePos.x, 0.1f);
+        }
     }
     ImGui::End();
     if (ImGui::Begin("File Manager",nullptr,  ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize)) {

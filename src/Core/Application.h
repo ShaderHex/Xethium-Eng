@@ -8,6 +8,8 @@ class Application {
 private:
     Renderer renderer;
     CameraWrapper* camera;
+    RenderTexture2D target;
+    Vector2 lastViewportSize = { 1200, 600 };
 public:
     bool Init();
     void Render();

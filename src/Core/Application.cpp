@@ -24,12 +24,20 @@ bool Application::Init() {
     renderer.SetCamera(camera);
 
     target = LoadRenderTexture(screenWidth, screenHeight);
+    SetTextureFilter(target.texture, TEXTURE_FILTER_BILINEAR);
+
+    if (target.texture.id == 0) {
+        std::cerr << "ERROR: Failed to create render texture!" << std::endl;
+        return false;
+    }
+
     
 
 #ifdef IMGUI_HAS_DOCK
     ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable; 
 #endif
     imguiTheme();
+    renderer.Init();
     renderer.imguiInit();
     return true;
 }
@@ -37,12 +45,14 @@ bool Application::Init() {
 void Application::Render() {
     BeginDrawing();
     ClearBackground(BLACK);
+    
     BeginTextureMode(target);
+    ClearBackground(BLANK);
     renderer.Loop();
     EndTextureMode();
 
     renderer.imguiLoop(target);
-    ImGui::Render();
+    
     EndDrawing();
 }
 
