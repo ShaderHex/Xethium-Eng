@@ -6,8 +6,9 @@ add_subdirectory(external/raylib)
 set(SOURCES
     src/main.cpp
     src/Core/Application.cpp
-    src/Core/Renderer.cpp
+    src/Renderer/Renderer.cpp
     src/Camera/Camera.cpp
+    src/Entities/Rectangle.cpp
 )
 
 set(RLIMGUI_SOURCES

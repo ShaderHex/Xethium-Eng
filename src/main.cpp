@@ -1,16 +1,10 @@
 #include "Core/Application.h"
+#include "Renderer/Renderer.h"
 
 int main() {
     Application app;
-
-    if (!app.Init()) {
-        return -1; 
-    }
-
-    while (!WindowShouldClose()) {
-        app.Render(); 
-    }
-
-    app.CleanUp();
+    app.Init();
+    app.Run();
+    app.Shutdown();
     return 0;
 }

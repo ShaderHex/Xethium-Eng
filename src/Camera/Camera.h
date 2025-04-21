@@ -1,8 +1,15 @@
 #pragma once
+
+#include <iostream>
+#include <vector>
+
 #include "raylib.h"
 
-class CameraWrapper {
+extern Camera2D camera;
+extern Camera2D playCamera;
+
+class EditorCamera {
 public:
-    Camera3D camera;
-    void Init();
+    void InitCam();
+    void UpdateCamera();
 };

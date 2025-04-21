@@ -1,18 +1,26 @@
-#include "raylib.h"
 #include "Camera.h"
-#include <iostream>
 
-void CameraWrapper::Init() {
-    camera = {0};
-    camera.position = { 10.0f, 10.0f, 10.0f };
-    camera.target = { 0.0f, 0.0f, 0.0f };
-    camera.up = { 0.0f, 1.0f, 0.0f };
-    camera.fovy = 45.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
-     std::cout << "Position: (" 
-          << camera.position.x << ", " 
-          << camera.position.y << ", " 
-          << camera.position.z << ")" 
-          << std::endl;    
-    std::cout<<"Camera init done!\n";
+Camera2D camera = { 0 };
+Camera2D playCamera = {0};
+
+void EditorCamera::InitCam() {
+    camera.target = (Vector2){ 0.0, 0.0 };
+    camera.offset = (Vector2){ 0.0, 0.0 };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+}
+
+void EditorCamera::UpdateCamera() {
+    if (IsKeyDown(KEY_D)) {
+        camera.target.x += 0.5;
+    } 
+    if (IsKeyDown(KEY_A)) {
+        camera.target.x -= 0.5;
+    }
+    if (IsKeyDown(KEY_W)) {
+        camera.target.y -= 0.5;
+    }
+    if (IsKeyDown(KEY_S)) {
+        camera.target.y += 0.5;
+    }
 }
