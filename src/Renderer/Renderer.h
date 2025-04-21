@@ -6,7 +6,7 @@
 class Renderer {
 public:
     void Init();
-    void RenderFrame(Camera2D currentCamera);
+    void RenderFrame(Camera2D currentCamera, const std::vector<RectangleObject>& rects);
 private:
     EditorCamera cam;
 };

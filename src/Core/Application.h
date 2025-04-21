@@ -8,6 +8,7 @@
 #include "Renderer/Renderer.h"
 #include "Entities/Rectangle.h"
 #include "Camera/Camera.h"
+#include "SceneManager.h"
 
 class Application {
 public:
@@ -17,4 +18,5 @@ public:
 private:
     Renderer renderer;
     EditorCamera cam;
+    std::vector<RectangleObject> rectangles;
 };

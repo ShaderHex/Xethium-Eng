@@ -7,11 +7,11 @@ void Renderer::Init() {
     // For now, nothing fancy needed.
 }
 
-void Renderer::RenderFrame(Camera2D currentCamera) {
+void Renderer::RenderFrame(Camera2D currentCamera, const std::vector<RectangleObject>& rects) {
     ClearBackground(GRAY);
     BeginMode2D(currentCamera);
-        for (const RectangleObject& rect : rectangles) {
-            DrawRectangleV(rect.position, rect.size, rect.color);
+        for (const auto& r : rects) {
+            DrawRectangleV(r.position, r.size, r.color);
         }
     EndMode2D();
 

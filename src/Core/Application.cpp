@@ -16,6 +16,8 @@ void Application::Init() {
     renderer.Init();
 
     currentCamera = &camera;
+
+    rectangles = SceneManager::LoadScene("scenes/scene.json");
 }
 
 void Application::Run() {
@@ -49,7 +51,7 @@ void Application::Run() {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        renderer.RenderFrame(*currentCamera);
+        renderer.RenderFrame(*currentCamera, rectangles);
 
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
