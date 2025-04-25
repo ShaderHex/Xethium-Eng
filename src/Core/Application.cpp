@@ -10,14 +10,25 @@ Mode currentMode;
 Camera2D *currentCamera;
 
 void Application::Init() {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
     InitWindow(800, 600, "Xethium");
+    rlImGuiSetup(true);
     currentMode = MODE_EDIT;
     cam.InitCam();
+    //camera = cam.LoadCam("scenes/scene.json");
     renderer.Init();
 
     currentCamera = &camera;
 
-    rectangles = SceneManager::LoadScene("scenes/scene.json");
+    rectangles = SceneManager::LoadScene("scenes/scene.json", *currentCamera);
+}
+
+bool Application::CurrentGameMode() {
+    if (currentMode == MODE_EDIT){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void Application::Run() {
@@ -52,7 +63,7 @@ void Application::Run() {
         ClearBackground(RAYWHITE);
 
         renderer.RenderFrame(*currentCamera, rectangles);
-
+        renderer.ImGuiRender(CurrentGameMode());
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
         EndDrawing();
@@ -61,5 +72,6 @@ void Application::Run() {
 
 
 void Application::Shutdown() {
+    rlImGuiShutdown();
     CloseWindow();
 }

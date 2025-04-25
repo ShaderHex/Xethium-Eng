@@ -1,8 +1,9 @@
 #pragma once
 
-#include "raylib.h"
-
+#include <iostream>
 #include <vector>
+
+#include "raylib.h"
 
 struct RectangleObject {
     Vector2 position;
@@ -17,3 +18,8 @@ struct RectangleObject {
 
 
 extern std::vector<RectangleObject> rectangles;
+
+class RectangleObj {
+public:
+    void CreateRect();
+};

@@ -4,6 +4,9 @@
 #include <iostream>
 
 #include "raylib.h"
+#include "raylib.h"
+#include "imgui.h"
+#include "rlImGui.h"
 
 #include "Renderer/Renderer.h"
 #include "Entities/Rectangle.h"
@@ -14,6 +17,7 @@ class Application {
 public:
     void Init();
     void Run();
+    bool CurrentGameMode();
     void Shutdown();
 private:
     Renderer renderer;

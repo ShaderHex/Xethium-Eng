@@ -1,5 +1,4 @@
 #include "Renderer.h"
-#include "raylib.h"
 
 void Renderer::Init() {
     // Any renderer-specific initialization can go here
@@ -15,4 +14,16 @@ void Renderer::RenderFrame(Camera2D currentCamera, const std::vector<RectangleOb
         }
     EndMode2D();
 
+}
+
+void Renderer::ImGuiRender(bool CanEdit) {
+    rlImGuiBegin();
+        ImGui::Begin("Inspector");
+            if (ImGui::Button("Create")) {
+                if (CanEdit) {
+                    rect.CreateRect();
+                }
+            }
+        ImGui::End();
+    rlImGuiEnd();
 }
