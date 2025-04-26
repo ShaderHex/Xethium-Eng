@@ -12,8 +12,8 @@ class Renderer {
 public:
     void Init();
     void RenderFrame(Camera2D currentCamera, const std::vector<RectangleObject>& rects);
-    void ImGuiRender(bool CanEdit);
+    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects);
 private:
     EditorCamera cam;
-    RectangleObj rect;
+    RectangleObj rectang;
 };

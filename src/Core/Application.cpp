@@ -15,7 +15,6 @@ void Application::Init() {
     rlImGuiSetup(true);
     currentMode = MODE_EDIT;
     cam.InitCam();
-    //camera = cam.LoadCam("scenes/scene.json");
     renderer.Init();
 
     currentCamera = &camera;
@@ -58,12 +57,11 @@ void Application::Run() {
             playCamera.zoom = 1.0f;
             std::cout << "Play camera created\n";
         }
-
+        
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-
+        
         renderer.RenderFrame(*currentCamera, rectangles);
-        renderer.ImGuiRender(CurrentGameMode());
+        renderer.ImGuiRender(CurrentGameMode(), rectangles);
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
         EndDrawing();

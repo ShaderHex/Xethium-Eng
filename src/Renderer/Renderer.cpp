@@ -1,5 +1,5 @@
 #include "Renderer.h"
-
+#include "Core/Application.h"
 void Renderer::Init() {
     // Any renderer-specific initialization can go here
     // For example: loading shaders, setting up render targets, etc.
@@ -16,13 +16,16 @@ void Renderer::RenderFrame(Camera2D currentCamera, const std::vector<RectangleOb
 
 }
 
-void Renderer::ImGuiRender(bool CanEdit) {
+void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects) {
     rlImGuiBegin();
         ImGui::Begin("Inspector");
             if (ImGui::Button("Create")) {
-                if (CanEdit) {
-                    rect.CreateRect();
-                }
+                    if (CanEdit) {
+                        rectang.CreateRect(rects);
+                    }
+            }
+            if (ImGui::Button("Create Camera")) {
+
             }
         ImGui::End();
     rlImGuiEnd();

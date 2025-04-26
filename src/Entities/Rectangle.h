@@ -21,5 +21,5 @@ extern std::vector<RectangleObject> rectangles;
 
 class RectangleObj {
 public:
-    void CreateRect();
+    void CreateRect(std::vector<RectangleObject>& rects);
 };
