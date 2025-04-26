@@ -9,6 +9,7 @@ struct RectangleObject {
     Vector2 position;
     Vector2 size;
     Color color;
+    std::string name;
 
     RectangleObject() = default;
 

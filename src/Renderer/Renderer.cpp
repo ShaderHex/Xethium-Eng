@@ -16,7 +16,7 @@ void Renderer::RenderFrame(Camera2D currentCamera, const std::vector<RectangleOb
 
 }
 
-void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects) {
+void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D currentCamera) {
     rlImGuiBegin();
         ImGui::Begin("Inspector");
             if (ImGui::Button("Create")) {
@@ -26,6 +26,17 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects) {
             }
             if (ImGui::Button("Create Camera")) {
 
+            }
+            if (ImGui::Button("Load Scene")) {
+                if (CanEdit) {
+                    rects = SceneManager::LoadScene("scenes/scene.json", camera, playCamera);
+                    std::cout << "Loaded rectangles: " << rects.size() << std::endl;
+                }
+            }
+            if (ImGui::Button("Save Scene")) {
+                if (CanEdit) {
+                    SceneManager::SaveScene(rects, camera, playCamera, "scenes/scene.json");
+                }
             }
         ImGui::End();
     rlImGuiEnd();

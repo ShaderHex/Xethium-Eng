@@ -19,7 +19,7 @@ void Application::Init() {
 
     currentCamera = &camera;
 
-    rectangles = SceneManager::LoadScene("scenes/scene.json", *currentCamera);
+    //rectangles = SceneManager::LoadScene("scenes/scene.json", *currentCamera);
 }
 
 bool Application::CurrentGameMode() {
@@ -39,14 +39,8 @@ void Application::Run() {
 
         if (currentMode == MODE_EDIT){
             cam.UpdateCamera();
-            if (IsKeyPressed(KEY_H)) {
-                RectangleObject rect;
-                rect.position = { (float)GetRandomValue(0, 500), (float)GetRandomValue(0, 500)};
-                rect.size = {100, 100};
-                rect.color = (RED);
-                
-                rectangles.push_back(rect);
-                std::cout<<"Pushed back to the memory\n";
+            if (IsKeyPressed(KEY_L)) {
+                rectangles = SceneManager::LoadScene("scenes/scene.json", camera, playCamera);
             }
         }
 
@@ -61,13 +55,12 @@ void Application::Run() {
         BeginDrawing();
         
         renderer.RenderFrame(*currentCamera, rectangles);
-        renderer.ImGuiRender(CurrentGameMode(), rectangles);
+        renderer.ImGuiRender(CurrentGameMode(), rectangles, *currentCamera);
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
         EndDrawing();
     }
 }
-
 
 void Application::Shutdown() {
     rlImGuiShutdown();
