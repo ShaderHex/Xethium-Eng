@@ -7,6 +7,7 @@
 
 #include "Camera/Camera.h"
 #include "Entities/Rectangle.h"
+#include "Core/FileManager.h"
 
 class Renderer {
 public:
@@ -16,4 +17,5 @@ public:
 private:
     EditorCamera cam;
     RectangleObj rectang;
+    FileManager filemanager;
 };
