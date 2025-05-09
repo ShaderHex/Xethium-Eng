@@ -127,6 +127,34 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             }
         }
     }
+
+    if (ImGui::Button("Create Scene")) {
+        ImGui::OpenPopup("Create Scene Popup");
+    }
+    
+    if (ImGui::BeginPopupModal("Create Scene Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        static char SceneName[128] = "";
+    
+        ImGui::InputText("Name", SceneName, IM_ARRAYSIZE(SceneName));
+    
+        if (ImGui::Button("OK", ImVec2(120, 0))) {
+            if (strlen(SceneName) > 0) {
+                SceneManager::CreateScene(SceneName);
+            } else {
+                std::cerr << "[UI] Error: Scene name cannot be empty!\n";
+            }
+            ImGui::CloseCurrentPopup();
+            SceneName[0] = '\0';
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+    
+        ImGui::EndPopup();
+    }
+    
+
     ImGui::End();
 
     RenderFileManagerPanel("project/", rects);

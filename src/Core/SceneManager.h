@@ -17,4 +17,5 @@ public:
         const std::string& filepath,
         Camera2D& editorCamera,
         Camera2D& playCamera);
+    static void CreateScene(char* SceneName);
 };

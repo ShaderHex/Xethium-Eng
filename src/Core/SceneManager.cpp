@@ -9,6 +9,19 @@
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
+void SceneManager::CreateScene(char* SceneName) {
+    std::string sceneDir = "project/scenes/";
+    std::ofstream file(sceneDir + SceneName + ".json");
+
+    if (file.is_open()) {
+        file << "This is a line written to the file.\n";
+        file.close();
+        std::cout << "File created and written successfully.\n";
+    } else {
+        std::cerr << "Failed to create the file.\n";
+    }
+}
+
 std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath, Camera2D& editorCamera, Camera2D& playCamera)
 {
     std::vector<RectangleObject> rectangles;
