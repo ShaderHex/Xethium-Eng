@@ -18,8 +18,6 @@ void Application::Init() {
     renderer.Init();
 
     currentCamera = &camera;
-
-    //rectangles = SceneManager::LoadScene("scenes/scene.json", *currentCamera);
 }
 
 bool Application::CurrentGameMode() {

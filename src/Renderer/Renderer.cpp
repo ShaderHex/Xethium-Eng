@@ -75,8 +75,41 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             rectang.CreateRect(rects);
         }
     }
+
+    static int selectedUiD = -1; // UI element to select UiD
+    if (ImGui::Button("Select Rectangle to Modify")) {
+        ImGui::OpenPopup("Select UiD");
+    }
+    if (ImGui::BeginPopup("Select UiD")) {
+        for (const auto& rect : rects) {
+            if (ImGui::Selectable(("UiD: " + std::to_string(rect.UiD)).c_str())) {
+                selectedUiD = rect.UiD; // Store selected UiD
+            }
+        }
+        ImGui::EndPopup();
+    }
+
+    // Modify selected rectangle's properties based on its UiD
+    if (selectedUiD != -1) {
+        for (auto& rect : rects) {
+            if (rect.UiD == selectedUiD) {
+                ImGui::Text("Modify Rectangle: UiD %d", selectedUiD);
+
+                // Modify Position
+                ImGui::InputFloat2("Position", (float*)&rect.position);
+
+                // Modify Size
+                ImGui::InputFloat2("Size", (float*)&rect.size);
+
+                // Modify Color
+                ImGui::ColorEdit3("Color", (float*)&rect.color);
+            }
+        }
+    }
+
+
     if (ImGui::Button("Create Camera")) {
-        // Future work: create camera logic
+        // TODO: create camera logic
     }
     if (ImGui::Button("Load Scene")) {
         if (CanEdit) {
@@ -94,9 +127,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             }
         }
     }
-    ImGui::End();
-
-    ImGui::Begin("Files");
     ImGui::End();
 
     RenderFileManagerPanel("project/", rects);

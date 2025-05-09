@@ -7,10 +7,11 @@ set(SOURCES
     src/main.cpp
     src/Core/Application.cpp
     src/Core/SceneManager.cpp
+    src/Core/FileManager.cpp
+    src/Core/UiDgenerator.cpp
     src/Renderer/Renderer.cpp
     src/Camera/Camera.cpp
     src/Entities/Rectangle.cpp
-    src/Core/FileManager.cpp
 )
 
 set(RLIMGUI_SOURCES

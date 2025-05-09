@@ -3,6 +3,7 @@
 #include <string> 
 
 #include "Entities/Rectangle.h"
+#include "UiDgenerator.h"
 
 class SceneManager {
 public:

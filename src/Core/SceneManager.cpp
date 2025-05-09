@@ -1,3 +1,5 @@
+// I have absolutely NO idea how this thing is working, i wrote it 2 weeks ago and here i am fully clueless.
+
 #include "SceneManager.h"
 #include <fstream>
 #include <iostream>
@@ -95,6 +97,10 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
                     rect.color.b = color[2].get<uint8_t>();
                     rect.color.a = color.size() > 3 ? color[3].get<uint8_t>() : 255;
                 }
+
+                rect.UiD = entry["uid"];
+                int ID = entry["uid"];
+                currentUiD = ID + 1;
                 rectangles.push_back(rect);
             }
             catch (const json::exception& e) {
@@ -156,8 +162,9 @@ void SceneManager::SaveScene(
              << (int)rect.color.r << ", "
              << (int)rect.color.g << ", "
              << (int)rect.color.b << ", "
-             << (int)rect.color.a << "]\n";
-        file << "  }";
+             << (int)rect.color.a << "],\n";
+        file << "    \"uid\": " << rect.UiD,
+        file << "\n  }";
     }
 
     file << "\n]\n";
