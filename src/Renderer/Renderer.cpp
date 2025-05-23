@@ -57,14 +57,40 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
     }
 }
 
-void Renderer::RenderFrame(Camera2D currentCamera, const std::vector<RectangleObject>& rects) {
+void Renderer::RenderFrame(Camera2D currentCamera, std::vector<RectangleObject>& rects) {
     ClearBackground(GRAY);
     BeginMode2D(currentCamera);
-    for (const auto& r : rects) {
+
+    Vector2 mousePos = GetMousePosition();
+    Vector2 worldMouse = GetScreenToWorld2D(mousePos, currentCamera);
+
+    hoveredUiD = -1;
+
+    for (auto& r : rects) {
+        Rectangle rect = { r.position.x, r.position.y, r.size.x, r.size.y };
+    
         DrawRectangleV(r.position, r.size, r.color);
+    
+        if (CheckCollisionPointRec(worldMouse, rect)) {
+            hoveredUiD = r.UiD;
+            DrawRectangleLinesEx(rect, 2, YELLOW);
+            std::cout << "Mouse hovering on UiD: " << r.UiD << std::endl;
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                if (hoveredUiD != -1) {
+                    selectedUiD = hoveredUiD;
+                    DrawRectangleLinesEx(rect, 2, WHITE);
+                }
+            }
+        }
+    
+        if (selectedUiD == r.UiD) {
+            DrawRectangleLinesEx(rect, 2, WHITE);
+        }
     }
+    
     EndMode2D();
 }
+
 
 void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D currentCamera) {
     rlImGuiBegin();
@@ -76,7 +102,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         }
     }
 
-    static int selectedUiD = -1; // UI element to select UiD
+    static int selectedUiD = -1;
     if (ImGui::Button("Select Rectangle to Modify")) {
         ImGui::OpenPopup("Select UiD");
     }
@@ -85,6 +111,10 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             if (ImGui::Selectable(("UiD: " + std::to_string(rect.UiD)).c_str())) {
                 selectedUiD = rect.UiD; // Store selected UiD
             }
+        }
+        for (const auto& rect : rects) {
+            selectedUiD = rect.UiD; // Store selected UiD
+
         }
         ImGui::EndPopup();
     }

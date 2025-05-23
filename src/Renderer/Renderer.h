@@ -14,8 +14,16 @@
 class Renderer {
 public:
     void Init();
-    void RenderFrame(Camera2D currentCamera, const std::vector<RectangleObject>& rects);
+    void RenderFrame(Camera2D currentCamera, std::vector<RectangleObject>& rects);
     void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D currentCamera);
+    void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
+
+    int hoveredUiD = -1;
+    int selectedUiD = -1;
+    bool isDragging = false;
+    Vector2 dragOffset = {0, 0};
+    
+
 private:
     EditorCamera cam;
     RectangleObj rectang;

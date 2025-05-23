@@ -6,7 +6,8 @@
 
 Camera2D camera = { 0 };
 Camera2D playCamera = {0};
-
+static Vector2 panOrigin = {0};
+static bool isPanning = false;
 
 Camera2D EditorCamera::LoadCam(const std::string& filePath) {
     std::ifstream file(filePath);
@@ -37,15 +38,33 @@ void EditorCamera::InitCam() {
 
 void EditorCamera::UpdateCamera() {
     if (IsKeyDown(KEY_D)) {
-        camera.target.x += 0.5;
+        camera.target.x += 900 * GetFrameTime();
     } 
     if (IsKeyDown(KEY_A)) {
-        camera.target.x -= 0.5;
+        camera.target.x -= 900 * GetFrameTime();
     }
     if (IsKeyDown(KEY_W)) {
-        camera.target.y -= 0.5;
+        camera.target.y -= 900 * GetFrameTime();
     }
     if (IsKeyDown(KEY_S)) {
-        camera.target.y += 0.5;
+        camera.target.y += 900 * GetFrameTime();
+    }
+
+    float zoomSpeed = 0.1f;
+    camera.zoom += GetMouseWheelMove() * zoomSpeed;
+
+
+    if (IsMouseButtonPressed(MOUSE_MIDDLE_BUTTON)) {
+        panOrigin = GetMousePosition();
+        isPanning = true;
+    } else if (IsMouseButtonReleased(MOUSE_MIDDLE_BUTTON)) {
+        isPanning = false;
+    }
+
+    if (isPanning) {
+        Vector2 mouseDelta = Vector2Subtract(panOrigin, GetMousePosition());
+        mouseDelta = Vector2Scale(mouseDelta, 1.0f / camera.zoom); // Scale by zoom
+        camera.target = Vector2Add(camera.target, mouseDelta);
+        panOrigin = GetMousePosition(); // Update origin for smooth dragging
     }
 }

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "raylib.h"
+#include "raymath.h"
 
 extern Camera2D camera;
 extern Camera2D playCamera;
