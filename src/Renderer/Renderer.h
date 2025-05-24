@@ -10,12 +10,13 @@
 #include "Camera/Camera.h"
 #include "Entities/Rectangle.h"
 #include "Core/FileManager.h"
+#include "Core/EngineState.h"
 
 class Renderer {
 public:
     void Init();
     void RenderFrame(Camera2D currentCamera, std::vector<RectangleObject>& rects);
-    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D currentCamera);
+    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D*& currentCamera, Camera2D* editorCam, Camera2D* playCam);
     void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
 
     int hoveredUiD = -1;

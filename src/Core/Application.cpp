@@ -1,12 +1,7 @@
 #include "Application.h"
 #include "Renderer/Renderer.h"
 
-enum Mode {
-    MODE_PLAY,
-    MODE_EDIT
-};
-
-Mode currentMode;
+Mode Application::currentMode = MODE_EDIT;
 Camera2D *currentCamera;
 
 void Application::Init() {
@@ -53,7 +48,8 @@ void Application::Run() {
         BeginDrawing();
         
         renderer.RenderFrame(*currentCamera, rectangles);
-        renderer.ImGuiRender(CurrentGameMode(), rectangles, *currentCamera);
+        renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera, &camera, &playCamera);
+
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
         EndDrawing();

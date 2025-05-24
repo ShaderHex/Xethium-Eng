@@ -12,6 +12,7 @@
 #include "Entities/Rectangle.h"
 #include "Camera/Camera.h"
 #include "SceneManager.h"
+#include "EngineState.h"
 
 class Application {
 public:
@@ -19,8 +20,11 @@ public:
     void Run();
     bool CurrentGameMode();
     void Shutdown();
+
+    static Mode currentMode;
 private:
     Renderer renderer;
     EditorCamera cam;
     std::vector<RectangleObject> rectangles;
+    std::vector<RectangleObject> circles;
 };

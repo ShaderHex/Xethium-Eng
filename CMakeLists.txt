@@ -9,6 +9,7 @@ set(SOURCES
     src/Core/SceneManager.cpp
     src/Core/FileManager.cpp
     src/Core/UiDgenerator.cpp
+    src/Core/EngineState.cpp
     src/Renderer/Renderer.cpp
     src/Camera/Camera.cpp
     src/Entities/Rectangle.cpp

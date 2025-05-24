@@ -1,6 +1,7 @@
 #include "Rectangle.h"
 
 std::vector<RectangleObject> rectangles;
+Color color = {255, 255, 255, 255};
 
 void RectangleObj::CreateRect(std::vector<RectangleObject>& rects) {
     RectangleObject rect;
@@ -9,7 +10,7 @@ void RectangleObj::CreateRect(std::vector<RectangleObject>& rects) {
     rect.name = "Rectangle" + rectName;
     rect.position = { (float)GetRandomValue(0, 500), (float)GetRandomValue(0, 500)};
     rect.size = {100, 100};
-    rect.color = (RED);
+    rect.color = RED;
     
     rects.push_back(rect);
     std::cout<<"UiD: " << rect.UiD << std::endl;
