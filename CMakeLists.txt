@@ -26,16 +26,22 @@ set(IMGUI_SOURCES
     external/imgui/imgui_widgets.cpp
 )
 
+set(IMGUIZMO_SOURCES
+    external/ImGuizmo/ImGuizmo.cpp
+)
+
 add_executable(xethium
     ${SOURCES}
     ${IMGUI_SOURCES}
     ${RLIMGUI_SOURCES}
+    ${IMGUIZMO_SOURCES}
 )
 
 target_include_directories(xethium PRIVATE
     external/imgui
     external/imgui/backends
     external/rlimgui
+    external/ImGuizmo
     src
 )
 

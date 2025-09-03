@@ -1,60 +1,59 @@
 #include "Application.h"
 #include "Renderer/Renderer.h"
+#include "Camera/Camera.h"
+#include "SceneManager.h"
 
 Mode Application::currentMode = MODE_EDIT;
-Camera2D *currentCamera;
+Camera3D* currentCamera = nullptr;
 
 void Application::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
     InitWindow(800, 600, "Xethium");
     rlImGuiSetup(true);
+
     currentMode = MODE_EDIT;
-    cam.InitCam();
+
+    EditorCamera::InitCam();
+    EditorCamera::InitPlayCam();
+
+    currentCamera = &EditorCamera::editorCamera;
+
     renderer.Init();
 
-    currentCamera = &camera;
+    rectangles = SceneManager::LoadScene("scenes/scene.json",
+                                         EditorCamera::editorCamera,
+                                         EditorCamera::playCamera);
 }
 
 bool Application::CurrentGameMode() {
-    if (currentMode == MODE_EDIT){
-        return true;
-    } else {
-        return false;
-    }
+    return currentMode == MODE_EDIT;
 }
 
 void Application::Run() {
     while (!WindowShouldClose()) {
         if (IsKeyPressed(KEY_SPACE)) {
             currentMode = (currentMode == MODE_EDIT) ? MODE_PLAY : MODE_EDIT;
-            currentCamera = (currentMode == MODE_EDIT) ? &camera : &playCamera;
+            currentCamera = (currentMode == MODE_EDIT) ? &EditorCamera::editorCamera
+                                                       : &EditorCamera::playCamera;
         }
 
-        if (currentMode == MODE_EDIT){
-            cam.UpdateCamera();
-            if (IsKeyPressed(KEY_L)) {
-                rectangles = SceneManager::LoadScene("scenes/scene.json", camera, playCamera);
-            }
+        if (currentMode == MODE_EDIT) {
+            EditorCamera::UpdateEditorCamera();
         }
 
-        if (currentMode == MODE_EDIT && IsKeyPressed(KEY_C)) {
-            playCamera.target = (Vector2){ 0.0f, 0.0f };
-            playCamera.offset = (Vector2){ 0.0f, 0.0f };
-            playCamera.rotation = 0.0f;
-            playCamera.zoom = 1.0f;
-            std::cout << "Play camera created\n";
-        }
-        
         BeginDrawing();
-        
+        ClearBackground(RAYWHITE);
+
         renderer.RenderFrame(*currentCamera, rectangles);
-        renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera, &camera, &playCamera);
+        renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
+                             &EditorCamera::editorCamera, &EditorCamera::playCamera);
 
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
         EndDrawing();
     }
 }
+
 
 void Application::Shutdown() {
     rlImGuiShutdown();

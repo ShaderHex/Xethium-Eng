@@ -1,4 +1,4 @@
-// I have absolutely NO idea how this thing is working, i wrote it 2 weeks ago and here i am fully clueless.
+// Updated SceneManager.cpp for 3D camera support
 
 #include "SceneManager.h"
 #include <fstream>
@@ -22,19 +22,16 @@ void SceneManager::CreateScene(char* SceneName) {
     }
 }
 
-std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath, Camera2D& editorCamera, Camera2D& playCamera)
-{
+std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath, Camera3D& editorCamera, Camera3D& playCamera) {
     std::vector<RectangleObject> rectangles;
 
     std::ifstream file(filepath);
-    if (!file.is_open())
-    {
+    if (!file.is_open()) {
         std::cerr << "[SceneManager] Error: Could not open file " << filepath << "\n";
         return rectangles;
     }
 
-    if (file.peek() == std::ifstream::traits_type::eof())
-    {
+    if (file.peek() == std::ifstream::traits_type::eof()) {
         std::cerr << "[SceneManager] Error: Scene file is empty (" << filepath << ")\n";
         return rectangles;
     }
@@ -42,8 +39,7 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
     json sceneJson;
     try {
         file >> sceneJson;
-    }
-    catch (const json::parse_error& e) {
+    } catch (const json::parse_error& e) {
         std::cerr << "[SceneManager] Error: Malformed JSON in " << filepath << "\n";
         std::cerr << "Parser message: " << e.what() << "\n";
         return rectangles;
@@ -54,54 +50,67 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
         return rectangles;
     }
 
-    for (auto& entry : sceneJson)
-    {
-        if (!entry.is_object()) {
-            std::cerr << "[SceneManager] Warning: Skipping invalid array entry\n";
-            continue;
-        }
-
-        if (!entry.contains("name")) {
-            std::cerr << "[SceneManager] Warning: Entry missing 'name' field\n";
-            continue;
-        }
+    for (auto& entry : sceneJson) {
+        if (!entry.is_object()) continue;
+        if (!entry.contains("name")) continue;
 
         std::string name = entry["name"];
-        
+
         if (name == "EditorCamera") {
             try {
-                editorCamera.target.x = entry["target"][0];
-                editorCamera.target.y = entry["target"][1];
-                editorCamera.offset.x = entry["offset"][0];
-                editorCamera.offset.y = entry["offset"][1];
-                editorCamera.rotation = entry["rotation"];
-                editorCamera.zoom = entry["zoom"];
+                editorCamera.position = {
+                    entry["position"][0],
+                    entry["position"][1],
+                    entry["position"][2]
+                };
+                editorCamera.target = {
+                    entry["target"][0],
+                    entry["target"][1],
+                    entry["target"][2]
+                };
+                editorCamera.up = {
+                    entry["up"][0],
+                    entry["up"][1],
+                    entry["up"][2]
+                };
+                editorCamera.fovy = entry["fovy"];
+                editorCamera.projection = entry["projection"];
+            } catch (const json::exception& e) {
+                std::cerr << "[SceneManager] Error loading EditorCamera: " << e.what() << "\n";
             }
-            catch (const json::exception& e) {
-                std::cerr << "[SceneManager] Error: Invalid EditorCamera data - " << e.what() << "\n";
-            }
-        }
-        else if (name == "PlayCamera") {
+        } else if (name == "PlayCamera") {
             try {
-                playCamera.target.x = entry["target"][0];
-                playCamera.target.y = entry["target"][1];
-                playCamera.offset.x = entry["offset"][0];
-                playCamera.offset.y = entry["offset"][1];
-                playCamera.rotation = entry["rotation"];
-                playCamera.zoom = entry["zoom"];
+                playCamera.position = {
+                    entry["position"][0],
+                    entry["position"][1],
+                    entry["position"][2]
+                };
+                playCamera.target = {
+                    entry["target"][0],
+                    entry["target"][1],
+                    entry["target"][2]
+                };
+                playCamera.up = {
+                    entry["up"][0],
+                    entry["up"][1],
+                    entry["up"][2]
+                };
+                playCamera.fovy = entry["fovy"];
+                playCamera.projection = entry["projection"];
+            } catch (const json::exception& e) {
+                std::cerr << "[SceneManager] Error loading PlayCamera: " << e.what() << "\n";
             }
-            catch (const json::exception& e) {
-                std::cerr << "[SceneManager] Error: Invalid PlayCamera data - " << e.what() << "\n";
-            }
-        }
-        else {
+        } else {
             RectangleObject rect;
             try {
                 rect.name = name;
                 rect.position.x = entry["x"];
                 rect.position.y = entry["y"];
+                rect.position.z = entry["z"];
                 rect.size.x = entry["width"];
                 rect.size.y = entry["height"];
+                rect.size.z = entry["depth"];
+
 
                 if (entry.contains("color") && entry["color"].is_array()) {
                     auto& color = entry["color"];
@@ -112,31 +121,19 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
                 }
 
                 rect.UiD = entry["uid"];
-                int ID = entry["uid"];
-                currentUiD = ID + 1;
+                currentUiD = rect.UiD + 1;
                 rectangles.push_back(rect);
-            }
-            catch (const json::exception& e) {
-                std::cerr << "[SceneManager] Error: Invalid rectangle data for '" 
-                         << name << "' - " << e.what() << "\n";
+            } catch (const json::exception& e) {
+                std::cerr << "[SceneManager] Invalid rectangle: " << e.what() << "\n";
             }
         }
     }
 
-    std::cout << "[SceneManager] Successfully loaded scene with: \n"
-              << "  - " << rectangles.size() << " rectangles\n"
-              << "  - Editor Camera: " << (sceneJson[0].contains("EditorCamera") ? "Loaded" : "Missing") << "\n"
-              << "  - Play Camera: " << (sceneJson[1].contains("PlayCamera") ? "Loaded" : "Missing") << "\n";
-
+    std::cout << "[SceneManager] Scene loaded with " << rectangles.size() << " rectangles\n";
     return rectangles;
 }
 
-void SceneManager::SaveScene(
-    const std::vector<RectangleObject>& rectangles, 
-    const Camera2D& editorCamera, 
-    const Camera2D& playCamera, 
-    const std::string& filename
-) {
+void SceneManager::SaveScene(const std::vector<RectangleObject>& rectangles, const Camera3D& editorCamera, const Camera3D& playCamera, const std::string& filename) {
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "[SceneManager] Failed to open file for writing!\n";
@@ -145,43 +142,36 @@ void SceneManager::SaveScene(
 
     file << "[\n";
 
-    file << "  {\n";
-    file << "    \"name\": \"EditorCamera\",\n";
-    file << "    \"target\": [" << editorCamera.target.x << ", " << editorCamera.target.y << "],\n";
-    file << "    \"offset\": [" << editorCamera.offset.x << ", " << editorCamera.offset.y << "],\n";
-    file << "    \"rotation\": " << editorCamera.rotation << ",\n";
-    file << "    \"zoom\": " << editorCamera.zoom << "\n";
-    file << "  },\n";
+    auto writeCam = [&](const std::string& name, const Camera3D& cam) {
+        file << "  {\n";
+        file << "    \"name\": \"" << name << "\",\n";
+        file << "    \"position\": [" << cam.position.x << ", " << cam.position.y << ", " << cam.position.z << "],\n";
+        file << "    \"target\": [" << cam.target.x << ", " << cam.target.y << ", " << cam.target.z << "],\n";
+        file << "    \"up\": [" << cam.up.x << ", " << cam.up.y << ", " << cam.up.z << "],\n";
+        file << "    \"fovy\": " << cam.fovy << ",\n";
+        file << "    \"projection\": " << cam.projection << "\n";
+        file << "  },\n";
+    };
 
-    file << "  {\n";
-    file << "    \"name\": \"PlayCamera\",\n";
-    file << "    \"target\": [" << playCamera.target.x << ", " << playCamera.target.y << "],\n";
-    file << "    \"offset\": [" << playCamera.offset.x << ", " << playCamera.offset.y << "],\n";
-    file << "    \"rotation\": " << playCamera.rotation << ",\n";
-    file << "    \"zoom\": " << playCamera.zoom << "\n";
-    file << "  }";
+    writeCam("EditorCamera", editorCamera);
+    writeCam("PlayCamera", playCamera);
 
     for (size_t i = 0; i < rectangles.size(); ++i) {
         const RectangleObject& rect = rectangles[i];
-
-        file << ",\n";
         file << "  {\n";
-        file << "    \"name\": \"" << rect.name << "\",\n";
         file << "    \"x\": " << rect.position.x << ",\n";
         file << "    \"y\": " << rect.position.y << ",\n";
+        file << "    \"z\": " << rect.position.z << ",\n";
         file << "    \"width\": " << rect.size.x << ",\n";
         file << "    \"height\": " << rect.size.y << ",\n";
-        file << "    \"color\": [" 
-             << (int)rect.color.r << ", "
-             << (int)rect.color.g << ", "
-             << (int)rect.color.b << ", "
-             << (int)rect.color.a << "],\n";
-        file << "    \"uid\": " << rect.UiD,
-        file << "\n  }";
+        file << "    \"depth\": " << rect.size.z << ",\n";
+        file << "    \"color\": [" << (int)rect.color.r << ", " << (int)rect.color.g << ", " << (int)rect.color.b << ", " << (int)rect.color.a << "],\n";
+        file << "    \"uid\": " << rect.UiD << "\n";
+        file << "  }";
+        if (i < rectangles.size() - 1) file << ",\n";
     }
 
     file << "\n]\n";
-
     file.close();
-    std::cout << "[SceneManager] Scene saved successfully to " << filename << "!\n";
+    std::cout << "[SceneManager] Scene saved to " << filename << "\n";
 }

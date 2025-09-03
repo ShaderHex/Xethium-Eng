@@ -5,23 +5,23 @@
 #include <string>
 
 #include "raylib.h"
-
-
 #include "Core/UiDgenerator.h"
 
 struct RectangleObject {
-    Vector2 position;
-    Vector2 size;
+    Vector3 position;
+    Vector3 size;
     Color color;
     std::string name;
     unsigned int UiD;
 
     RectangleObject() = default;
 
-    RectangleObject(float x, float y, float width, float height, Color color)
-        : UiD(UiDGenerator::GenerateUiD()), position{ x, y }, size{ width, height }, color(color) {}
+    RectangleObject(float x, float y, float z, float w, float h, float d, Color color)
+        : UiD(UiDGenerator::GenerateUiD()),
+          position{ x, y, z },
+          size{ w, h, d },
+          color(color) {}
 };
-
 
 extern std::vector<RectangleObject> rectangles;
 

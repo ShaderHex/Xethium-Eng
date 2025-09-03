@@ -1,16 +1,50 @@
 #include "Renderer.h"
 #include "Core/Application.h"
+#include "Core/SceneManager.h"
+#include "imgui.h"
+#include "rlImGui.h"
+#include "ImGuizmo.h"
+
+#include <filesystem>
+#include <iostream>
+#include <cstring>
 
 namespace fs = std::filesystem;
 
+int hoveredUiD = -1;
+int selectedUiD = -1;
+
 std::string currentPathWrite;
 std::string fileNameWrite;
+
+Vector3 playCamPos = EditorCamera::playCamera.position;
 
 void Renderer::Init() {
     // Renderer-specific initialization
 }
 
-void RenderFileManagerPanel(const std::string& projectDir, std::vector<RectangleObject>& rects) {
+bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
+    float tmin = (box.min.x - ray.position.x) / ray.direction.x;
+    float tmax = (box.max.x - ray.position.x) / ray.direction.x;
+    if (tmin > tmax) std::swap(tmin, tmax);
+
+    float tymin = (box.min.y - ray.position.y) / ray.direction.y;
+    float tymax = (box.max.y - ray.position.y) / ray.direction.y;
+    if (tymin > tymax) std::swap(tymin, tymax);
+
+    if ((tmin > tymax) || (tymin > tmax)) return false;
+    if (tymin > tmin) tmin = tymin;
+    if (tymax < tmax) tmax = tymax;
+
+    float tzmin = (box.min.z - ray.position.z) / ray.direction.z;
+    float tzmax = (box.max.z - ray.position.z) / ray.direction.z;
+    if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+    if ((tmin > tzmax) || (tzmin > tmax)) return false;
+    return true;
+}
+
+void RenderFileManagerPanel(const std::string& projectDir, std::vector<RectangleObject>& rects, Camera3D& camera, Camera3D& playCamera) {
     try {
         if (!fs::exists(projectDir) || !fs::is_directory(projectDir)) {
             ImGui::Begin("File Explorer");
@@ -21,238 +55,178 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 
         if (ImGui::Begin("File Explorer")) {
             static std::string currentPath = projectDir;
-
             ImGui::Text("Current Path: %s", currentPath.c_str());
 
-            if (fs::exists(currentPath) && fs::is_directory(currentPath)) {
-                for (const auto& entry : fs::directory_iterator(currentPath)) {
-                    const std::string fileName = entry.path().filename().string();
+            for (const auto& entry : fs::directory_iterator(currentPath)) {
+                const std::string fileName = entry.path().filename().string();
 
-                    if (entry.is_directory()) {
-                        if (ImGui::Button(("Open Folder: " + fileName).c_str())) {
-                            currentPath = entry.path().string();
-                        }
-                    } else {
-                        if (ImGui::Button(("Select File: " + fileName).c_str())) {
-                            std::cout << "File selected: " << entry.path().string() << std::endl;
-                            rects = SceneManager::LoadScene(entry.path().string(), camera, playCamera);
-                            std::cout << "Loaded: " << entry.path().string() << std::endl;
-                            fileNameWrite = fileName;
-                            currentPathWrite = currentPath;
-                        }
+                if (entry.is_directory()) {
+                    if (ImGui::Button(("Open Folder: " + fileName).c_str())) {
+                        currentPath = entry.path().string();
+                    }
+                } else {
+                    if (ImGui::Button(("Select File: " + fileName).c_str())) {
+                        rects = SceneManager::LoadScene(entry.path().string(), camera, playCamera);
+                        fileNameWrite = fileName;
+                        currentPathWrite = currentPath;
+                        std::cout << "Loaded: " << entry.path().string() << std::endl;
                     }
                 }
-            } else {
-                ImGui::Text("Error: Current path is invalid!");
             }
 
             ImGui::End();
         }
     } catch (const std::exception& e) {
-        std::cerr << "An error occurred while rendering the File Manager: " << e.what() << std::endl;
         ImGui::Begin("File Explorer");
-        ImGui::Text("An error occurred while loading the directory.");
+        ImGui::Text("Error: %s", e.what());
         ImGui::End();
     }
 }
 
-void Renderer::RenderFrame(Camera2D currentCamera, std::vector<RectangleObject>& rects) {
+void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
     ClearBackground(GRAY);
-    BeginMode2D(currentCamera);
+    BeginMode3D(currentCamera);
 
-    Vector2 mousePos = GetMousePosition();
-    Vector2 worldMouse = GetScreenToWorld2D(mousePos, currentCamera);
-
+    Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
     hoveredUiD = -1;
-
+    if (Application::currentMode == MODE_EDIT) {
+        playCamPos.x += 0.5f;
+        DrawCube(EditorCamera::playCamera.position, 1, 1, 1, BLUE);
+        DrawCube(playCamPos, 1, 1, 1, BLUE);
+    }
     for (auto& r : rects) {
-        Rectangle rect = { r.position.x, r.position.y, r.size.x, r.size.y };
-    
-        DrawRectangleV(r.position, r.size, r.color);
+        BoundingBox box = {
+            Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
+            Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
+        };
+
+        DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
+
         if (Application::currentMode == MODE_EDIT) {
-            if (CheckCollisionPointRec(worldMouse, rect)) {
+            if (CheckCollisionRayBox(ray, box)) {
                 hoveredUiD = r.UiD;
-                DrawRectangleLinesEx(rect, 2, YELLOW);
-                std::cout << "Mouse hovering on UiD: " << r.UiD << std::endl;
+                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
+
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    if (hoveredUiD != -1) {
-                        selectedUiD = hoveredUiD;
-                        DrawRectangleLinesEx(rect, 2, WHITE);
-                    }
+                    selectedUiD = r.UiD;
                 }
             }
-        
+
             if (selectedUiD == r.UiD) {
-                DrawRectangleLinesEx(rect, 2, WHITE);
+                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, WHITE);
             }
         }
     }
-    
-    EndMode2D();
+
+    EndMode3D();
 }
 
+static void GetCameraMatrices(Camera3D& cam, float view[16], float proj[16]) {
+    Matrix viewMat = GetCameraMatrix(cam);
+    Matrix projMat = MatrixPerspective(cam.fovy * DEG2RAD, (float)GetScreenWidth() / GetScreenHeight(), 0.01f, 1000.0f);
+    memcpy(view, &viewMat, sizeof(float) * 16);
+    memcpy(proj, &projMat, sizeof(float) * 16);
+}
 
-void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D*& currentCamera, Camera2D* editorCam, Camera2D* playCam) {
+void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
 
     ImGui::Begin("Inspector");
 
-    if (ImGui::Button("Create")) {
-        if (CanEdit) {
-            rectang.CreateRect(rects);
-        }
+    if (ImGui::Button("Create Cube") && CanEdit) {
+        RectangleObject obj;
+        obj.position = {0.0f, 1.0f, 0.0f};
+        obj.size = {1.0f, 1.0f, 1.0f};
+        obj.color = RED;
+        obj.UiD = rand() % 10000;
+        rects.push_back(obj);
     }
 
-    if (ImGui::Button("Select Rectangle to Modify")) {
-        ImGui::OpenPopup("Select UiD");
-    }
+    if (ImGui::Button("Select Object")) ImGui::OpenPopup("Select UiD");
 
     if (ImGui::BeginPopup("Select UiD")) {
         for (const auto& rect : rects) {
-            if (ImGui::Selectable(("UiD: " + std::to_string(rect.UiD)).c_str())) {
+            if (ImGui::Selectable(("UiD: " + std::to_string(rect.UiD)).c_str()))
                 selectedUiD = rect.UiD;
-            }
         }
         ImGui::EndPopup();
     }
 
-    if (selectedUiD != -1) {
     for (auto& rect : rects) {
         if (rect.UiD == selectedUiD) {
-            ImGui::Text("Modify Rectangle: UiD %d", selectedUiD);
-            ImGui::DragFloat("Position X", (float*)&rect.position.x);
-            ImGui::DragFloat("Position Y", (float*)&rect.position.y);
-            ImGui::InputFloat2("Size", (float*)&rect.size);
+            ImGui::Text("Modify Object: %d", rect.UiD);
+            ImGui::DragFloat3("Position", &rect.position.x);
+            ImGui::DragFloat3("Size", &rect.size.x);
 
-            // Color safely edited here:
-            float tempColor[3] = {
-                rect.color.r / 255.0f,
-                rect.color.g / 255.0f,
-                rect.color.b / 255.0f
-            };
-
+            float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
             if (ImGui::ColorEdit3("Color", tempColor)) {
                 rect.color.r = static_cast<unsigned char>(tempColor[0] * 255);
                 rect.color.g = static_cast<unsigned char>(tempColor[1] * 255);
                 rect.color.b = static_cast<unsigned char>(tempColor[2] * 255);
             }
-        }
-    }
-}
 
+            // ImGuizmo translation
+            if (CanEdit) {
+                float view[16], proj[16], objectMatrix[16];
+                GetCameraMatrices(*editorCam, view, proj);
 
-    if (ImGui::Button("Create Camera")) {
-        // TODO: create camera logic
-    }
+                Matrix m = MatrixTranslate(rect.position.x, rect.position.y, rect.position.z);
+                memcpy(objectMatrix, &m, sizeof(float) * 16);
 
-    if (ImGui::Button("Load Scene")) {
-        if (CanEdit) {
-            std::cout << "Loaded rectangles: " << rects.size() << std::endl;
-            std::cout << "Loaded triangles (of rectangles): " << rects.size() * 2 << std::endl;
-        }
-    }
+                ImGuizmo::SetRect(0, 0, (float)GetScreenWidth(), (float)GetScreenHeight());
+                ImGuizmo::SetDrawlist();
+                ImGuizmo::Manipulate(view, proj, ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, objectMatrix);
 
-    if (ImGui::Button("Save Scene")) {
-        if (CanEdit) {
-            if (!fileNameWrite.empty()) {
-                std::string fullPath = currentPathWrite + "/" + fileNameWrite;
-                SceneManager::SaveScene(rects, *editorCam, *playCam, fullPath);
-                std::cout << "Saved to: " << fullPath << std::endl;
-            } else {
-                std::cout << "No file selected to save!\n";
+                if (ImGuizmo::IsUsing()) {
+                    rect.position.x = objectMatrix[12];
+                    rect.position.y = objectMatrix[13];
+                    rect.position.z = objectMatrix[14];
+                }
             }
         }
     }
 
-    if (ImGui::Button("Create Scene")) {
-        ImGui::OpenPopup("Create Scene Popup");
+    if (ImGui::Button("Save Scene") && !fileNameWrite.empty()) {
+        SceneManager::SaveScene(rects, *editorCam, *playCam, currentPathWrite + "/" + fileNameWrite);
+        std::cout << "Saved to: " << currentPathWrite + "/" + fileNameWrite << std::endl;
     }
 
-    if (ImGui::BeginPopupModal("Create Scene Popup", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-        static char SceneName[128] = "";
+    if (ImGui::Button("Create Scene")) ImGui::OpenPopup("Create Scene Popup");
 
+    if (ImGui::BeginPopupModal("Create Scene Popup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        static char SceneName[128] = "";
         ImGui::InputText("Name", SceneName, IM_ARRAYSIZE(SceneName));
 
         if (ImGui::Button("OK", ImVec2(120, 0))) {
-            if (strlen(SceneName) > 0) {
-                SceneManager::CreateScene(SceneName);
-            } else {
-                std::cerr << "[UI] Error: Scene name cannot be empty!\n";
-            }
+            if (strlen(SceneName) > 0) SceneManager::CreateScene(SceneName);
+            else std::cerr << "[UI] Error: Scene name cannot be empty!\n";
+
             ImGui::CloseCurrentPopup();
             SceneName[0] = '\0';
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-            ImGui::CloseCurrentPopup();
-        }
-
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
     }
 
     ImGui::End();
 
-    // Play/Edit mode toggle
+    // Play/Edit toggle
     ImGui::Begin("Play");
     if (Application::currentMode == MODE_EDIT) {
         if (ImGui::Button("Play")) {
-            Application::currentMode = (Application::currentMode == MODE_EDIT) ? MODE_PLAY : MODE_EDIT;
-            currentCamera = (Application::currentMode == MODE_EDIT) ? editorCam : playCam;
+            Application::currentMode = MODE_PLAY;
+            currentCamera = playCam;
         }
-    } else if (Application::currentMode == MODE_PLAY) {
+    } else {
         if (ImGui::Button("Stop Playing")) {
-            Application::currentMode = (Application::currentMode == MODE_EDIT) ? MODE_PLAY : MODE_EDIT;
-            currentCamera = (Application::currentMode == MODE_EDIT) ? editorCam : playCam;
+            Application::currentMode = MODE_EDIT;
+            currentCamera = editorCam;
         }
     }
-
     ImGui::End();
-    // Object movement logic
-    if (CanEdit && selectedUiD != -1) {
-        RectangleObject* selected = nullptr;
-        for (auto& rect : rects) {
-            if (rect.UiD == selectedUiD) {
-                selected = &rect;
-                break;
-            }
-        }
-        if (selected) {
-            float moveSpeed = 2.0f;
 
-            if (IsKeyDown(KEY_RIGHT)) selected->position.x += moveSpeed; 
-            if (IsKeyDown(KEY_LEFT))  selected->position.x -= moveSpeed;
-            if (IsKeyDown(KEY_DOWN))  selected->position.y += moveSpeed;
-            if (IsKeyDown(KEY_UP))    selected->position.y -= moveSpeed;
-
-            static bool dragging = false;
-            static Vector2 dragOffset = { 0, 0 };
-
-            Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), *currentCamera);
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                Rectangle rectBox = {
-                    selected->position.x,
-                    selected->position.y,
-                    selected->size.x,
-                    selected->size.y
-                };
-                if (CheckCollisionPointRec(mouseWorld, rectBox)) {
-                    dragging = true;
-                    dragOffset = Vector2Subtract(selected->position, mouseWorld);
-                }
-            }
-
-            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-                dragging = false;
-            }
-
-            if (dragging && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-                selected->position = Vector2Add(mouseWorld, dragOffset);
-            }
-        }
-    }
-
-    RenderFileManagerPanel("project/", rects);
+    RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
 
     rlImGuiEnd();
 }

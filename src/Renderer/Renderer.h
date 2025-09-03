@@ -6,7 +6,7 @@
 #include "raylib.h"
 #include "imgui.h"
 #include "rlImGui.h"
-
+#include "ImGuizmo.h"
 #include "Camera/Camera.h"
 #include "Entities/Rectangle.h"
 #include "Core/FileManager.h"
@@ -15,8 +15,8 @@
 class Renderer {
 public:
     void Init();
-    void RenderFrame(Camera2D currentCamera, std::vector<RectangleObject>& rects);
-    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera2D*& currentCamera, Camera2D* editorCam, Camera2D* playCam);
+    void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
+    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
     void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
 
     int hoveredUiD = -1;

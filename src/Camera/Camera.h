@@ -1,17 +1,17 @@
+// Camera.h
 #pragma once
-
-#include <iostream>
-#include <vector>
-
 #include "raylib.h"
 #include "raymath.h"
-
-extern Camera2D camera;
-extern Camera2D playCamera;
+#include <string>
 
 class EditorCamera {
 public:
-    Camera2D LoadCam(const std::string& filename);
-    void InitCam();
-    void UpdateCamera();
+    static Camera3D editorCamera;
+    static Camera3D playCamera;
+
+    static void InitCam();
+    static void InitPlayCam();
+    static void UpdateEditorCamera();
+    static void UpdatePlayCamera();
+    static Camera3D LoadCam(const std::string& filePath);
 };
