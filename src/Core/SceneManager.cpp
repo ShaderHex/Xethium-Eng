@@ -1,5 +1,3 @@
-// Updated SceneManager.cpp for 3D camera support
-
 #include "SceneManager.h"
 #include <fstream>
 #include <iostream>
@@ -11,14 +9,16 @@ namespace fs = std::filesystem;
 
 void SceneManager::CreateScene(char* SceneName) {
     std::string sceneDir = "project/scenes/";
-    std::ofstream file(sceneDir + SceneName + ".json");
+    fs::create_directories(sceneDir); // make sure folder exists
+
+    std::ofstream file(sceneDir + std::string(SceneName) + ".json");
 
     if (file.is_open()) {
-        file << "This is a line written to the file.\n";
+        file << "[]"; // write empty JSON array
         file.close();
-        std::cout << "File created and written successfully.\n";
+        std::cout << "[SceneManager] Scene created successfully: " << SceneName << "\n";
     } else {
-        std::cerr << "Failed to create the file.\n";
+        std::cerr << "[SceneManager] Failed to create the file.\n";
     }
 }
 
@@ -52,7 +52,12 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
 
     for (auto& entry : sceneJson) {
         if (!entry.is_object()) continue;
-        if (!entry.contains("name")) continue;
+
+        // Every object *must* have a name
+        if (!entry.contains("name")) {
+            std::cerr << "[SceneManager] Warning: object missing 'name' field\n";
+            continue;
+        }
 
         std::string name = entry["name"];
 
@@ -111,7 +116,6 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
                 rect.size.y = entry["height"];
                 rect.size.z = entry["depth"];
 
-
                 if (entry.contains("color") && entry["color"].is_array()) {
                     auto& color = entry["color"];
                     rect.color.r = color[0].get<uint8_t>();
@@ -159,6 +163,7 @@ void SceneManager::SaveScene(const std::vector<RectangleObject>& rectangles, con
     for (size_t i = 0; i < rectangles.size(); ++i) {
         const RectangleObject& rect = rectangles[i];
         file << "  {\n";
+        file << "    \"name\": \"" << rect.name << "\",\n";
         file << "    \"x\": " << rect.position.x << ",\n";
         file << "    \"y\": " << rect.position.y << ",\n";
         file << "    \"z\": " << rect.position.z << ",\n";

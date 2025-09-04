@@ -165,7 +165,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
                 rect.color.b = static_cast<unsigned char>(tempColor[2] * 255);
             }
 
-            // ImGuizmo translation
             if (CanEdit) {
                 float view[16], proj[16], objectMatrix[16];
                 GetCameraMatrices(*editorCam, view, proj);
@@ -211,7 +210,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     ImGui::End();
 
-    // Play/Edit toggle
     ImGui::Begin("Play");
     if (Application::currentMode == MODE_EDIT) {
         if (ImGui::Button("Play")) {
