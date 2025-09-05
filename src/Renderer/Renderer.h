@@ -1,6 +1,10 @@
 #pragma once
 
 #include <fstream>
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+#include <random>
 
 #include "raylib.h"
 #include "raylib.h"

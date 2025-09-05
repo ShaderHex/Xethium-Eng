@@ -16,6 +16,7 @@ int selectedUiD = -1;
 
 std::string currentPathWrite;
 std::string fileNameWrite;
+std::unordered_set<long long> usedUiDs;
 
 Vector3 playCamPos = EditorCamera::playCamera.position;
 
@@ -128,6 +129,21 @@ static void GetCameraMatrices(Camera3D& cam, float view[16], float proj[16]) {
     memcpy(proj, &projMat, sizeof(float) * 16);
 }
 
+long long GenerateUniqueUiD() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<long long> dis(1, 999999999999999);
+
+    long long newUiD;
+
+    do {
+        newUiD = dis(gen);
+    } while (usedUiDs.count(newUiD));
+
+    usedUiDs.insert(newUiD);
+
+    return newUiD;
+}
 void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
 
@@ -138,7 +154,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         obj.position = {0.0f, 1.0f, 0.0f};
         obj.size = {1.0f, 1.0f, 1.0f};
         obj.color = RED;
-        obj.UiD = rand() % 10000;
+        obj.UiD = GenerateUniqueUiD();
         rects.push_back(obj);
     }
 
