@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "rlImGui.h"
 #include "ImGuizmo.h"
+#include <raygizmo.h>
 
 #include <filesystem>
 #include <iostream>
@@ -119,6 +120,19 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         }
     }
 
+    for (auto& r : rects) {
+        if (selectedUiD == r.UiD) {
+            static Transform gizmoTransform = GizmoIdentity();
+            gizmoTransform.translation = r.position;
+            gizmoTransform.scale = r.size;
+
+            DrawGizmo3D(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE, &gizmoTransform);
+
+            r.position = gizmoTransform.translation;
+            r.size = gizmoTransform.scale;
+        }
+    }
+
     EndMode3D();
 }
 
@@ -169,37 +183,23 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
     }
 
     for (auto& rect : rects) {
-        if (rect.UiD == selectedUiD) {
-            ImGui::Text("Modify Object: %d", rect.UiD);
-            ImGui::DragFloat3("Position", &rect.position.x);
-            ImGui::DragFloat3("Size", &rect.size.x);
+    if (rect.UiD == selectedUiD) {
+            static GizmoManager gizmo;
+            gizmo.transform.translation = rect.position;
+            gizmo.transform.scale = rect.size;
 
-            float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
-            if (ImGui::ColorEdit3("Color", tempColor)) {
-                rect.color.r = static_cast<unsigned char>(tempColor[0] * 255);
-                rect.color.g = static_cast<unsigned char>(tempColor[1] * 255);
-                rect.color.b = static_cast<unsigned char>(tempColor[2] * 255);
-            }
+            gizmo.Draw(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE);
 
-            if (CanEdit) {
-                float view[16], proj[16], objectMatrix[16];
-                GetCameraMatrices(*editorCam, view, proj);
-
-                Matrix m = MatrixTranslate(rect.position.x, rect.position.y, rect.position.z);
-                memcpy(objectMatrix, &m, sizeof(float) * 16);
-
-                ImGuizmo::SetRect(0, 0, (float)GetScreenWidth(), (float)GetScreenHeight());
-                ImGuizmo::SetDrawlist();
-                ImGuizmo::Manipulate(view, proj, ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, objectMatrix);
-
-                if (ImGuizmo::IsUsing()) {
-                    rect.position.x = objectMatrix[12];
-                    rect.position.y = objectMatrix[13];
-                    rect.position.z = objectMatrix[14];
-                }
-            }
+            Matrix m = gizmo.GetMatrix();
+            rect.position.x = m.m12;
+            rect.position.y = m.m13;
+            rect.position.z = m.m14;
+            rect.size.x = gizmo.transform.scale.x;
+            rect.size.y = gizmo.transform.scale.y;
+            rect.size.z = gizmo.transform.scale.z;
         }
     }
+
 
     if (ImGui::Button("Save Scene") && !fileNameWrite.empty()) {
         SceneManager::SaveScene(rects, *editorCam, *playCam, currentPathWrite + "/" + fileNameWrite);

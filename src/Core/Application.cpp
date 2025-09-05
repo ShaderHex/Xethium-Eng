@@ -8,7 +8,7 @@ Camera3D* currentCamera = nullptr;
 
 void Application::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
-    InitWindow(800, 600, "Xethium");
+    InitWindow(1200, 800, "Xethium");
     rlImGuiSetup(true);
 
     currentMode = MODE_EDIT;

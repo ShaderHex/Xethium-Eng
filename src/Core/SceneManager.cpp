@@ -9,12 +9,12 @@ namespace fs = std::filesystem;
 
 void SceneManager::CreateScene(char* SceneName) {
     std::string sceneDir = "project/scenes/";
-    fs::create_directories(sceneDir); // make sure folder exists
+    fs::create_directories(sceneDir);
 
     std::ofstream file(sceneDir + std::string(SceneName) + ".json");
 
     if (file.is_open()) {
-        file << "[]"; // write empty JSON array
+        file << "[]";
         file.close();
         std::cout << "[SceneManager] Scene created successfully: " << SceneName << "\n";
     } else {
@@ -53,7 +53,6 @@ std::vector<RectangleObject> SceneManager::LoadScene(const std::string& filepath
     for (auto& entry : sceneJson) {
         if (!entry.is_object()) continue;
 
-        // Every object *must* have a name
         if (!entry.contains("name")) {
             std::cerr << "[SceneManager] Warning: object missing 'name' field\n";
             continue;

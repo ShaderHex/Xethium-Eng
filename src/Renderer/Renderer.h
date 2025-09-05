@@ -15,6 +15,7 @@
 #include "Entities/Rectangle.h"
 #include "Core/FileManager.h"
 #include "Core/EngineState.h"
+#include "Core/GizmoManager.h"
 
 class Renderer {
 public:

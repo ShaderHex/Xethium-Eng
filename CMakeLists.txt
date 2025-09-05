@@ -10,6 +10,7 @@ set(SOURCES
     src/Core/FileManager.cpp
     src/Core/UiDgenerator.cpp
     src/Core/EngineState.cpp
+    src/Core/GizmoManager.cpp
     src/Renderer/Renderer.cpp
     src/Camera/Camera.cpp
     src/Entities/Rectangle.cpp
@@ -30,11 +31,17 @@ set(IMGUIZMO_SOURCES
     external/ImGuizmo/ImGuizmo.cpp
 )
 
+set(RAYGIZMO_SOURCES
+    external/raygizmo/raygizmo.h
+    external/raygizmo/raygizmo.c
+)
+
 add_executable(xethium
     ${SOURCES}
     ${IMGUI_SOURCES}
     ${RLIMGUI_SOURCES}
     ${IMGUIZMO_SOURCES}
+    ${RAYGIZMO_SOURCES}
 )
 
 target_include_directories(xethium PRIVATE
@@ -42,6 +49,7 @@ target_include_directories(xethium PRIVATE
     external/imgui/backends
     external/rlimgui
     external/ImGuizmo
+    external/raygizmo
     src
 )
 
