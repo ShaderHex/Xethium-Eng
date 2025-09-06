@@ -1,0 +1,38 @@
+[
+  {
+    "name": "EditorCamera",
+    "position": [-15.7687, 7.6674, 17.3518],
+    "target": [-15.2106, 7.50148, 16.5388],
+    "up": [0, 1, 0],
+    "fovy": 45,
+    "projection": 0
+  },
+  {
+    "name": "PlayCamera",
+    "position": [0, 5, 10],
+    "target": [0, 5, 9],
+    "up": [0, 1, 0],
+    "fovy": 45,
+    "projection": 0
+  },
+  {
+    "x": 0,
+    "y": 1,
+    "z": 0,
+    "width": 1,
+    "height": 1,
+    "depth": 1,
+    "color": [230, 41, 55, 255],
+    "uid": 886
+  },
+  {
+    "x": 0,
+    "y": 3,
+    "z": -9,
+    "width": 7,
+    "height": 8,
+    "depth": 1,
+    "color": [246, 41, 55, 255],
+    "uid": 2777
+  }
+]

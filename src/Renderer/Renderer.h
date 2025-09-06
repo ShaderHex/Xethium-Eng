@@ -17,6 +17,7 @@
 #include "Core/FileManager.h"
 #include "Core/EngineState.h"
 #include "Core/GizmoManager.h"
+#include "Core/SkyBox.h"
 
 class Renderer {
 public:

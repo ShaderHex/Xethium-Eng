@@ -1,0 +1,73 @@
+[
+  {
+    "name": "EditorCamera",
+    "position": [-6.61735, 20.113, 26.46],
+    "target": [-6.66961, 19.8046, 25.5102],
+    "up": [0, 1, 0],
+    "fovy": 45,
+    "projection": 0
+  },
+  {
+    "name": "PlayCamera",
+    "position": [0, 5, 10],
+    "target": [0, 5, 9],
+    "up": [0, 1, 0],
+    "fovy": 45,
+    "projection": 0
+  },
+  {
+    "name": "",
+    "x": -5,
+    "y": 2,
+    "z": -26,
+    "width": 1,
+    "height": 14,
+    "depth": 1,
+    "color": [230, 41, 55, 255],
+    "uid": 886
+  },
+  {
+    "name": "",
+    "x": 0,
+    "y": 2,
+    "z": -26,
+    "width": 1,
+    "height": 14,
+    "depth": 1,
+    "color": [230, 41, 55, 255],
+    "uid": 2777
+  },
+  {
+    "name": "",
+    "x": -3,
+    "y": 3,
+    "z": -26,
+    "width": 5,
+    "height": 1,
+    "depth": 1,
+    "color": [230, 41, 55, 255],
+    "uid": 6915
+  },
+  {
+    "name": "",
+    "x": 5,
+    "y": 3,
+    "z": -26,
+    "width": 1,
+    "height": 14,
+    "depth": 1,
+    "color": [230, 41, 55, 255],
+    "uid": 7793
+  },
+  {
+    "name": "",
+    "x": 5,
+    "y": 12,
+    "z": -26,
+    "width": 1,
+    "height": 1,
+    "depth": 1,
+    "color": [230, 41, 55, 255],
+    "uid": 8335
+  }
+]

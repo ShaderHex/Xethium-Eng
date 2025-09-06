@@ -21,6 +21,8 @@ std::unordered_set<long long> usedUiDs;
 
 Vector3 playCamPos = EditorCamera::playCamera.position;
 
+Skybox skybox;
+
 void DrawEngineGrid(int slices = 1000, float spacing = 1.0f)
 {
     int halfSlices = slices / 2;
@@ -44,8 +46,13 @@ void DrawEngineGrid(int slices = 1000, float spacing = 1.0f)
     rlEnd();
 }
 
+void RenderSkybox(Camera3D& camera) {
+    skybox.Draw(camera);
+}
+
+
 void Renderer::Init() {
-    // Renderer-specific initialization
+    skybox.Load("project/assets/skybox/autumn_field_puresky_1k.png", 100.0f);
 }
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
@@ -109,10 +116,11 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 }
 
 void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
-    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-    std::cout << "Rendering the 3D world..." << std::endl;
-    ClearBackground(GRAY);
+    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    //std::cout << "Rendering the 3D world..." << std::endl;
     BeginMode3D(currentCamera);
+    RenderSkybox(currentCamera);
+
 
     Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
     hoveredUiD = -1;
@@ -150,10 +158,10 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     rlDisableDepthTest();
     rlDisableDepthMask();
 
-    std::cout << "Exiting 3D mode..." << std::endl;
-    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-    std::cout << "Rendering the ImGuizmo..." << std::endl;
+    //std::cout << "Exiting 3D mode..." << std::endl;
+    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    //std::cout << "Rendering the ImGuizmo..." << std::endl;
     for (auto& r : rects) {
         if (selectedUiD == r.UiD) {
             static Transform gizmoTransform = GizmoIdentity();
@@ -166,15 +174,13 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
             r.size = gizmoTransform.scale;
         }
     }
-    std::cout << "Exiting ImGuizmo rendering..." << std::endl;
-    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    //std::cout << "Exiting ImGuizmo rendering..." << std::endl;
+    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
 
     rlEnableDepthTest();
     rlEnableDepthMask();
 
     EndMode3D();
-
-
 
 }
 
