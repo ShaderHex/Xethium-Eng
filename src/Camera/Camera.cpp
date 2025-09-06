@@ -55,39 +55,49 @@ void EditorCamera::InitPlayCam() {
 }
 
 void EditorCamera::UpdateEditorCamera() {
+    static float yaw = 0.0f;
+    static float pitch = 0.0f;
     float speed = 10.0f * GetFrameTime();
+    
+    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+        HideCursor();
+        Vector2 delta = GetMouseDelta();
+        yaw   -= delta.x * 0.003f;
+        pitch -= delta.y * 0.003f;
 
-    Vector3 forward = Vector3Normalize(Vector3Subtract(editorCamera.target, editorCamera.position));
-    Vector3 right   = Vector3Normalize(Vector3CrossProduct(forward, editorCamera.up));
+        if (pitch > 1.5f) pitch = 1.5f;
+        if (pitch < -1.5f) pitch = -1.5f;
+    }
+    else {
+        ShowCursor();
+    }
+
+    Vector3 forward;
+    forward.x = cosf(pitch) * sinf(yaw);
+    forward.y = sinf(pitch);
+    forward.z = cosf(pitch) * cosf(yaw);
+    forward = Vector3Normalize(forward);
+
+    Vector3 worldUp = {0.0f, 1.0f, 0.0f};
+    Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, worldUp));
+    Vector3 up    = Vector3Normalize(Vector3CrossProduct(right, forward));
 
     if (IsKeyDown(KEY_W)) {
         editorCamera.position = Vector3Add(editorCamera.position, Vector3Scale(forward, speed));
-        editorCamera.target   = Vector3Add(editorCamera.target,   Vector3Scale(forward, speed));
     }
     if (IsKeyDown(KEY_S)) {
         editorCamera.position = Vector3Subtract(editorCamera.position, Vector3Scale(forward, speed));
-        editorCamera.target   = Vector3Subtract(editorCamera.target,   Vector3Scale(forward, speed));
     }
     if (IsKeyDown(KEY_A)) {
         editorCamera.position = Vector3Subtract(editorCamera.position, Vector3Scale(right, speed));
-        editorCamera.target   = Vector3Subtract(editorCamera.target,   Vector3Scale(right, speed));
     }
     if (IsKeyDown(KEY_D)) {
         editorCamera.position = Vector3Add(editorCamera.position, Vector3Scale(right, speed));
-        editorCamera.target   = Vector3Add(editorCamera.target,   Vector3Scale(right, speed));
     }
 
-    if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
-        Vector2 delta = GetMouseDelta();
-        float yaw   = -delta.x * 0.003f;
-        float pitch = -delta.y * 0.003f;
-
-        Matrix rot = MatrixRotateXYZ({ pitch, yaw, 0.0f });
-        Vector3 forwardNew = Vector3Transform(forward, rot);
-
-        editorCamera.target = Vector3Add(editorCamera.position, forwardNew);
-    }
+    editorCamera.target = Vector3Add(editorCamera.position, forward);
 }
+
 
 void EditorCamera::UpdatePlayCamera() {
     float speed = 10.0f * GetFrameTime();
