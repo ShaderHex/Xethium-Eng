@@ -11,6 +11,7 @@
 #include "imgui.h"
 #include "rlImGui.h"
 #include "ImGuizmo.h"
+#include "rlgl.h"
 #include "Camera/Camera.h"
 #include "Entities/Rectangle.h"
 #include "Core/FileManager.h"

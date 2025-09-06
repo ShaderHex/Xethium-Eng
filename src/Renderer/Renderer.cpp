@@ -86,6 +86,8 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 }
 
 void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
+    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "Rendering the 3D world..." << std::endl;
     ClearBackground(GRAY);
     BeginMode3D(currentCamera);
 
@@ -97,15 +99,15 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         DrawCube(playCamPos, 1, 1, 1, BLUE);
     }
     for (auto& r : rects) {
-        BoundingBox box = {
-            Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
-            Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
-        };
-
         DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
 
         if (Application::currentMode == MODE_EDIT) {
-            if (CheckCollisionRayBox(ray, box)) {
+            BoundingBox box = {
+                Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
+                Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
+            };
+
+            if (CheckCollisionRayBox(GetMouseRay(GetMousePosition(), currentCamera), box)) {
                 hoveredUiD = r.UiD;
                 DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
 
@@ -120,6 +122,14 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         }
     }
 
+
+    rlDisableDepthTest();
+    rlDisableDepthMask();
+
+    std::cout << "Exiting 3D mode..." << std::endl;
+    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+    std::cout << "Rendering the ImGuizmo..." << std::endl;
     for (auto& r : rects) {
         if (selectedUiD == r.UiD) {
             static Transform gizmoTransform = GizmoIdentity();
@@ -132,8 +142,16 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
             r.size = gizmoTransform.scale;
         }
     }
+    std::cout << "Exiting ImGuizmo rendering..." << std::endl;
+    std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+
+    rlEnableDepthTest();
+    rlEnableDepthMask();
 
     EndMode3D();
+
+
+
 }
 
 static void GetCameraMatrices(Camera3D& cam, float view[16], float proj[16]) {
@@ -243,4 +261,5 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
 
     rlImGuiEnd();
+
 }

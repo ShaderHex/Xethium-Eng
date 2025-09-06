@@ -43,10 +43,18 @@ void Application::Run() {
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "Rendering the frames..." << std::endl;
         renderer.RenderFrame(*currentCamera, rectangles);
+        std::cout << "Exit rendering frames..." << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
+        std::cout << "Rendering the ImGui Windows..." << std::endl;
         renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
                              &EditorCamera::editorCamera, &EditorCamera::playCamera);
+        std::cout << "Exit rendering ImGui Windows..." << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
 
         DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
 
