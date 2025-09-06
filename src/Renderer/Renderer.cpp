@@ -21,6 +21,29 @@ std::unordered_set<long long> usedUiDs;
 
 Vector3 playCamPos = EditorCamera::playCamera.position;
 
+void DrawEngineGrid(int slices = 1000, float spacing = 1.0f)
+{
+    int halfSlices = slices / 2;
+
+    rlBegin(RL_LINES);
+    for (int i = -halfSlices; i <= halfSlices; i++)
+    {
+        if (i == 0)
+            rlColor3f(1.0f, 0.0f, 0.0f); 
+        else if (i % 10 == 0)
+            rlColor3f(1.0f, 1.0f, 1.0f); 
+        else
+            rlColor3f(0.6f, 0.6f, 0.6f); 
+
+        rlVertex3f((float)i*spacing, 0.0f, (float)-halfSlices*spacing);
+        rlVertex3f((float)i*spacing, 0.0f, (float)halfSlices*spacing);
+
+        rlVertex3f((float)-halfSlices*spacing, 0.0f, (float)i*spacing);
+        rlVertex3f((float)halfSlices*spacing, 0.0f, (float)i*spacing);
+    }
+    rlEnd();
+}
+
 void Renderer::Init() {
     // Renderer-specific initialization
 }
@@ -122,6 +145,7 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         }
     }
 
+    DrawEngineGrid();
 
     rlDisableDepthTest();
     rlDisableDepthMask();
@@ -263,3 +287,4 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
     rlImGuiEnd();
 
 }
+
