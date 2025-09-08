@@ -26,6 +26,11 @@ void Application::Init() {
 
     scripting.init();
     scripting.runScriptFile("project/assets/Scripts/game.lua");
+
+    sol::function luaStart = scripting.getState()["Start"];
+    if (luaStart.valid()) {
+        luaStart();
+    }
 }
 
 bool Application::CurrentGameMode() {
