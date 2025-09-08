@@ -7,6 +7,7 @@
 #include "raylib.h"
 #include "imgui.h"
 #include "rlImGui.h"
+#include "sol/sol.hpp"
 
 #include "Renderer/Renderer.h"
 #include "Entities/Rectangle.h"

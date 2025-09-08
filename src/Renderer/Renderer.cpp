@@ -14,6 +14,7 @@ namespace fs = std::filesystem;
 
 int hoveredUiD = -1;
 int selectedUiD = -1;
+int CubeNumber;
 
 std::string currentPathWrite;
 std::string fileNameWrite;
@@ -206,18 +207,23 @@ long long GenerateUniqueUiD() {
 
     return newUiD;
 }
+
 void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
 
     ImGui::Begin("Inspector");
 
     if (ImGui::Button("Create Cube") && CanEdit) {
+        
         RectangleObject obj;
         obj.position = {0.0f, 1.0f, 0.0f};
         obj.size = {1.0f, 1.0f, 1.0f};
         obj.color = RED;
         obj.UiD = GenerateUniqueUiD();
+        obj.name = "Cube" + std::to_string(CubeNumber);
+        CubeNumber++;
         rects.push_back(obj);
+        std::cout << "Created cube with name: " << obj.name << std::endl;
     }
 
     if (ImGui::Button("Select Object")) ImGui::OpenPopup("Select UiD");
