@@ -13,6 +13,7 @@
 #include "Camera/Camera.h"
 #include "SceneManager.h"
 #include "EngineState.h"
+#include "Core/Scripting.h"
 
 class Application {
 public:
@@ -22,6 +23,7 @@ public:
     void Shutdown();
 
     static Mode currentMode;
+    Scripting scripting;
 private:
     Renderer renderer;
     EditorCamera cam;

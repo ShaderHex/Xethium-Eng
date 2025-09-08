@@ -23,6 +23,9 @@ void Application::Init() {
     rectangles = SceneManager::LoadScene("scenes/scene.json",
                                          EditorCamera::editorCamera,
                                          EditorCamera::playCamera);
+
+    scripting.init();
+    scripting.runScriptFile("project/assets/Scripts/game.lua");
 }
 
 bool Application::CurrentGameMode() {
@@ -31,6 +34,9 @@ bool Application::CurrentGameMode() {
 
 void Application::Run() {
     while (!WindowShouldClose()) {
+
+        float dt = GetFrameTime();
+
         if (IsKeyPressed(KEY_SPACE)) {
             currentMode = (currentMode == MODE_EDIT) ? MODE_PLAY : MODE_EDIT;
             currentCamera = (currentMode == MODE_EDIT) ? &EditorCamera::editorCamera
@@ -39,6 +45,11 @@ void Application::Run() {
 
         if (currentMode == MODE_EDIT) {
             EditorCamera::UpdateEditorCamera();
+        }
+
+        sol::function luaUpdate = scripting.getState()["update"];
+        if (luaUpdate.valid()) {
+            luaUpdate(dt);
         }
 
         BeginDrawing();
