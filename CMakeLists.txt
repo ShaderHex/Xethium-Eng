@@ -32,7 +32,6 @@ set(IMGUIZMO_SOURCES
 )
 
 set(RAYGIZMO_SOURCES
-    external/raygizmo/raygizmo.h
     external/raygizmo/raygizmo.c
 )
 
@@ -51,15 +50,23 @@ target_include_directories(xethium PRIVATE
     external/ImGuizmo
     external/raygizmo
     src
+    src/ThirdParty/nlohmann
 )
+
+if(WIN32)
+    set(PLATFORM_LIBS opengl32 gdi32)
+elseif(UNIX)
+    set(PLATFORM_LIBS GL m dl pthread)
+endif()
 
 target_link_libraries(xethium PRIVATE
     raylib
     glfw
-    GL  
-    m 
-    dl
-    pthread 
+    ${PLATFORM_LIBS}
 )
 
-set_target_properties(xethium PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES)
+set_target_properties(xethium PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED YES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+)
