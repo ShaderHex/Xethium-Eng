@@ -2,8 +2,6 @@
 *
 *   raylib [models] example - Models loading
 *
-*   Example complexity rating: [★☆☆☆] 1/4
-*
 *   NOTE: raylib supports multiple models file formats:
 *
 *     - OBJ  > Text file format. Must include vertex position-texcoords-normals information,

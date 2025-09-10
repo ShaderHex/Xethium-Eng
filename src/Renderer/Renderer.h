@@ -1,4 +1,5 @@
 #pragma once
+#define STBI_INCLUDE_EXR
 
 #include <fstream>
 #include <iostream>
@@ -18,6 +19,7 @@
 #include "Core/EngineState.h"
 #include "Core/GizmoManager.h"
 #include "Core/SkyBox.h"
+#include "Entities/SpotLight.h"
 
 class Renderer {
 public:
@@ -25,6 +27,7 @@ public:
     void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
     void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
     void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
+    void ApplyPostProcessing();
 
     int hoveredUiD = -1;
     int selectedUiD = -1;
@@ -36,4 +39,8 @@ private:
     EditorCamera cam;
     RectangleObj rectang;
     FileManager filemanager;
+    Light light;
+    LightManager lightManager;
+    Shader shader;
+    Shader postShader;
 };

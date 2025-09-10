@@ -24,13 +24,13 @@ Vector3 playCamPos = EditorCamera::playCamera.position;
 
 Skybox skybox;
 
-void DrawEngineGrid(int slices = 1000, float spacing = 1.0f)
-{
+RenderTexture2D target;
+
+void DrawEngineGrid(int slices = 1000, float spacing = 1.0f) {
     int halfSlices = slices / 2;
 
     rlBegin(RL_LINES);
-    for (int i = -halfSlices; i <= halfSlices; i++)
-    {
+    for (int i = -halfSlices; i <= halfSlices; i++) {
         if (i == 0)
             rlColor3f(1.0f, 0.0f, 0.0f); 
         else if (i % 10 == 0)
@@ -47,14 +47,18 @@ void DrawEngineGrid(int slices = 1000, float spacing = 1.0f)
     rlEnd();
 }
 
-void RenderSkybox(Camera3D& camera) {
-    skybox.Draw(camera);
-}
-
-
 void Renderer::Init() {
-    skybox.Load("project/assets/skybox/autumn_field_puresky_1k.png", 100.0f);
+    postShader = LoadShader(0, "project/shaders/postProcessing.fs");
+    if (postShader.id == 0) {
+        std::cout << "Shader failed to load!" << std::endl;
+    } else {
+        std::cout << "Shader loaded!\n";
+    }
+
+    skybox.Load("project/assets/skybox/default/skybox.png", false);
+    target = LoadRenderTexture(1200, 800);
 }
+
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
     float tmin = (box.min.x - ray.position.x) / ray.direction.x;
@@ -117,72 +121,76 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 }
 
 void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
-    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-    //std::cout << "Rendering the 3D world..." << std::endl;
-    BeginMode3D(currentCamera);
-    RenderSkybox(currentCamera);
-
-
-    Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
-    hoveredUiD = -1;
-    if (Application::currentMode == MODE_EDIT) {
-        playCamPos.x += 0.5f;
-        DrawCube(EditorCamera::playCamera.position, 1, 1, 1, BLUE);
-        DrawCube(playCamPos, 1, 1, 1, BLUE);
+    if (IsWindowResized()) {
+        UnloadRenderTexture(target);
+        target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
-    for (auto& r : rects) {
-        DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
 
-        if (Application::currentMode == MODE_EDIT) {
-            BoundingBox box = {
-                Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
-                Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
-            };
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+        
+        BeginMode3D(currentCamera);
+            rlDisableDepthTest();
+            skybox.Draw(currentCamera);
+            rlEnableDepthTest();
+            
+            DrawEngineGrid();
 
-            if (CheckCollisionRayBox(GetMouseRay(GetMousePosition(), currentCamera), box)) {
-                hoveredUiD = r.UiD;
-                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
+            Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
+            hoveredUiD = -1;
+            if (Application::currentMode == MODE_EDIT) {
+                playCamPos.x += 0.5f;
+                DrawCube(EditorCamera::playCamera.position, 1, 1, 1, BLUE);
+                DrawCube(playCamPos, 1, 1, 1, BLUE);
+            }
 
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    selectedUiD = r.UiD;
+            for (auto& r : rects) {
+                DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
+
+                if (Application::currentMode == MODE_EDIT) {
+                    BoundingBox box = {
+                        Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
+                        Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
+                    };
+
+                    if (CheckCollisionRayBox(ray, box)) {
+                        hoveredUiD = r.UiD;
+                        DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
+                        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) selectedUiD = r.UiD;
+                    }
+
+                    if (selectedUiD == r.UiD) {
+                        DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, WHITE);
+                    }
                 }
             }
 
-            if (selectedUiD == r.UiD) {
-                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, WHITE);
+            for (auto& r : rects) {
+                if (selectedUiD == r.UiD) {
+                    static Transform gizmoTransform = GizmoIdentity();
+                    gizmoTransform.translation = r.position;
+                    gizmoTransform.scale = r.size;
+                    DrawGizmo3D(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE, &gizmoTransform);
+                    r.position = gizmoTransform.translation;
+                    r.size = gizmoTransform.scale;
+                }
             }
-        }
-    }
+        EndMode3D();
+    EndTextureMode();
 
-    DrawEngineGrid();
+    ApplyPostProcessing();
+}
 
-    rlDisableDepthTest();
-    rlDisableDepthMask();
 
-    //std::cout << "Exiting 3D mode..." << std::endl;
-    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-    //std::cout << "Rendering the ImGuizmo..." << std::endl;
-    for (auto& r : rects) {
-        if (selectedUiD == r.UiD) {
-            static Transform gizmoTransform = GizmoIdentity();
-            gizmoTransform.translation = r.position;
-            gizmoTransform.scale = r.size;
-
-            DrawGizmo3D(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE, &gizmoTransform);
-
-            r.position = gizmoTransform.translation;
-            r.size = gizmoTransform.scale;
-        }
-    }
-    //std::cout << "Exiting ImGuizmo rendering..." << std::endl;
-    //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-
-    rlEnableDepthTest();
-    rlEnableDepthMask();
-
-    EndMode3D();
-
+void Renderer::ApplyPostProcessing() {
+    BeginShaderMode(postShader);
+        DrawTextureRec(
+            target.texture,
+            {0, 0, (float)target.texture.width, -(float)target.texture.height},
+            {0, 0},
+            WHITE
+        );
+    EndShaderMode();
 }
 
 static void GetCameraMatrices(Camera3D& cam, float view[16], float proj[16]) {
@@ -225,6 +233,12 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         rects.push_back(obj);
         std::cout << "Created cube with name: " << obj.name << std::endl;
     }
+
+    if (ImGui::Button("Create Spotlight")) {
+        Light& newLight = lightManager.AddLight(LightKind::Point, {0,5,0}, {0,0,0}, WHITE, shader);
+        newLight.name = "Spotlight" + std::to_string(lightManager.Size());
+    }
+
 
     if (ImGui::Button("Select Object")) ImGui::OpenPopup("Select UiD");
 
@@ -328,4 +342,3 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
     rlImGuiEnd();
 
 }
-

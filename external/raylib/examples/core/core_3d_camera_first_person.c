@@ -2,8 +2,6 @@
 *
 *   raylib [core] example - 3d camera first person
 *
-*   Example complexity rating: [★★☆☆] 2/4
-*
 *   Example originally created with raylib 1.3, last time updated with raylib 1.3
 *
 *   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
@@ -117,7 +115,7 @@ int main(void)
 
         // Update camera computes movement internally depending on the camera mode
         // Some default standard keyboard/mouse inputs are hardcoded to simplify use
-        // For advanced camera controls, it's recommended to compute camera movement manually
+        // For advance camera controls, it's reecommended to compute camera movement manually
         UpdateCamera(&camera, cameraMode);                  // Update camera
 
 /*

@@ -1,8 +1,6 @@
 /*******************************************************************************************
 *
-*   raylib [textures] example - particles blending
-*
-*   Example complexity rating: [★☆☆☆] 1/4
+*   raylib example - particles blending
 *
 *   Example originally created with raylib 1.7, last time updated with raylib 3.5
 *

@@ -6,8 +6,7 @@
 *
 *   Example create by GreenSnakeLinux (@GreenSnakeLinux),
 *   lighter by oblerion (@oblerion) and 
-*   reviewed by Ramon Santamaria (@raysan5) and
-*   improved by danilwhale (@danilwhale)
+*   reviewed by Ramon Santamaria (@raysan5)
 *
 *   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,
 *   BSD-like license that allows static linking with closed source software
@@ -18,16 +17,6 @@
 
 #include "raylib.h"
 #include <math.h>
-
-typedef enum {
-    BUTTON_NONE = -1,
-    BUTTON_UP,
-    BUTTON_LEFT,
-    BUTTON_RIGHT,
-    BUTTON_DOWN,
-    BUTTON_MAX
-} PadButton;
-
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -40,38 +29,24 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - input virtual controls");
 
-    Vector2 padPosition = { 100, 350 };
-    float buttonRadius = 30;
+    const float dpadX = 90;
+    const float dpadY = 300;
+    const float dpadRad = 25.0f;//radius of each pad
+    Color dpadColor = BLUE;
+    int dpadKeydown = -1;//-1 if not down, else 0,1,2,3 
 
-    Vector2 buttonPositions[BUTTON_MAX] =
+    
+    const float dpadCollider[4][2]= // collider array with x,y position
     {
-        { padPosition.x,padPosition.y - buttonRadius*1.5f },  // Up
-        { padPosition.x - buttonRadius*1.5f, padPosition.y }, // Left
-        { padPosition.x + buttonRadius*1.5f, padPosition.y }, // Right
-        { padPosition.x, padPosition.y + buttonRadius*1.5f }  // Down
+        {dpadX,dpadY-dpadRad*1.5f},//up
+        {dpadX-dpadRad*1.5f,dpadY},//left
+        {dpadX+dpadRad*1.5f,dpadY},//right
+        {dpadX,dpadY+dpadRad*1.5f}//down
     };
+    const char dpadLabel[4]="XYBA";//label of Dpad
 
-    const char *buttonLabels[BUTTON_MAX] =
-    {
-        "Y",    // Up
-        "X",    // Left
-        "B",    // Right
-        "A"     // Down
-    };
-
-    Color buttonLabelColors[BUTTON_MAX] =
-    {
-        YELLOW, // Up
-        BLUE,   // Left
-        RED,    // Right
-        GREEN   // Down
-    };
-
-    int pressedButton = BUTTON_NONE;
-    Vector2 inputPosition = { 0, 0 };
-
-    Vector2 playerPosition = { (float)screenWidth/2, (float)screenHeight/2 };
-    float playerSpeed = 75;
+    float playerX=100;
+    float playerY=100;
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
@@ -79,73 +54,63 @@ int main(void)
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update
-        //--------------------------------------------------------------------------
-        if ((GetTouchPointCount() > 0))
-        {
-            // Use touch position
-            inputPosition = GetTouchPosition(0);
+    // Update 
+    //--------------------------------------------------------------------------
+        dpadKeydown = -1; //reset
+        int inputX = 0;
+        int inputY = 0;
+        if(GetTouchPointCount()>0)
+        {//use touch pos
+            inputX = GetTouchX();
+            inputY = GetTouchY();
         }
         else
-        {
-            // Use mouse position
-            inputPosition = GetMousePosition();
+        {//use mouse pos
+            inputX = GetMouseX();
+            inputY = GetMouseY();
         }
-
-        // Reset pressed button to none
-        pressedButton = BUTTON_NONE;
-
-        // Make sure user is pressing left mouse button if they're from desktop
-        if ((GetTouchPointCount() > 0) || ((GetTouchPointCount() == 0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)))
+        for(int i=0;i<4;i++)
         {
-            // Find nearest D-Pad button to the input position
-            for (int i = 0; i < BUTTON_MAX; i++)
+            //test distance each collider and input < radius
+            if( fabsf(dpadCollider[i][1]-inputY) + fabsf(dpadCollider[i][0]-inputX) < dpadRad)
             {
-                float distX = fabsf(buttonPositions[i].x - inputPosition.x);
-                float distY = fabsf(buttonPositions[i].y - inputPosition.y);
-
-                if ((distX + distY < buttonRadius))
+                dpadKeydown = i;
+                break;
+            }
+        }
+        // move player
+        switch(dpadKeydown){
+            case 0: playerY -= 50*GetFrameTime();
+            break;
+            case 1: playerX -= 50*GetFrameTime();
+            break;
+            case 2: playerX += 50*GetFrameTime();
+            break;
+            case 3: playerY += 50*GetFrameTime();
+            default:;
+        };
+    //--------------------------------------------------------------------------
+    // Draw 
+    //--------------------------------------------------------------------------
+       BeginDrawing();
+            ClearBackground(RAYWHITE);
+            for(int i=0;i<4;i++)
+            {
+                //draw all pad
+                DrawCircleV((Vector2) { dpadCollider[i][0], dpadCollider[i][1] }, dpadRad, dpadColor);
+                if(i!=dpadKeydown)
                 {
-                    pressedButton = i;
-                    break;
+                    //draw label
+                    DrawText(TextSubtext(dpadLabel,i,1),
+                             (int)dpadCollider[i][0]-7,
+                             (int)dpadCollider[i][1]-8,20,BLACK);
                 }
             }
-        }
 
-        // Move player according to pressed button
-        switch (pressedButton)
-        {
-            case BUTTON_UP: playerPosition.y -= playerSpeed*GetFrameTime(); break;
-            case BUTTON_LEFT: playerPosition.x -= playerSpeed*GetFrameTime(); break;
-            case BUTTON_RIGHT: playerPosition.x += playerSpeed*GetFrameTime(); break;
-            case BUTTON_DOWN: playerPosition.y += playerSpeed*GetFrameTime(); break;
-            default: break;
-        };
-
-        //--------------------------------------------------------------------------
-        // Draw
-        //--------------------------------------------------------------------------
-        BeginDrawing();
-
-            ClearBackground(RAYWHITE);
-
-            // Draw world
-            DrawCircleV(playerPosition, 50, MAROON);
-
-            // Draw GUI
-            for (int i = 0; i < BUTTON_MAX; i++)
-            {
-                DrawCircleV(buttonPositions[i], buttonRadius, (i == pressedButton)? DARKGRAY : BLACK);
-
-                DrawText(buttonLabels[i],
-                    (int)buttonPositions[i].x - 7, (int)buttonPositions[i].y - 8,
-                    20, buttonLabelColors[i]);
-            }
-
-            DrawText("move the player with D-Pad buttons", 10, 10, 20, DARKGRAY);
-
+            DrawRectangleRec((Rectangle) { playerX - 4, playerY - 4, 75, 28 }, RED);
+            DrawText("Player", (int)playerX, (int)playerY, 20, WHITE);
         EndDrawing();
-        //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     }
 
     // De-Initialization

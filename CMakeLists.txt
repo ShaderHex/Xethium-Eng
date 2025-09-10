@@ -5,6 +5,7 @@ add_subdirectory(external/raylib)
 
 set(SOURCES
     src/main.cpp
+    src/stb_impl.cpp
     src/Core/Application.cpp
     src/Core/SceneManager.cpp
     src/Core/FileManager.cpp
@@ -90,6 +91,7 @@ target_include_directories(xethium PRIVATE
     external/lua/src
     src
     src/ThirdParty/nlohmann
+    external/stb
 )
 
 if(WIN32)

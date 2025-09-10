@@ -2,8 +2,6 @@
 *
 *   raylib [text] example - Rectangle bounds
 *
-*   Example complexity rating: [★★★★] 4/4
-*
 *   Example originally created with raylib 2.5, last time updated with raylib 4.0
 *
 *   Example contributed by Vlad Adrian (@demizdor) and reviewed by Ramon Santamaria (@raysan5)

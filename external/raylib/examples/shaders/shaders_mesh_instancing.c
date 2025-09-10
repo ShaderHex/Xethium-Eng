@@ -2,8 +2,6 @@
 *
 *   raylib [shaders] example - Mesh instancing
 *
-*   Example complexity rating: [★★★★] 4/4
-*
 *   Example originally created with raylib 3.7, last time updated with raylib 4.2
 *
 *   Example contributed by @seanpringle and reviewed by Max (@moliad) and Ramon Santamaria (@raysan5)
@@ -63,7 +61,7 @@ int main(void)
     {
         Matrix translation = MatrixTranslate((float)GetRandomValue(-50, 50), (float)GetRandomValue(-50, 50), (float)GetRandomValue(-50, 50));
         Vector3 axis = Vector3Normalize((Vector3){ (float)GetRandomValue(0, 360), (float)GetRandomValue(0, 360), (float)GetRandomValue(0, 360) });
-        float angle = (float)GetRandomValue(0, 180)*DEG2RAD;
+        float angle = (float)GetRandomValue(0, 10)*DEG2RAD;
         Matrix rotation = MatrixRotate(axis, angle);
         
         transforms[i] = MatrixMultiply(rotation, translation);
@@ -75,6 +73,7 @@ int main(void)
     // Get shader locations
     shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader, "mvp");
     shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader, "instanceTransform");
 
     // Set shader value: ambient light level
     int ambientLoc = GetShaderLocation(shader, "ambient");

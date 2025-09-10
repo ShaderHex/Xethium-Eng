@@ -12,20 +12,23 @@ uniform vec2 offset;            // Offset of the scale.
 uniform float zoom;             // Zoom of the scale.
 
 const int maxIterations = 255;     // Max iterations to do.
-const float colorCycles = 2.0;    // Number of times the color palette repeats. Can show higher detail for higher iteration numbers.
+const float colorCycles = 2.0f;    // Number of times the color palette repeats. Can show higher detail for higher iteration numbers.
 
 // Square a complex number
 vec2 ComplexSquare(vec2 z)
 {
-    return vec2(z.x*z.x - z.y*z.y, z.x*z.y*2.0);
+    return vec2(
+        z.x*z.x - z.y*z.y,
+        z.x*z.y*2.0f
+    );
 }
 
 // Convert Hue Saturation Value (HSV) color into RGB
 vec3 Hsv2rgb(vec3 c)
 {
-    vec4 K = vec4(1.0, 2.0/3.0, 1.0/3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz)*6.0 - K.www);
-    return c.z*mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    vec4 K = vec4(1.0f, 2.0f/3.0f, 1.0f/3.0f, 3.0f);
+    vec3 p = abs(fract(c.xxx + K.xyz)*6.0f - K.www);
+    return c.z*mix(K.xxx, clamp(p - K.xxx, 0.0f, 1.0f), c.y);
 }
 
 void main()
@@ -51,7 +54,7 @@ void main()
 
     // The pixel coordinates are scaled so they are on the mandelbrot scale
     // NOTE: fragTexCoord already comes as normalized screen coordinates but offset must be normalized before scaling and zoom
-    vec2 z = vec2((fragTexCoord.x - 0.5f)*2.5, (fragTexCoord.y - 0.5)*1.5)/zoom;
+    vec2 z = vec2((fragTexCoord.x - 0.5f)*2.5f, (fragTexCoord.y - 0.5f)*1.5f)/zoom;
     z.x += offset.x;
     z.y += offset.y;
 
@@ -60,7 +63,7 @@ void main()
     {
         z = ComplexSquare(z) + c;  // Iterate function
 
-        if (dot(z, z) > 4.0) break;
+        if (dot(z, z) > 4.0f) break;
     }
 
     // Another few iterations decreases errors in the smoothing calculation.
@@ -69,12 +72,12 @@ void main()
     z = ComplexSquare(z) + c;
 
     // This last part smooths the color (again see link above).
-    float smoothVal = float(iterations) + 1.0 - (log(log(length(z)))/log(2.0));
+    float smoothVal = float(iterations) + 1.0f - (log(log(length(z)))/log(2.0f));
 
     // Normalize the value so it is between 0 and 1.
     float norm = smoothVal/float(maxIterations);
 
     // If in set, color black. 0.999 allows for some float accuracy error.
-    if (norm > 0.999) finalColor = vec4(0.0, 0.0, 0.0, 1.0);
-    else finalColor = vec4(Hsv2rgb(vec3(norm*colorCycles, 1.0, 1.0)), 1.0);
+    if (norm > 0.999f) finalColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    else finalColor = vec4(Hsv2rgb(vec3(norm*colorCycles, 1.0f, 1.0f)), 1.0f);
 }

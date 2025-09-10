@@ -2,8 +2,6 @@
 *
 *   raylib [textures] example - gif playing
 *
-*   Example complexity rating: [★★★☆] 3/4
-*
 *   Example originally created with raylib 4.2, last time updated with raylib 4.2
 *
 *   Example licensed under an unmodified zlib/libpng license, which is an OSI-certified,

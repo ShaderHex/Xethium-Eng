@@ -28,9 +28,7 @@ void Application::Init() {
 
     renderer.Init();
 
-    rectangles = SceneManager::LoadScene("scenes/scene.json",
-                                         EditorCamera::editorCamera,
-                                         EditorCamera::playCamera);
+    SetTargetFPS(60);
 
     scripting.init();
     scripting.runScriptFile("project/assets/Scripts/game.lua");
@@ -73,29 +71,20 @@ void Application::Run() {
         sol::function luaUpdate = scripting.getState()["Update"];
         if (luaUpdate.valid()) {
             luaUpdate(dt);
-        }
-
+        }        
+        
         BeginDrawing();
         ClearBackground(BLACK);
-        //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-        //std::cout << "Rendering the frames..." << std::endl;
-        renderer.RenderFrame(*currentCamera, rectangles);
-        //std::cout << "Exit rendering frames..." << std::endl;
-        //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-
-        //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
-        //std::cout << "Rendering the ImGui Windows..." << std::endl;
-        renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
+        
+            renderer.RenderFrame(*currentCamera, rectangles);
+            renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
                              &EditorCamera::editorCamera, &EditorCamera::playCamera);
-        //std::cout << "Exit rendering ImGui Windows..." << std::endl;
-        //std::cout << "---------------------------------------------------------------------------------------------------" << std::endl;
 
-        DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, BLACK);
+            DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, WHITE);
 
         EndDrawing();
     }
 }
-
 
 void Application::Shutdown() {
     rlImGuiShutdown();

@@ -2,8 +2,6 @@
 *
 *   raylib [shapes] example - draw rectangle rounded (with gui options)
 *
-*   Example complexity rating: [★★★☆] 3/4
-*
 *   Example originally created with raylib 2.5, last time updated with raylib 2.5
 *
 *   Example contributed by Vlad Adrian (@demizdor) and reviewed by Ramon Santamaria (@raysan5)

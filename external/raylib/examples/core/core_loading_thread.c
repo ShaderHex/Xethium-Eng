@@ -2,8 +2,6 @@
 *
 *   raylib [core] example - loading thread
 *
-*   Example complexity rating: [★★★☆] 3/4
-*
 *   NOTE: This example requires linking with pthreads library on MinGW, 
 *   it can be accomplished passing -static parameter to compiler
 *
