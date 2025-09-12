@@ -26,8 +26,8 @@ void Application::Init() {
 
     currentCamera = &EditorCamera::editorCamera;
 
+    rlImGuiSetup(true);
     renderer.Init();
-
     SetTargetFPS(60);
 
     scripting.init();
@@ -79,8 +79,6 @@ void Application::Run() {
             renderer.RenderFrame(*currentCamera, rectangles);
             renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
                              &EditorCamera::editorCamera, &EditorCamera::playCamera);
-
-            DrawText((currentMode == MODE_EDIT ? "Edit Mode" : "Play Mode"), 10, 10, 20, WHITE);
 
         EndDrawing();
     }

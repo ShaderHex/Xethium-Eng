@@ -2,6 +2,7 @@
 #include "Core/Application.h"
 #include "Core/SceneManager.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "rlImGui.h"
 #include "ImGuizmo.h"
 #include <raygizmo.h>
@@ -48,6 +49,10 @@ void DrawEngineGrid(int slices = 1000, float spacing = 1.0f) {
 }
 
 void Renderer::Init() {
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
     postShader = LoadShader(0, "project/shaders/postProcessing.fs");
     if (postShader.id == 0) {
         std::cout << "Shader failed to load!" << std::endl;
@@ -67,7 +72,7 @@ bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
 
     float tymin = (box.min.y - ray.position.y) / ray.direction.y;
     float tymax = (box.max.y - ray.position.y) / ray.direction.y;
-    if (tymin > tymax) std::swap(tymin, tymax);
+    if (tymin > tmax) std::swap(tymin, tmax);
 
     if ((tmin > tymax) || (tymin > tmax)) return false;
     if (tymin > tmin) tmin = tymin;
@@ -219,6 +224,44 @@ long long GenerateUniqueUiD() {
 void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
 
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size, ImGuiCond_Always);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0)); 
+
+    ImGuiWindowFlags dockspaceFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
+                                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                                      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+    ImGui::Begin("DockSpace", nullptr, dockspaceFlags);
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor();
+
+    ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    static bool docked = false;
+if (!docked) {
+    ImGui::DockBuilderRemoveNode(dockspace_id);
+    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+    ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
+
+    ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
+    ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
+    ImGuiID buttom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
+
+    ImGui::DockBuilderDockWindow("Play", top_id);
+    ImGui::DockBuilderDockWindow("Inspector", right_id);
+    ImGui::DockBuilderDockWindow("File Explorer", buttom_id);
+
+    ImGui::DockBuilderFinish(dockspace_id);
+    docked = true;
+}
+
+    ImGui::End();
+
     ImGui::Begin("Inspector");
 
     if (ImGui::Button("Create Cube") && CanEdit) {
@@ -324,18 +367,27 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
     ImGui::End();
 
     ImGui::Begin("Play");
+
+    float windowWidth = ImGui::GetWindowSize().x;
+
+    float buttonWidth = 120.0f;
+
+    ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+
     if (Application::currentMode == MODE_EDIT) {
-        if (ImGui::Button("Play")) {
+        if (ImGui::Button("Play", ImVec2(buttonWidth, 0))) {
             Application::currentMode = MODE_PLAY;
             currentCamera = playCam;
         }
     } else {
-        if (ImGui::Button("Stop Playing")) {
+        if (ImGui::Button("Stop Playing", ImVec2(buttonWidth, 0))) {
             Application::currentMode = MODE_EDIT;
             currentCamera = editorCam;
         }
     }
+
     ImGui::End();
+
 
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
 
