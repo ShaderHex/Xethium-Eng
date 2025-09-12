@@ -75,11 +75,13 @@ void Application::Run() {
         
         BeginDrawing();
         ClearBackground(BLACK);
+
+
         
             renderer.RenderFrame(*currentCamera, rectangles);
             renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
                              &EditorCamera::editorCamera, &EditorCamera::playCamera);
-
+        
         EndDrawing();
     }
 }

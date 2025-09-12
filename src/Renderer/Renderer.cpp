@@ -2,8 +2,8 @@
 #include "Core/Application.h"
 #include "Core/SceneManager.h"
 #include "imgui.h"
-#include "imgui_internal.h"
 #include "rlImGui.h"
+#include "imgui_internal.h"
 #include "ImGuizmo.h"
 #include <raygizmo.h>
 
@@ -49,9 +49,12 @@ void DrawEngineGrid(int slices = 1000, float spacing = 1.0f) {
 }
 
 void Renderer::Init() {
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+    IMGUI_CHECKVERSION();
+ImGui::CreateContext();
+ImGuiIO& io = ImGui::GetIO();
+io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 
     postShader = LoadShader(0, "project/shaders/postProcessing.fs");
     if (postShader.id == 0) {
@@ -72,7 +75,7 @@ bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
 
     float tymin = (box.min.y - ray.position.y) / ray.direction.y;
     float tymax = (box.max.y - ray.position.y) / ray.direction.y;
-    if (tymin > tmax) std::swap(tymin, tmax);
+    if (tymin > tymax) std::swap(tymin, tymax);
 
     if ((tmin > tymax) || (tymin > tmax)) return false;
     if (tymin > tmin) tmin = tymin;
@@ -223,44 +226,58 @@ long long GenerateUniqueUiD() {
 
 void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
 
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2((float)GetScreenWidth(), (float)GetScreenHeight()), ImGuiCond_Always);
+
+    ImGuiWindowFlags dockspaceFlags = ImGuiWindowFlags_NoTitleBar |
+                                     ImGuiWindowFlags_NoResize |
+                                     ImGuiWindowFlags_NoMove |
+                                     ImGuiWindowFlags_NoCollapse |
+                                     ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                     ImGuiWindowFlags_NoNavFocus |
+                                     ImGuiWindowFlags_NoBackground;
+
+
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0)); 
-
-    ImGuiWindowFlags dockspaceFlags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar |
-                                      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-                                      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0));
 
     ImGui::Begin("DockSpace", nullptr, dockspaceFlags);
+
     ImGui::PopStyleVar(3);
     ImGui::PopStyleColor();
 
     ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
+    ImGui::DockSpace(dockspace_id, ImVec2(0,0), ImGuiDockNodeFlags_PassthruCentralNode);
+
 
     static bool docked = false;
-if (!docked) {
-    ImGui::DockBuilderRemoveNode(dockspace_id);
-    ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
-    ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->Size);
+    if (!docked) {
+        ImGui::DockBuilderRemoveNode(dockspace_id);
+        ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
 
-    ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
-    ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
-    ImGuiID buttom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
+        ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
+        ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
+        ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
 
-    ImGui::DockBuilderDockWindow("Play", top_id);
-    ImGui::DockBuilderDockWindow("Inspector", right_id);
-    ImGui::DockBuilderDockWindow("File Explorer", buttom_id);
+        ImGui::DockBuilderDockWindow("Play", top_id);
+        ImGui::DockBuilderDockWindow("Inspector", right_id);
+        ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
 
-    ImGui::DockBuilderFinish(dockspace_id);
-    docked = true;
-}
+        ImGui::DockBuilderFinish(dockspace_id);
+        docked = true;
+    }
 
     ImGui::End();
+
 
     ImGui::Begin("Inspector");
 
@@ -276,12 +293,6 @@ if (!docked) {
         rects.push_back(obj);
         std::cout << "Created cube with name: " << obj.name << std::endl;
     }
-
-    if (ImGui::Button("Create Spotlight")) {
-        Light& newLight = lightManager.AddLight(LightKind::Point, {0,5,0}, {0,0,0}, WHITE, shader);
-        newLight.name = "Spotlight" + std::to_string(lightManager.Size());
-    }
-
 
     if (ImGui::Button("Select Object")) ImGui::OpenPopup("Select UiD");
 
@@ -313,7 +324,7 @@ if (!docked) {
             ImGui::DragFloat3("Position", &rect.position.x);
             ImGui::DragFloat3("Size", &rect.size.x);
 
-            float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
+float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
             if (ImGui::ColorEdit3("Color", tempColor)) {
                 rect.color.r = static_cast<unsigned char>(tempColor[0] * 255);
                 rect.color.g = static_cast<unsigned char>(tempColor[1] * 255);
