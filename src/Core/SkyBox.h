@@ -48,7 +48,9 @@ public:
             Texture2D panorama = LoadTexture(filePath.c_str());
             Shader shdrCubemap = LoadShader(TextFormat("project/shaders/cubemap.vs", GLSL_VERSION),
                                             TextFormat("project/shaders/cubemap.fs", GLSL_VERSION));
-            SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), (int[1]){0}, SHADER_UNIFORM_INT);
+            int cubemapSlot[1] = {0};
+	    SetShaderValue(shdrCubemap, GetShaderLocation(shdrCubemap, "equirectangularMap"), cubemapSlot, SHADER_UNIFORM_INT);
+
 
             cubemap = GenTextureCubemap(shdrCubemap, panorama, 1024, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
             model.materials[0].maps[MATERIAL_MAP_CUBEMAP].texture = cubemap;

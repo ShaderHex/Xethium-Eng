@@ -90,7 +90,7 @@ target_include_directories(xethium PRIVATE
     external/
     external/lua/src
     src
-    src/ThirdParty/nlohmann
+    src/ThirdParty/
     external/stb
 )
 
