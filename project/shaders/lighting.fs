@@ -10,13 +10,11 @@ uniform vec4 colDiffuse;
 
 out vec4 finalColor;
 
-
-#define     MAX_LIGHTS              4
-#define     LIGHT_DIRECTIONAL       0
-#define     LIGHT_POINT             1
+#define MAX_LIGHTS 4
+#define LIGHT_DIRECTIONAL 0
+#define LIGHT_POINT 1
 
 struct Light {
-    int enabled;
     int type;
     vec3 position;
     vec3 target;
@@ -30,40 +28,36 @@ uniform vec3 viewPos;
 void main()
 {
     vec4 texelColor = texture(texture0, fragTexCoord);
-    vec3 lightDot = vec3(0.0);
     vec3 normal = normalize(fragNormal);
     vec3 viewD = normalize(viewPos - fragPosition);
-    vec3 specular = vec3(0.0);
-
-    vec4 tint = colDiffuse*fragColor;
+    vec3 lightAccum = vec3(0.0);
+    vec3 specularAccum = vec3(0.0);
+    vec4 tint = colDiffuse * fragColor;
 
     for (int i = 0; i < MAX_LIGHTS; i++)
     {
-        if (lights[i].enabled == 1)
+        vec3 lightDir = vec3(0.0);
+
+        if (lights[i].type == LIGHT_DIRECTIONAL)
         {
-            vec3 light = vec3(0.0);
+            lightDir = -normalize(lights[i].target - lights[i].position);
+        }
+        else if (lights[i].type == LIGHT_POINT)
+        {
+            lightDir = normalize(lights[i].position - fragPosition);
+        }
 
-            if (lights[i].type == LIGHT_DIRECTIONAL)
-            {
-                light = -normalize(lights[i].target - lights[i].position);
-            }
+        float NdotL = max(dot(normal, lightDir), 0.0);
+        lightAccum += lights[i].color.rgb * NdotL;
 
-            if (lights[i].type == LIGHT_POINT)
-            {
-                light = normalize(lights[i].position - fragPosition);
-            }
-
-            float NdotL = max(dot(normal, light), 0.0);
-            lightDot += lights[i].color.rgb*NdotL;
-
-            float specCo = 0.0;
-            if (NdotL > 0.0) specCo = pow(max(0.0, dot(viewD, reflect(-(light), normal))), 16.0);
-            specular += specCo;
+        if (NdotL > 0.0)
+        {
+            float spec = pow(max(0.0, dot(viewD, reflect(-lightDir, normal))), 16.0);
+            specularAccum += spec;
         }
     }
 
-    finalColor = (texelColor*((tint + vec4(specular, 1.0))*vec4(lightDot, 1.0)));
-    finalColor += texelColor*(ambient/10.0)*tint;
-
-    finalColor = pow(finalColor, vec4(1.0/2.2));
+    // final color
+    vec3 litColor = (tint.rgb + specularAccum) * lightAccum + (ambient.rgb / 5.0) * tint.rgb;
+    finalColor = vec4(pow(litColor, vec3(1.0/2.2)), 1.0);
 }

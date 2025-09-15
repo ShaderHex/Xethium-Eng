@@ -15,6 +15,7 @@
 #include "SceneManager.h"
 #include "EngineState.h"
 #include "Core/Scripting.h"
+#include "Entities/Sphere.h"
 
 class Application {
 public:
@@ -29,5 +30,5 @@ private:
     Renderer renderer;
     EditorCamera cam;
     std::vector<RectangleObject> rectangles;
-    std::vector<RectangleObject> circles;
+    std::vector<SphereObject> sphere;
 };

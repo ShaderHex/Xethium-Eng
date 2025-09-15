@@ -79,7 +79,7 @@ void Application::Run() {
 
         
             renderer.RenderFrame(*currentCamera, rectangles);
-            renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
+            renderer.ImGuiRender(CurrentGameMode(), rectangles, sphere, currentCamera,
                              &EditorCamera::editorCamera, &EditorCamera::playCamera);
         
         EndDrawing();

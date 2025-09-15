@@ -16,6 +16,7 @@ set(SOURCES
     src/Renderer/Renderer.cpp
     src/Camera/Camera.cpp
     src/Entities/Rectangle.cpp
+    src/Entities/SceneObject.h
 )
 
 set(RLIMGUI_SOURCES

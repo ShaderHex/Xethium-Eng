@@ -38,7 +38,7 @@ void EditorCamera::InitCam() {
     editorCamera.position   = { 0.0f, 5.0f, 10.0f };
     editorCamera.target     = { 0.0f, 5.0f, 9.0f };
     editorCamera.up         = { 0.0f, 1.0f, 0.0f };
-    editorCamera.fovy       = 45.0f;
+    editorCamera.fovy       = 60.0f;
     editorCamera.projection = CAMERA_PERSPECTIVE;
 
     DisableCursor();

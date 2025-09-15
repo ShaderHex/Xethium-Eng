@@ -22,7 +22,6 @@
 
 #include "raymath.h"
 
-#define RLIGHTS_IMPLEMENTATION
 #include "rlights.h"
 
 #if defined(PLATFORM_DESKTOP)
