@@ -31,24 +31,6 @@ void Application::Init() {
     rlImGuiSetup(true);
     renderer.Init();
     SetTargetFPS(60);
-
-    scripting.init();
-    scripting.runScriptFile("project/assets/Scripts/game.lua");
-    
-    scripting.getState().set_function("MoveRectangleByName", [&](const std::string& name, float x, float y, float z) {
-        RectangleObject* r = GetRectangleByName(rectangles, name);
-        if (r) r->position = {x, y, z};
-    });
-
-    scripting.getState().set_function("SetColorByName", [&](const std::string& name, int r, int g, int b, int a) {
-        RectangleObject* rect = GetRectangleByName(Application::rectangles, name);
-        if (rect) rect->color = { (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a };
-    });
-
-    sol::function luaStart = scripting.getState()["Start"];
-    if (luaStart.valid()) {
-        luaStart();
-    }
 }
 
 bool Application::CurrentGameMode() {
@@ -60,33 +42,53 @@ void Application::Run() {
 
         float dt = GetFrameTime();
 
-        if (IsKeyPressed(KEY_SPACE)) {
-            currentMode = (currentMode == MODE_EDIT) ? MODE_PLAY : MODE_EDIT;
-            currentCamera = (currentMode == MODE_EDIT) ? &EditorCamera::editorCamera
-                                                       : &EditorCamera::playCamera;
-        }
-
         if (currentMode == MODE_EDIT) {
             EditorCamera::UpdateEditorCamera();
         }
 
-        sol::function luaUpdate = scripting.getState()["Update"];
-        if (luaUpdate.valid()) {
-            luaUpdate(dt);
-        }        
         
         BeginDrawing();
         ClearBackground(BLACK);
 
 
             if (currentMode == MODE_EDIT) {
+                isRuntimeInit = false;
+                std::cout<<"mode edit entered\n";
+                std::cout<<isRuntimeInit << '\n';
                 renderer.RenderFrame(*currentCamera, rectangles);
                 renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
                     &EditorCamera::editorCamera, &EditorCamera::playCamera);
             } else if (currentMode == MODE_PLAY) {
+                std::cout << isRuntimeInit << "\n";
                 if (!isRuntimeInit) {
+                    std::cout << "Init Runtime\n";
                     renderer.InitRuntime();
+                
+                    scripting.init();
+                    scripting.runScriptFile("project/assets/Scripts/game.lua");
+                    
+                    scripting.getState().set_function("MoveRectangleByName", [&](const std::string& name, float x, float y, float z) {
+                        RectangleObject* r = GetRectangleByName(rectangles, name);
+                        if (r) r->position = {x, y, z};
+                    });
+
+                    scripting.getState().set_function("SetColorByName", [&](const std::string& name, int r, int g, int b, int a) {
+                        RectangleObject* rect = GetRectangleByName(Application::rectangles, name);
+                        if (rect) rect->color = { (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a };
+                    });
+
+                    sol::function luaStart = scripting.getState()["Start"];
+                    if (luaStart.valid()) {
+                        luaStart();
+                    }
+                    
                     isRuntimeInit = true;
+                } else {
+                    std::cout<<"It's true\n";
+                }
+                sol::function luaUpdate = scripting.getState()["Update"];
+                if (luaUpdate.valid()) {
+                    luaUpdate(dt);
                 }
                 renderer.RenderRuntime(rectangles);
                 renderer.ImGuiRenderRuntime(CurrentGameMode(), rectangles, currentCamera,

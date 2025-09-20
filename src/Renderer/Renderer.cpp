@@ -202,7 +202,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
 
                 DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
-                std::cout << r.position.x << " " << r.position.y << " " << r.position.z << "\n";
 
                 if (Application::currentMode == MODE_EDIT) {
                     BoundingBox box = {
@@ -471,9 +470,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             }
         }
     }
-
-    std::cout << "sphere address = " << &sphere 
-          << " size = " << sphere.size() << "\n";
 
     for (auto& s : sphere) {
         if (s.UiD == selectedUiD) {
@@ -754,12 +750,10 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
 
     ImGui::End();
 
-    std::cout<< "ImGui crashed after the dockspace\n"; 
 
     ImGui::Begin("Inspector");    
 
     ImGui::End();
-    std::cout<< "ImGui crashed after the inspector\n"; 
     ImGui::Begin("Lights");
     
     ImGui::End();

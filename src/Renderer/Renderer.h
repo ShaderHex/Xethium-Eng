@@ -54,4 +54,5 @@ private:
 
     std::vector<LightSystem> lights;
     std::vector<SphereObject> sphere;
+
 };
