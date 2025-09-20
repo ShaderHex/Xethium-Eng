@@ -9,7 +9,7 @@ local CubeColor = 0
 
 -- Called once when the script starts
 function Start()
-    print("Game started!")
+    --print("Game started!")
 end
 
 -- Called every frame; dt = delta time (seconds)

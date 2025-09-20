@@ -55,4 +55,7 @@ private:
     std::vector<LightSystem> lights;
     std::vector<SphereObject> sphere;
 
+    std::vector<LightSystem> editorStateLights;
+    std::vector<SphereObject> editorStateSphere;
+    std::vector<RectangleObject> editorStateRectangles;
 };

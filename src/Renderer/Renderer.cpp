@@ -609,11 +609,20 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     if (Application::currentMode == MODE_EDIT) {
         if (ImGui::Button("Play", ImVec2(buttonWidth, 0))) {
+            //Renderer::editorStateLights = Renderer::lightSystem.lights;
+            editorStateRectangles = rects;
+            editorStateSphere = sphere;
+
             Application::currentMode = MODE_PLAY;
             currentCamera = playCam;
         }
     } else {
         if (ImGui::Button("Stop Playing", ImVec2(buttonWidth, 0))) {
+
+            //Renderer::lightSystem.lights = Renderer::editorStateLights;
+            rects = editorStateRectangles;
+            sphere = editorStateSphere;
+
             Application::currentMode = MODE_EDIT;
             currentCamera = editorCam;
         }
