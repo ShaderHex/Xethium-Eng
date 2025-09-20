@@ -6,6 +6,8 @@
 Mode Application::currentMode = MODE_EDIT;
 Camera3D* currentCamera = nullptr;
 
+bool isRuntimeInit = false;
+
 RectangleObject* GetRectangleByName(std::vector<RectangleObject>& rects, const std::string& name) {
     for (auto& r : rects) {
         if (r.name == name)
@@ -77,10 +79,19 @@ void Application::Run() {
         ClearBackground(BLACK);
 
 
-        
-            renderer.RenderFrame(*currentCamera, rectangles);
-            renderer.ImGuiRender(CurrentGameMode(), rectangles, sphere, currentCamera,
-                             &EditorCamera::editorCamera, &EditorCamera::playCamera);
+            if (currentMode == MODE_EDIT) {
+                renderer.RenderFrame(*currentCamera, rectangles);
+                renderer.ImGuiRender(CurrentGameMode(), rectangles, currentCamera,
+                    &EditorCamera::editorCamera, &EditorCamera::playCamera);
+            } else if (currentMode == MODE_PLAY) {
+                if (!isRuntimeInit) {
+                    renderer.InitRuntime();
+                    isRuntimeInit = true;
+                }
+                renderer.RenderRuntime(rectangles);
+                renderer.ImGuiRenderRuntime(CurrentGameMode(), rectangles, currentCamera,
+                    &EditorCamera::editorCamera, &EditorCamera::playCamera);
+            }
         
         EndDrawing();
     }

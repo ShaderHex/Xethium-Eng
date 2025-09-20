@@ -66,7 +66,7 @@ void Renderer::Init() {
         std::cout << "Post-processing shader loaded!\n";
     }
 
-    skybox.Load("project/assets/skybox/default/skybox.png", false);
+    skybox.Load("project/assets/skybox/default/default.hdr", true);
     target = LoadRenderTexture(1200, 800);
     
     shader = LoadShader("project/shaders/lighting.vs", "project/shaders/lighting.fs");
@@ -168,7 +168,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         
         if (Application::currentMode == MODE_EDIT && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             float closestDist = FLT_MAX;
-            //Renderer::selectedLightUiD = -1;
             
             for (auto& light : Renderer::lightSystem.lights) {
                 if (!light.enabled) continue;
@@ -203,6 +202,7 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
 
                 DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
+                std::cout << r.position.x << " " << r.position.y << " " << r.position.z << "\n";
 
                 if (Application::currentMode == MODE_EDIT) {
                     BoundingBox box = {
@@ -226,27 +226,22 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
             }
 
             for (auto& s : sphere) {
-                Matrix transform = MatrixTranslate(s.position.x, s.position.y, s.position.z);
-                SetShaderValueMatrix(shader, GetShaderLocation(shader, "matModel"), transform);
-                
-                Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
-                SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
+                DrawSphere(s.position, s.radius, RED); 
 
-                DrawSphere(s.position, s.radius, s.color);
-                
                 if (Application::currentMode == MODE_EDIT) {
                     Vector3 half = { s.radius, s.radius, s.radius };
                     BoundingBox box = {
-                            Vector3Subtract(s.position, half),
-                            Vector3Add(s.position, half)
+                        Vector3Subtract(s.position, half),
+                        Vector3Add(s.position, half)
                     };
 
                     if (CheckCollisionRayBox(ray, box)) {
                         hoveredUiD = s.UiD;
                         DrawSphereWires(s.position, s.radius, 16, 16, YELLOW);
+                        
                         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                             selectedUiD = s.UiD;
-                            Renderer::selectedLightUiD = -1; 
+                            Renderer::selectedLightUiD = -1;
                         }
                     }
 
@@ -255,7 +250,10 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                     }
                 }
             }
-        EndShaderMode();
+
+
+            EndShaderMode();
+            
         
         Renderer::lightSystem.DebugDraw();
         
@@ -277,9 +275,18 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 static Transform gizmoTransform = GizmoIdentity();
                 gizmoTransform.translation = r.position;
                 gizmoTransform.scale = r.size;
-                DrawGizmo3D(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE, &gizmoTransform);
+                DrawGizmo3D(GIZMO_TRANSLATE | GIZMO_SCALE, &gizmoTransform);
                 r.position = gizmoTransform.translation;
                 r.size = gizmoTransform.scale;
+            }
+        }
+
+        for (auto& s : sphere) {
+            if (selectedUiD == s.UiD) {
+                Transform gizmoTransform = GizmoIdentity();
+                gizmoTransform.translation = s.position;
+                DrawGizmo3D(GIZMO_TRANSLATE | GIZMO_ROTATE, &gizmoTransform);
+                s.position = gizmoTransform.translation;
             }
         }
         EndMode3D();
@@ -322,7 +329,7 @@ long long GenerateUniqueUiD() {
     return newUiD;
 }
 
-void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, std::vector<SphereObject> sphere, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
+void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
@@ -391,7 +398,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, st
     if (ImGui::Button("Create Sphere") && CanEdit) {
         SphereObject obj;
         obj.position = {0.0f, 1.0f, 0.0f};
-        obj.radius = {10};
+        obj.radius = {1};
         obj.color = RED;
         obj.UiD = GenerateUniqueUiD();
         obj.name = "Sphere" + std::to_string(SphereNumber);
@@ -404,8 +411,16 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, st
 
     if (ImGui::BeginPopup("Select UiD")) {
         for (const auto& rect : rects) {
-            if (ImGui::Selectable(("UiD: " + std::to_string(rect.UiD)).c_str()))
+            if (ImGui::Selectable(("Cube UiD: " + std::to_string(rect.UiD)).c_str()))
                 selectedUiD = rect.UiD;
+                std::cout << "Cube UiD " << rect.UiD << '\n';
+        }
+
+        for (const auto& spheres : sphere) {
+            if (ImGui::Selectable(("UiD: " + std::to_string(spheres.UiD)).c_str()))
+                selectedUiD = spheres.UiD;
+            
+            std::cout << "Sphere UiD " << spheres.UiD << '\n';
         }
         ImGui::EndPopup();
     }
@@ -457,6 +472,51 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, st
         }
     }
 
+    std::cout << "sphere address = " << &sphere 
+          << " size = " << sphere.size() << "\n";
+
+    for (auto& s : sphere) {
+        if (s.UiD == selectedUiD) {
+            static GizmoManager gizmo;
+            gizmo.transform.translation = s.position;
+
+            gizmo.Draw(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE);
+
+            Matrix m = gizmo.GetMatrix();
+            s.position.x = m.m12;
+            s.position.y = m.m13;
+            s.position.z = m.m14;
+
+
+            ImGui::Text("Modify Object: %d", s.UiD);
+            ImGui::DragFloat3("Position", &s.position.x);
+
+            float tempColor[3] = {s.color.r / 255.0f, s.color.g / 255.0f, s.color.b / 255.0f};
+            if (ImGui::ColorEdit3("Color", tempColor)) {
+                s.color.r = static_cast<unsigned char>(tempColor[0] * 255);
+                s.color.g = static_cast<unsigned char>(tempColor[1] * 255);
+                s.color.b = static_cast<unsigned char>(tempColor[2] * 255);
+            }
+
+            if (CanEdit) {
+                float view[16], proj[16], objectMatrix[16];
+                GetCameraMatrices(*editorCam, view, proj);
+
+                Matrix m = MatrixTranslate(s.position.x, s.position.y, s.position.z);
+                memcpy(objectMatrix, &m, sizeof(float) * 16);
+
+                ImGuizmo::SetRect(0, 0, (float)GetScreenWidth(), (float)GetScreenHeight());
+                ImGuizmo::SetDrawlist();
+                ImGuizmo::Manipulate(view, proj, ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, objectMatrix);
+
+                if (ImGuizmo::IsUsing()) {
+                    s.position.x = objectMatrix[12];
+                    s.position.y = objectMatrix[13];
+                    s.position.z = objectMatrix[14];
+                }
+            }
+        }
+    }
     
 
     if (ImGui::Button("Save Scene") && !fileNameWrite.empty()) {
@@ -566,6 +626,164 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, st
     ImGui::End();
 
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
+
+    rlImGuiEnd();
+}
+
+void Renderer::InitRuntime() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+
+    postShader = LoadShader(0, "project/shaders/postProcessing.fs");
+    if (postShader.id == 0) {
+        std::cout << "Post-processing shader failed to load!" << std::endl;
+    } else {
+        std::cout << "Post-processing shader loaded!\n";
+    }
+
+    skybox.Load("project/assets/skybox/default/default.hdr", true);
+    target = LoadRenderTexture(1200, 800);
+    
+    shader = LoadShader("project/shaders/lighting.vs", "project/shaders/lighting.fs");
+    if (shader.id == 0) {
+        std::cout << "Lighting shader failed to load!" << std::endl;
+    } else {
+        std::cout << "Lighting shader loaded!\n";
+    }
+    
+    Renderer::lightSystem.SetShader(&shader);
+
+    UnloadRenderTexture(target);
+    target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+}
+
+void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
+    if (IsWindowResized()) {
+        UnloadRenderTexture(target);
+        target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    }
+
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+        
+        BeginMode3D(EditorCamera::playCamera);
+        rlDisableDepthTest();
+        skybox.Draw(EditorCamera::playCamera);
+        rlEnableDepthTest();
+            
+        if (Application::currentMode == MODE_EDIT) {
+            DrawCube(EditorCamera::playCamera.position, 1, 1, 1, BLUE);
+        }
+        
+        Renderer::lightSystem.UpdateLights(EditorCamera::playCamera);
+        
+        BeginShaderMode(shader);
+            for (auto& r : rects) {
+                Matrix transform = MatrixTranslate(r.position.x, r.position.y, r.position.z);
+                SetShaderValueMatrix(shader, GetShaderLocation(shader, "matModel"), transform);
+                
+                Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
+                SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
+
+                DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
+            }
+
+            for (auto& s : sphere) {
+                DrawSphere(s.position, s.radius, RED);
+            }
+
+            EndShaderMode();
+        EndMode3D();
+    EndTextureMode();
+
+    ApplyPostProcessing();
+}
+
+void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
+    rlImGuiBegin();
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2((float)GetScreenWidth(), (float)GetScreenHeight()), ImGuiCond_Always);
+
+    ImGuiWindowFlags dockspaceFlags = ImGuiWindowFlags_NoTitleBar |
+                                     ImGuiWindowFlags_NoResize |
+                                     ImGuiWindowFlags_NoMove |
+                                     ImGuiWindowFlags_NoCollapse |
+                                     ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                     ImGuiWindowFlags_NoNavFocus |
+                                     ImGuiWindowFlags_NoBackground;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0,0));
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0,0,0,0));
+
+    ImGui::Begin("DockSpace", nullptr, dockspaceFlags);
+
+    ImGui::PopStyleVar(3);
+    ImGui::PopStyleColor();
+
+    ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0,0), ImGuiDockNodeFlags_PassthruCentralNode);
+
+    static bool docked = false;
+    if (!docked) {
+        ImGui::DockBuilderRemoveNode(dockspace_id);
+        ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+        ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+        ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
+        ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
+        ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
+
+        ImGui::DockBuilderDockWindow("Play", top_id);
+        ImGui::DockBuilderDockWindow("Inspector", right_id);
+        ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
+        ImGui::DockBuilderDockWindow("Lights", right_id);
+
+        ImGui::DockBuilderFinish(dockspace_id);
+        docked = true;
+    }
+
+    ImGui::End();
+
+    std::cout<< "ImGui crashed after the dockspace\n"; 
+
+    ImGui::Begin("Inspector");    
+
+    ImGui::End();
+    std::cout<< "ImGui crashed after the inspector\n"; 
+    ImGui::Begin("Lights");
+    
+    ImGui::End();
+
+    ImGui::Begin("Play");
+
+    float windowWidth = ImGui::GetWindowSize().x;
+    float buttonWidth = 120.0f;
+    ImGui::SetCursorPosX((windowWidth - buttonWidth) * 0.5f);
+
+    if (Application::currentMode == MODE_EDIT) {
+        if (ImGui::Button("Play", ImVec2(buttonWidth, 0))) {
+            Application::currentMode = MODE_PLAY;
+            currentCamera = playCam;
+        }
+    } else {
+        if (ImGui::Button("Stop Playing", ImVec2(buttonWidth, 0))) {
+            Application::currentMode = MODE_EDIT;
+            currentCamera = editorCam;
+        }
+    }
+
+    ImGui::End();
+
 
     rlImGuiEnd();
 }

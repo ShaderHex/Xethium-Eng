@@ -30,9 +30,12 @@ class Renderer {
 public:
     void Init();
     void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
-    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, std::vector<SphereObject> sphere, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
+    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
     void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
     void ApplyPostProcessing();
+    void RenderRuntime(std::vector<RectangleObject>& rects);
+    void InitRuntime();
+    void ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
 
     int hoveredUiD = -1;
     int selectedUiD = -1;
