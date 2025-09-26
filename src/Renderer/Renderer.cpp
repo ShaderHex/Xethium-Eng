@@ -613,18 +613,11 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             editorStateRectangles = rects;
             editorStateSphere = sphere;
 
+            std::cout<<"-------------------------------------------------------------\n";
+            std::cout<<editorStateRectangles[0].position.y<<'\n';
+
             Application::currentMode = MODE_PLAY;
             currentCamera = playCam;
-        }
-    } else {
-        if (ImGui::Button("Stop Playing", ImVec2(buttonWidth, 0))) {
-
-            //Renderer::lightSystem.lights = Renderer::editorStateLights;
-            rects = editorStateRectangles;
-            sphere = editorStateSphere;
-
-            Application::currentMode = MODE_EDIT;
-            currentCamera = editorCam;
         }
     }
 
@@ -780,6 +773,11 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
         }
     } else {
         if (ImGui::Button("Stop Playing", ImVec2(buttonWidth, 0))) {
+
+            //Renderer::lightSystem.lights = Renderer::editorStateLights;
+            rects = editorStateRectangles;
+            sphere = editorStateSphere;
+
             Application::currentMode = MODE_EDIT;
             currentCamera = editorCam;
         }
