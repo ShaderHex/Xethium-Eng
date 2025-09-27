@@ -25,6 +25,7 @@
 #include "Core/SkyBox.h"
 #include "Entities/AreaLight.h"
 #include "Entities/Sphere.h"
+#include "Core/Console.h"
 
 class Renderer {
 public:

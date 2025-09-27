@@ -76,6 +76,8 @@ void Renderer::Init() {
         std::cout << "Lighting shader loaded!\n";
     }
     
+    RedirectCoutToLogger();
+
     Renderer::lightSystem.SetShader(&shader);
 }
 
@@ -138,8 +140,8 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
                 }
             }
 
-            ImGui::End();
         }
+        ImGui::End();
     } catch (const std::exception& e) {
         ImGui::Begin("File Explorer");
         ImGui::Text("Error: %s", e.what());
@@ -373,6 +375,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         ImGui::DockBuilderDockWindow("Inspector", right_id);
         ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
         ImGui::DockBuilderDockWindow("Lights", right_id);
+        ImGui::DockBuilderDockWindow("Console", bottom_id);
 
         ImGui::DockBuilderFinish(dockspace_id);
         docked = true;
@@ -613,9 +616,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             editorStateRectangles = rects;
             editorStateSphere = sphere;
 
-            std::cout<<"-------------------------------------------------------------\n";
-            std::cout<<editorStateRectangles[0].position.y<<'\n';
-
             Application::currentMode = MODE_PLAY;
             currentCamera = playCam;
         }
@@ -623,6 +623,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     ImGui::End();
 
+    g_Logger.DrawWindow();
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
 
     rlImGuiEnd();
@@ -656,6 +657,7 @@ void Renderer::InitRuntime() {
 
     UnloadRenderTexture(target);
     target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    RedirectCoutToLogger();
 }
 
 void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
@@ -745,6 +747,7 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
         ImGui::DockBuilderDockWindow("Inspector", right_id);
         ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
         ImGui::DockBuilderDockWindow("Lights", right_id);
+        ImGui::DockBuilderDockWindow("Console", bottom_id);
 
         ImGui::DockBuilderFinish(dockspace_id);
         docked = true;
@@ -785,6 +788,7 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
 
     ImGui::End();
 
+    g_Logger.DrawWindow();
 
     rlImGuiEnd();
 }
