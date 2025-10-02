@@ -17,27 +17,44 @@ struct LightEntity {
     std::string name;
     unsigned int UiD;
     bool enabled;
+    RenderTexture2D* shadowMap;
+    bool castsShadows = true;
 
-    LightEntity() : 
-        type(XE_LIGHT_POINT),
-        position{0.0f, 2.0f, 0.0f},
-        target{0.0f, 0.0f, 0.0f},
-        color(WHITE),
-        intensity(1.0f),
-        name("Light"),
-        UiD(UiDGenerator::GenerateUiD()),
-        enabled(true) {}
-        
-    LightEntity(int lightType, Vector3 pos, Color col, float intens, std::string lightName) : 
-        type(lightType),
-        position(pos),
-        target{0.0f, 0.0f, 0.0f},
-        color(col),
-        intensity(intens),
-        name(lightName),
-        UiD(UiDGenerator::GenerateUiD()),
-        enabled(true) {}
+    Matrix lightView;
+    Matrix lightProj;
+    Matrix lightViewProj;
+
+    LightEntity()
+        : type(XE_LIGHT_POINT),
+          position{0.0f, 2.0f, 0.0f},
+          target{0.0f, 0.0f, 0.0f},
+          color(WHITE),
+          intensity(1.0f),
+          name("Light"),
+          UiD(UiDGenerator::GenerateUiD()),
+          enabled(true),
+          shadowMap(nullptr),
+          lightView(MatrixIdentity()),
+          lightProj(MatrixIdentity()),
+          lightViewProj(MatrixIdentity())
+    {}
+
+    LightEntity(int lightType, Vector3 pos, Color col, float intens, std::string lightName)
+        : type(lightType),
+          position(pos),
+          target{0.0f, 0.0f, 0.0f},
+          color(col),
+          intensity(intens),
+          name(lightName),
+          UiD(UiDGenerator::GenerateUiD()),
+          enabled(true),
+          shadowMap(nullptr),
+          lightView(MatrixIdentity()),
+          lightProj(MatrixIdentity()),
+          lightViewProj(MatrixIdentity())
+    {}
 };
+
 
 class LightSystem {
 public:
@@ -54,9 +71,10 @@ public:
         lights.push_back(light);
     }
 
-    void CreateDefaultLight() {
+    void CreateDefaultLight(RenderTexture2D& ShadowMap) {
         LightEntity light;
         light.name = "Light" + std::to_string(lights.size());
+        light.shadowMap = &ShadowMap;
         lights.push_back(light);
     }
 
@@ -102,6 +120,18 @@ public:
         }
     }
 
+    void UpdateLightMatrix(LightEntity& light, int shadowWidth, int shadowHeight) {
+        if (light.type == XE_LIGHT_DIRECTIONAL) {
+            light.lightView = MatrixLookAt(light.position, light.target, {0.0f, 1.0f, 0.0f});
+            float orthoSize = 10.0f;
+            light.lightProj = MatrixOrtho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 100.0f);
+        } else {
+            light.lightView = MatrixLookAt(light.position, light.target, {0.0f, 1.0f, 0.0f});
+            light.lightProj = MatrixPerspective(90.0f * DEG2RAD, (float)shadowWidth / shadowHeight, 0.1f, 100.0f);
+        }
+        light.lightViewProj = MatrixMultiply(light.lightView, light.lightProj);
+    }
+
     void DebugDraw() {
         for (auto& light : lights) {
             if (light.enabled) {
@@ -119,5 +149,19 @@ public:
             }
         }
         return nullptr;
+    }
+    Matrix GetLightMatrix(const LightEntity& light, int shadowWidth, int shadowHeight) {
+        Matrix view, proj;
+        
+        if (light.type == 0) {
+            view = MatrixLookAt(light.position, light.target, {0.0f, 1.0f, 0.0f});
+            float orthoSize = 10.0f;
+            proj = MatrixOrtho(-orthoSize, orthoSize, -orthoSize, orthoSize, 0.1f, 100.0f);
+        } else {
+            view = MatrixLookAt(light.position, light.target, {0.0f, 1.0f, 0.0f});
+            proj = MatrixPerspective(90.0f * DEG2RAD, (float)shadowWidth / shadowHeight, 0.1f, 100.0f);
+        }
+        
+        return MatrixMultiply(view, proj);
     }
 };

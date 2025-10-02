@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_set>
 #include <random>
+#include <stdio.h>
 
 #include "raylib.h"
 #include "raylib.h"
@@ -30,6 +31,8 @@
 class Renderer {
 public:
     void Init();
+    void DrawSceneObjects();
+    void RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects);
     void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
     void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
     void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
@@ -44,6 +47,9 @@ public:
     Vector2 dragOffset = {0, 0};
     static int selectedLightUiD;
     static LightSystem lightSystem;
+    RenderTexture2D ShadowMap;
+    Texture2D depthShadowMap;
+    Shader depthShader;
 
 private:
     EditorCamera cam;
@@ -59,4 +65,8 @@ private:
     std::vector<LightSystem> editorStateLights;
     std::vector<SphereObject> editorStateSphere;
     std::vector<RectangleObject> editorStateRectangles;
+    Texture2D dummy = {0};
+    int lightVPLoc;
+    int shadowMapLoc;
+    int textureSlot;
 };
