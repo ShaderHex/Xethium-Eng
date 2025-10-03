@@ -31,7 +31,7 @@
 class Renderer {
 public:
     void Init();
-    void DrawSceneObjects();
+    void DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
     void RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects);
     void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
     void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
@@ -69,4 +69,17 @@ private:
     int lightVPLoc;
     int shadowMapLoc;
     int textureSlot;
+    Vector3 lightDir;
+    Shader shadowShader;
+    int lightDirLoc;
+    Camera3D lightCam;
+    Matrix lightView;
+    Matrix lightProj;
+    Matrix lightViewProj;
+    int textureActiveSlot;
+    Model cube;
+    Camera3D lightCamera;
+    Mesh cubeMesh;
+    Material cubeMaterial;
+    bool isPlayMode;
 };

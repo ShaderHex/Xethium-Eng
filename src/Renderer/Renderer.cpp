@@ -111,7 +111,7 @@ void Renderer::Init() {
 
     Renderer::lightSystem.SetShader(&shader);
     
-    ShadowMap = LoadRenderTextureDepthTex(512, 512);
+    ShadowMap = LoadRenderTextureDepthTex(2048, 2048);
 
     depthShadowMap = ShadowMap.depth;
 
@@ -126,12 +126,44 @@ void Renderer::Init() {
         std::cout << "Shadow map created successfully. ID: " << ShadowMap.texture.id << std::endl;
     }
 
+    Mesh cubeMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
     depthShader = LoadShader("project/shaders/shadowmap.vs", "project/shaders/shadowmap.fs");
     lightVPLoc = GetShaderLocation(depthShader, "lightVP");
     shadowMapLoc = GetShaderLocation(depthShader, "shadowMap");
     
+    shadowShader = LoadShader(TextFormat("project/shaders/shadowmap.vs", 3.3),
+                                     TextFormat("project/shaders/shadowmap.fs", 3.3));
+    shadowShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shadowShader, "viewPos");
+    lightDir = Vector3Normalize((Vector3){ 0.35f, -1.0f, -0.35f });
+    Color lightColor = WHITE;
+    Vector4 lightColorNormalized = ColorNormalize(lightColor);
+    lightDirLoc = GetShaderLocation(shadowShader, "lightDir");
+    int lightColLoc = GetShaderLocation(shadowShader, "lightColor");
+    SetShaderValue(shadowShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+    SetShaderValue(shadowShader, lightColLoc, &lightColorNormalized, SHADER_UNIFORM_VEC4);
+    int ambientLoc = GetShaderLocation(shadowShader, "ambient");
+    float ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+    SetShaderValue(shadowShader, ambientLoc, ambient, SHADER_UNIFORM_VEC4);
+    int lightVPLoc = GetShaderLocation(shadowShader, "lightVP");
+    int shadowMapLoc = GetShaderLocation(shadowShader, "shadowMap");
     int shadowMapResolution = 1024;
-    SetShaderValue(depthShader, GetShaderLocation(depthShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
+    SetShaderValue(shadowShader, GetShaderLocation(shadowShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
+    cube = LoadModelFromMesh(cubeMesh);
+    cube.materials[0].shader = shadowShader;
+
+    lightCamera = { 0 };
+    lightCamera.position = Vector3Scale(lightDir, -15.0f);
+    lightCamera.target = Vector3Zero();
+    lightCamera.projection = CAMERA_ORTHOGRAPHIC;
+    lightCamera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    lightCamera.fovy = 20.0f;
+
+    lightView = { 0 };
+    lightProj = { 0 };
+    lightViewProj = { 0 };
+    textureActiveSlot = 10;
+    UploadMesh(&cubeMesh, false);
+    cubeMaterial = LoadMaterialDefault();
 }
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
@@ -202,20 +234,120 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
     }
 }
 
-void Renderer::DrawSceneObjects() {
+void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
+    for (auto& r : rects) {
+        DrawCube(r.position, r.size.x, r.size.y, r.size.z, WHITE);
+    }
 
-    DrawCube({0.0f, 0.5f, 0.0f}, 1.0f, 1.0f, 1.0f, RED);
-    DrawCube({2.0f, 0.5f, 1.0f}, 1.0f, 1.0f, 1.0f, BLUE);
-    DrawCube({-2.0f, 0.5f, -1.5f}, 1.0f, 1.0f, 1.0f, GREEN);
+    Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
 
-    DrawSphere({1.5f, 0.5f, -1.0f}, 0.5f, YELLOW);
-    DrawSphere({-1.5f, 0.5f, 1.5f}, 0.5f, ORANGE);
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        for (auto& r : rects) {
+            BoundingBox box = { r.position - r.size / 2, r.position + r.size / 2 };
+            if (CheckCollisionRayBox(ray, box)) {
+                hoveredUiD = r.UiD;
+                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, RED);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedUiD = r.UiD;
+                    Renderer::selectedLightUiD = -1;
+                }
+            }
+        }
+    }
+
+    if (Application::currentMode == MODE_EDIT && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        float closestDist = FLT_MAX;
+        for (auto& light : Renderer::lightSystem.lights) {
+            if (!light.enabled) continue;
+
+            Vector3 diff = Vector3Subtract(light.position, ray.position);
+            float t = Vector3DotProduct(diff, ray.direction);
+            Vector3 closestPoint = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
+            float dist = Vector3Distance(closestPoint, light.position);
+
+            if (dist < 0.3f && t > 0) {
+                if (t < closestDist) {
+                    closestDist = t;
+                    Renderer::selectedLightUiD = light.UiD;
+                    selectedUiD = -1;
+                }
+            }
+        }
+    }
+
+    for (auto& r : rects) {
+        cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = r.color;
+
+        Matrix transform = MatrixMultiply(
+            MatrixScale(r.size.x, r.size.y, r.size.z),
+            MatrixTranslate(r.position.x, r.position.y, r.position.z)
+        );
+
+        DrawModelEx(cube, Vector3Zero(), (Vector3) r.position, 0.0f, (Vector3) { 10.0f, 1.0f, 10.0f }, r.color);
+
+        if (Application::currentMode == MODE_EDIT) {
+            BoundingBox box = {
+                Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
+                Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
+            };
+
+            if (CheckCollisionRayBox(ray, box)) {
+                hoveredUiD = r.UiD;
+                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedUiD = r.UiD;
+                    Renderer::selectedLightUiD = -1;
+                }
+            }
+
+            if (selectedUiD == r.UiD) {
+                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, WHITE);
+            }
+        }
+    }
+
+    for (auto& s : sphere) {
+        Matrix transform = MatrixTranslate(s.position.x, s.position.y, s.position.z);
+        SetShaderValueMatrix(shader, GetShaderLocation(shader, "matModel"), transform);
+
+        Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
+        SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
+
+        DrawSphere(s.position, s.radius, s.color); 
+
+        if (Application::currentMode == MODE_EDIT) {
+            Vector3 half = { s.radius, s.radius, s.radius };
+            BoundingBox box = {
+                Vector3Subtract(s.position, half),
+                Vector3Add(s.position, half)
+            };
+
+            if (CheckCollisionRayBox(ray, box)) {
+                hoveredUiD = s.UiD;
+                DrawSphereWires(s.position, s.radius, 16, 16, YELLOW);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedUiD = s.UiD;
+                    Renderer::selectedLightUiD = -1;
+                }
+            }
+
+            if (selectedUiD == s.UiD) {
+                DrawSphereWires(s.position, s.radius, 16, 16, WHITE);
+            }
+        }
+    }
+
+    DrawModelEx(cube, Vector3Zero(), (Vector3) { 0.0f, 1.0f, 0.0f }, 0.0f, (Vector3) { 10.0f, 1.0f, 10.0f }, BLUE);
+    DrawModelEx(cube, (Vector3) { 1.5f, 1.0f, -1.5f }, (Vector3) { 0.0f, 1.0f, 0.0f }, 0.0f, Vector3One(), WHITE);
 }
 
 
 
 void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects) {
-    Camera3D lightCam = {0};
+    lightCam = {0};
     
     if (light.type == 0) {
         lightCam.position = light.position;
@@ -234,7 +366,8 @@ void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleO
     BeginTextureMode(ShadowMap);
         ClearBackground(WHITE);
         BeginMode3D(lightCam);
-            DrawSceneObjects();
+            lightView = rlGetMatrixModelview();
+            lightProj = rlGetMatrixProjection();
             for (auto& light : Renderer::lightSystem.lights) {
                 Renderer::lightSystem.UpdateLightMatrix(light, 1024, 1024);
             }
@@ -255,55 +388,72 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
 
-    LightEntity* shadowLight = nullptr;
-    if (!Renderer::lightSystem.lights.empty()) {
-        shadowLight = &Renderer::lightSystem.lights[0];
-        RenderShadowPass(*shadowLight, rects);
-    }
-
+    
+    Vector3 cameraPos = currentCamera.position;
+    SetShaderValue(shadowShader, shadowShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
+    
+    lightDir = Vector3Normalize(lightDir);
+    lightCamera.position = Vector3Scale(lightDir, -15.0f);
+    SetShaderValue(shadowShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+    
+    BeginTextureMode(ShadowMap);
+            ClearBackground(WHITE);
+            
+            BeginMode3D(lightCamera);
+                lightView = rlGetMatrixModelview();
+                lightProj = rlGetMatrixProjection();
+                DrawSceneObjects(currentCamera, rects);
+            EndMode3D();
+            
+    EndTextureMode();
+    lightViewProj = MatrixMultiply(lightView, lightProj);
+    
     BeginTextureMode(target);
         ClearBackground(BLACK);
-        rlActiveTextureSlot(textureSlot);
-        rlEnableTexture(ShadowMap.depth.id);
-
-        
+            SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
+            rlEnableShader(shadowShader.id);
+            
+            rlActiveTextureSlot(textureActiveSlot);
+            rlEnableTexture(ShadowMap.depth.id);
+            rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
+        DrawTexture(ShadowMap.depth, 0, 0, WHITE);
         BeginMode3D(currentCamera);
+
         rlDisableDepthTest();
         skybox.Draw(currentCamera);
         rlEnableDepthTest();
-        
         DrawEngineGrid();
-        
-        Renderer::lightSystem.SetShader(&shader);
-        BeginShaderMode(shader);
-            //lightProj = rlGetMatrixProjection();
-            textureSlot = 10;
+
+        if (shader.id != 0) {
+            BeginShaderMode(shader);
+
+            int shadowMapLoc = GetShaderLocation(shader, "shadowMap");
+            int textureSlot = 10;
             rlActiveTextureSlot(textureSlot);
             rlEnableTexture(ShadowMap.depth.id);
-
-            int shadowMapLoc = GetShaderLocation(depthShader, "shadowMap");
-            SetShaderValue(depthShader, shadowMapLoc, &textureSlot, SHADER_UNIFORM_INT);
+            SetShaderValue(shader, shadowMapLoc, &textureSlot, SHADER_UNIFORM_INT);
 
             for (auto& light : Renderer::lightSystem.lights) {
-                SetShaderValueMatrix(depthShader, lightVPLoc, Renderer::lightSystem.GetLightMatrix(light, 512, 512));
+                Matrix lightVP = Renderer::lightSystem.GetLightMatrix(light, 512, 512);
+                int lightVPLoc = GetShaderLocation(shader, "lightVP");
+                SetShaderValueMatrix(shader, lightVPLoc, lightVP);
             }
 
-            DrawSceneObjects();
+            DrawSceneObjects(currentCamera, rects);
 
             Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
             hoveredUiD = -1;
-            
+
             if (Application::currentMode == MODE_EDIT && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 float closestDist = FLT_MAX;
-                
                 for (auto& light : Renderer::lightSystem.lights) {
                     if (!light.enabled) continue;
-                    
+
                     Vector3 diff = Vector3Subtract(light.position, ray.position);
                     float t = Vector3DotProduct(diff, ray.direction);
                     Vector3 closestPoint = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
                     float dist = Vector3Distance(closestPoint, light.position);
-                    
+
                     if (dist < 0.3f && t > 0) {
                         if (t < closestDist) {
                             closestDist = t;
@@ -313,88 +463,27 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                     }
                 }
             }
-            
+
             if (Application::currentMode == MODE_EDIT) {
                 DrawCube(EditorCamera::playCamera.position, 1, 1, 1, BLUE);
             }
-            
+
             Renderer::lightSystem.UpdateLights(currentCamera);
-            
-            for (auto& r : rects) {
-                Matrix transform = MatrixTranslate(r.position.x, r.position.y, r.position.z);
-                SetShaderValueMatrix(depthShader, GetShaderLocation(depthShader, "matModel"), transform);
-                
-                Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
-                SetShaderValueMatrix(depthShader, GetShaderLocation(depthShader, "matNormal"), matNormal);
 
-                DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
+            EndShaderMode();
+        }
 
-                if (Application::currentMode == MODE_EDIT) {
-                    BoundingBox box = {
-                        Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
-                        Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
-                    };
-
-                    if (CheckCollisionRayBox(ray, box)) {
-                        hoveredUiD = r.UiD;
-                        DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
-                        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                            selectedUiD = r.UiD;
-                            Renderer::selectedLightUiD = -1; 
-                        }
-                    }
-
-                    if (selectedUiD == r.UiD) {
-                        DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, WHITE);
-                    }
-                }
-            }
-
-            for (auto& s : sphere) {
-                Matrix transform = MatrixTranslate(s.position.x, s.position.y, s.position.z);
-                SetShaderValueMatrix(shader, GetShaderLocation(shader, "matModel"), transform);
-                
-                Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
-                SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
-
-                DrawSphere(s.position, s.radius, s.color); 
-
-                if (Application::currentMode == MODE_EDIT) {
-                    Vector3 half = { s.radius, s.radius, s.radius };
-                    BoundingBox box = {
-                        Vector3Subtract(s.position, half),
-                        Vector3Add(s.position, half)
-                    };
-
-                    if (CheckCollisionRayBox(ray, box)) {
-                        hoveredUiD = s.UiD;
-                        DrawSphereWires(s.position, s.radius, 16, 16, YELLOW);
-                        
-                        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                            selectedUiD = s.UiD;
-                            Renderer::selectedLightUiD = -1;
-                        }
-                    }
-
-                    if (selectedUiD == s.UiD) {
-                        DrawSphereWires(s.position, s.radius, 16, 16, WHITE);
-                    }
-                }
-            }
-
-        EndShaderMode();
-        
         Renderer::lightSystem.DebugDraw();
-        
+
         if (Application::currentMode == MODE_EDIT && Renderer::selectedLightUiD != -1) {
             LightEntity* selectedLight = Renderer::lightSystem.GetLightByUiD(Renderer::selectedLightUiD);
             if (selectedLight) {
                 static Transform gizmoTransform = GizmoIdentity();
                 gizmoTransform.translation = selectedLight->position;
-                
+
                 DrawGizmo3D(GIZMO_TRANSLATE, &gizmoTransform);
                 selectedLight->position = gizmoTransform.translation;
-                
+
                 DrawSphereWires(selectedLight->position, 0.25f, 12, 12, YELLOW);
             }
         }
@@ -418,6 +507,7 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 s.position = gizmoTransform.translation;
             }
         }
+
         EndMode3D();
     EndTextureMode();
 
@@ -553,53 +643,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             std::cout << "Sphere UiD " << spheres.UiD << '\n';
         }
         ImGui::EndPopup();
-    }
-
-    for (auto& rect : rects) {
-        if (rect.UiD == selectedUiD) {
-            static GizmoManager gizmo;
-            gizmo.transform.translation = rect.position;
-            gizmo.transform.scale = rect.size;
-
-            gizmo.Draw(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE);
-
-            Matrix m = gizmo.GetMatrix();
-            rect.position.x = m.m12;
-            rect.position.y = m.m13;
-            rect.position.z = m.m14;
-            rect.size.x = gizmo.transform.scale.x;
-            rect.size.y = gizmo.transform.scale.y;
-            rect.size.z = gizmo.transform.scale.z;
-
-            ImGui::Text("Modify Object: %d", rect.UiD);
-            ImGui::DragFloat3("Position", &rect.position.x);
-            ImGui::DragFloat3("Size", &rect.size.x);
-
-            float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
-            if (ImGui::ColorEdit3("Color", tempColor)) {
-                rect.color.r = static_cast<unsigned char>(tempColor[0] * 255);
-                rect.color.g = static_cast<unsigned char>(tempColor[1] * 255);
-                rect.color.b = static_cast<unsigned char>(tempColor[2] * 255);
-            }
-
-            if (CanEdit) {
-                float view[16], proj[16], objectMatrix[16];
-                GetCameraMatrices(*editorCam, view, proj);
-
-                Matrix m = MatrixTranslate(rect.position.x, rect.position.y, rect.position.z);
-                memcpy(objectMatrix, &m, sizeof(float) * 16);
-
-                ImGuizmo::SetRect(0, 0, (float)GetScreenWidth(), (float)GetScreenHeight());
-                ImGuizmo::SetDrawlist();
-                ImGuizmo::Manipulate(view, proj, ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, objectMatrix);
-
-                if (ImGuizmo::IsUsing()) {
-                    rect.position.x = objectMatrix[12];
-                    rect.position.y = objectMatrix[13];
-                    rect.position.z = objectMatrix[14];
-                }
-            }
-        }
     }
 
     for (auto& s : sphere) {
@@ -824,6 +867,7 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
     }
 
     BeginTextureMode(target);
+        BeginDrawing();
         ClearBackground(BLACK);
         
         BeginMode3D(EditorCamera::playCamera);
@@ -854,6 +898,7 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
 
             EndShaderMode();
         EndMode3D();
+        EndDrawing();
     EndTextureMode();
 
     ApplyPostProcessing();

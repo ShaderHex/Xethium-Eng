@@ -47,13 +47,11 @@ void Application::Run() {
         }
 
         BeginDrawing();
-        ClearBackground(BLACK);
-
         if (currentMode == MODE_EDIT) {
             isRuntimeInit = false;
             renderer.RenderFrame(*currentCamera, rectangles);
             renderer.ImGuiRender(
-                CurrentGameMode(),
+                true,
                 rectangles,
                 currentCamera,
                 &EditorCamera::editorCamera,
@@ -93,15 +91,15 @@ void Application::Run() {
 
             renderer.RenderRuntime(rectangles);
             renderer.ImGuiRenderRuntime(
-                CurrentGameMode(),
+                false,
                 rectangles,
                 currentCamera,
                 &EditorCamera::editorCamera,
                 &EditorCamera::playCamera
             );
         }
-
         EndDrawing();
+
     }
 }
 
