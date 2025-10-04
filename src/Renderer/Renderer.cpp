@@ -53,6 +53,8 @@ void DrawEngineGrid(int slices = 1000, float spacing = 1.0f) {
     rlEnd();
 }
 
+void imguiTheme();
+
 static RenderTexture2D LoadRenderTextureDepthTex(int width, int height) {
     RenderTexture2D target = { 0 };
 
@@ -89,6 +91,13 @@ void Renderer::Init() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    font = ImGui::GetIO().Fonts->AddFontFromFileTTF("Roboto.ttf", 18.0f);
+    if (!font) {
+        CloseWindow();
+    }
+    IM_ASSERT(font != nullptr);
+    ImGui_ImplRaylib_BuildFontAtlas();
+    io.FontDefault = font;
 
     postShader = LoadShader(0, "project/shaders/postProcessing.fs");
     if (postShader.id == 0) {
@@ -164,6 +173,15 @@ void Renderer::Init() {
     textureActiveSlot = 10;
     UploadMesh(&cubeMesh, false);
     cubeMaterial = LoadMaterialDefault();
+
+    bloomShader = LoadShader(0, "project/shaders/bloom.fs");
+    if(bloomShader.id == 0) {
+        printf("Failed to load bloomShader\n");
+    } else {
+        printf("bloomShader loaded!\n");
+    }
+    bloomTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
 }
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
@@ -392,7 +410,10 @@ void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleO
 void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
     if (IsWindowResized()) {
         UnloadRenderTexture(target);
+        UnloadRenderTexture(bloomTarget);
         target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        bloomTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
 
     Vector3 cameraPos = currentCamera.position;
@@ -413,8 +434,11 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
             
     EndTextureMode();
     lightViewProj = MatrixMultiply(lightView, lightProj);
+    BeginMode3D(currentCamera);
+
+    EndMode3D();
     
-    BeginTextureMode(target);
+    BeginTextureMode(sceneTarget);
         ClearBackground(BLACK);
         SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
         rlEnableShader(shadowShader.id);
@@ -422,12 +446,8 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         rlActiveTextureSlot(textureActiveSlot);
         rlEnableTexture(ShadowMap.depth.id);
         rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
-        DrawTexture(ShadowMap.depth, 0, 0, WHITE);
         BeginMode3D(currentCamera);
 
-        rlDisableDepthTest();
-        skybox.Draw(currentCamera);
-        rlEnableDepthTest();
         DrawEngineGrid();
 
         if (shader.id != 0) {
@@ -517,7 +537,41 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         EndMode3D();
     EndTextureMode();
 
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+            BeginMode3D(currentCamera);
+                rlDisableDepthTest();
+                skybox.Draw(currentCamera);
+                rlEnableDepthTest();
+
+                DrawTextureRec(
+                    sceneTarget.texture,
+                    Rectangle{ 0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height },
+                    Vector2{ 0, 0 },
+                    WHITE
+                );
+
+            EndMode3D();
+    EndTextureMode();
+
+    BeginTextureMode(bloomTarget);
+    ClearBackground(BLACK);
+    BeginShaderMode(bloomShader);
+
+
+        DrawTextureRec(
+            sceneTarget.texture,
+            Rectangle{ 0, 0, (float)sceneTarget.texture.width, (float)sceneTarget.texture.height },
+            Vector2{ 0, 0 },
+            WHITE
+        );
+
+    EndShaderMode();
+    EndTextureMode();
+
     ApplyPostProcessing();
+    
+ //   DrawRectangle(0, 9, 580, 30, Fade(LIGHTGRAY, 0.7f));
 }
 
 void Renderer::ApplyPostProcessing() {
@@ -528,6 +582,13 @@ void Renderer::ApplyPostProcessing() {
             {0, 0},
             WHITE
         );
+
+        rlSetBlendMode(BLEND_ADDITIVE);
+        DrawTextureRec(bloomTarget.texture,
+            Rectangle{0, 0, (float)bloomTarget.texture.width, (float)bloomTarget.texture.height},
+            Vector2{0, 0}, WHITE);
+        rlSetBlendMode(BLEND_ALPHA);
+
     EndShaderMode();
 }
 
@@ -556,6 +617,7 @@ long long GenerateUniqueUiD() {
 
 void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
     rlImGuiBegin();
+    imguiTheme();
     ImGuiViewport* viewport = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
@@ -594,13 +656,14 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
         ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
         ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
+        ImGuiID bottom_right_id = ImGui::DockBuilderSplitNode(bottom_id, ImGuiDir_Right, 0.5f, &bottom_id, nullptr);
 
         ImGui::DockBuilderDockWindow("Play", top_id);
         ImGui::DockBuilderDockWindow("Inspector", right_id);
         ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
         ImGui::DockBuilderDockWindow("Lights", right_id);
         ImGui::DockBuilderDockWindow("Console", bottom_id);
-        ImGui::DockBuilderDockWindow("Console", bottom_id);
+        ImGui::DockBuilderDockWindow("Shadow Map Debug", bottom_right_id);
 
 
         ImGui::DockBuilderFinish(dockspace_id);
@@ -835,7 +898,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         ImVec2 winSize = ImGui::GetContentRegionAvail();
         
         if (ShadowMap.id != 0 && ShadowMap.texture.id != 0) {
-            rlImGuiImage(&ShadowMap.depth);
+            rlImGuiImage(&ShadowMap.texture);
             
             ImGui::Text("Shadow Map Size: %dx%d", ShadowMap.texture.width, ShadowMap.texture.height);
             ImGui::Text("Texture ID: %u", ShadowMap.texture.id);
@@ -871,7 +934,13 @@ void Renderer::InitRuntime() {
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
+    font = ImGui::GetIO().Fonts->AddFontFromFileTTF("Roboto.ttf", 18.0f);
+    if (!font) {
+        CloseWindow();
+    }
+    IM_ASSERT(font != nullptr);
+    ImGui_ImplRaylib_BuildFontAtlas();
+    io.FontDefault = font;
 
     postShader = LoadShader(0, "project/shaders/postProcessing.fs");
     if (postShader.id == 0) {
@@ -950,12 +1019,25 @@ void Renderer::InitRuntime() {
     textureActiveSlot = 10;
     UploadMesh(&cubeMesh, false);
     cubeMaterial = LoadMaterialDefault();
+
+    bloomShader = LoadShader(0, "project/shaders/bloom.fs");
+    if(bloomShader.id == 0) {
+        printf("Failed to load bloomShader\n");
+    } else {
+        printf("bloomShader loaded!\n");
+    }
+    bloomTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+
 }
 
 void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
     if (IsWindowResized()) {
         UnloadRenderTexture(target);
+        UnloadRenderTexture(bloomTarget);
         target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        bloomTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
 
 
@@ -978,7 +1060,7 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
     EndTextureMode();
     lightViewProj = MatrixMultiply(lightView, lightProj);
 
-    BeginTextureMode(target);
+    BeginTextureMode(sceneTarget);
         ClearBackground(BLACK);
         SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
         rlEnableShader(shadowShader.id);
@@ -986,12 +1068,8 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
         rlActiveTextureSlot(textureActiveSlot);
         rlEnableTexture(ShadowMap.depth.id);
         rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
-        DrawTexture(ShadowMap.depth, 0, 0, WHITE);
         
         BeginMode3D(EditorCamera::playCamera);
-        rlDisableDepthTest();
-        skybox.Draw(EditorCamera::playCamera);
-        rlEnableDepthTest();
 
         if (shader.id != 0) {
             BeginShaderMode(shader);
@@ -1016,6 +1094,38 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
         }
                 
         EndMode3D();
+    EndTextureMode();
+
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+            BeginMode3D(EditorCamera::playCamera);
+                rlDisableDepthTest();
+                skybox.Draw(EditorCamera::playCamera);
+                rlEnableDepthTest();
+
+                DrawTextureRec(
+                    sceneTarget.texture,
+                    Rectangle{ 0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height },
+                    Vector2{ 0, 0 },
+                    WHITE
+                );
+
+            EndMode3D();
+    EndTextureMode();
+
+    BeginTextureMode(bloomTarget);
+    ClearBackground(BLACK);
+    BeginShaderMode(bloomShader);
+
+
+        DrawTextureRec(
+            sceneTarget.texture,
+            Rectangle{ 0, 0, (float)sceneTarget.texture.width, (float)sceneTarget.texture.height },
+            Vector2{ 0, 0 },
+            WHITE
+        );
+
+    EndShaderMode();
     EndTextureMode();
 
     ApplyPostProcessing();
@@ -1107,7 +1217,98 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
 
     ImGui::End();
 
+    if (ImGui::Begin("Shadow Map Debug")) {
+        ImVec2 winSize = ImGui::GetContentRegionAvail();
+        
+        if (ShadowMap.id != 0 && ShadowMap.texture.id != 0) {
+            rlImGuiImage(&ShadowMap.texture);
+            
+            ImGui::Text("Shadow Map Size: %dx%d", ShadowMap.texture.width, ShadowMap.texture.height);
+            ImGui::Text("Texture ID: %u", ShadowMap.texture.id);
+            
+            if (!Renderer::lightSystem.lights.empty()) {
+                LightEntity& light = Renderer::lightSystem.lights[0];
+                ImGui::Text("Light Position: (%.2f, %.2f, %.2f)", 
+                           light.position.x, light.position.y, light.position.z);
+                ImGui::Text("Light Target: (%.2f, %.2f, %.2f)", 
+                           light.target.x, light.target.y, light.target.z);
+                ImGui::Text("Light Type: %s", light.type == 0 ? "Directional" : "Point");
+            }
+        } else {
+            ImGui::Text("Shadow map not properly initialized!");
+            if (ShadowMap.id == 0) {
+                ImGui::Text("RenderTexture ID is 0");
+            }
+            if (ShadowMap.texture.id == 0) {
+                ImGui::Text("Texture ID is 0");
+            }
+        }
+    }
+    ImGui::End();
+
     g_Logger.DrawWindow();
 
     rlImGuiEnd();
+}
+
+void imguiTheme() {
+    ImGuiStyle &style = ImGui::GetStyle();
+    ImVec4 *colors = style.Colors;
+
+    style.WindowRounding = 5.0f;
+    style.FrameRounding = 5.0f;
+    style.ScrollbarRounding = 5.0f;
+    style.GrabRounding = 5.0f;
+    style.TabRounding = 5.0f;
+    style.WindowBorderSize = 1.0f;
+    style.FrameBorderSize = 1.0f;
+    style.PopupBorderSize = 1.0f;
+    style.PopupRounding = 5.0f;
+
+    colors[ImGuiCol_Text] = ImVec4(0.95f, 0.95f, 0.95f, 1.00f);
+    colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
+    colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+    colors[ImGuiCol_ChildBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+    colors[ImGuiCol_PopupBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.f);
+    colors[ImGuiCol_Border] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+    colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+    colors[ImGuiCol_FrameBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+    colors[ImGuiCol_TitleBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+    colors[ImGuiCol_MenuBarBg] = ImVec4(0.15f, 0.15f, 0.15f, 1.00f);
+    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+
+    colors[ImGuiCol_CheckMark] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    colors[ImGuiCol_Button] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+    colors[ImGuiCol_Header] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    colors[ImGuiCol_Separator] = ImVec4(0.30f, 0.30f, 0.30f, 1.00f);
+    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+    colors[ImGuiCol_ResizeGrip] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f); 
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
+    colors[ImGuiCol_Tab] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+    colors[ImGuiCol_TabHovered] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+    colors[ImGuiCol_TabActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+    colors[ImGuiCol_TabUnfocused] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.40f, 0.40f, 0.40f, 1.00f);
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f); 
+    colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+
+    style.FramePadding = ImVec2(8.0f, 4.0f);
+    style.ItemSpacing = ImVec2(8.0f, 4.0f);
+    style.IndentSpacing = 20.0f;
+    style.ScrollbarSize = 16.0f;
 }

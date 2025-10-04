@@ -27,6 +27,7 @@
 #include "Entities/AreaLight.h"
 #include "Entities/Sphere.h"
 #include "Core/Console.h"
+#include "imgui_impl_raylib.h"
 
 class Renderer {
 public:
@@ -57,6 +58,7 @@ private:
     FileManager filemanager;
     Shader shader;
     Shader postShader;
+    Shader bloomShader;
     using json = nlohmann::json;
 
     std::vector<LightSystem> lights;
@@ -82,4 +84,7 @@ private:
     Mesh cubeMesh;
     Material cubeMaterial;
     bool isPlayMode;
+    RenderTexture2D bloomTarget;
+    RenderTexture2D sceneTarget;
+    ImFont* font;
 };
