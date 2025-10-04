@@ -395,7 +395,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
 
-    
     Vector3 cameraPos = currentCamera.position;
     SetShaderValue(shadowShader, shadowShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
     
@@ -417,12 +416,12 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     
     BeginTextureMode(target);
         ClearBackground(BLACK);
-            SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
-            rlEnableShader(shadowShader.id);
+        SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
+        rlEnableShader(shadowShader.id);
             
-            rlActiveTextureSlot(textureActiveSlot);
-            rlEnableTexture(ShadowMap.depth.id);
-            rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
+        rlActiveTextureSlot(textureActiveSlot);
+        rlEnableTexture(ShadowMap.depth.id);
+        rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
         DrawTexture(ShadowMap.depth, 0, 0, WHITE);
         BeginMode3D(currentCamera);
 
@@ -601,6 +600,8 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
         ImGui::DockBuilderDockWindow("Lights", right_id);
         ImGui::DockBuilderDockWindow("Console", bottom_id);
+        ImGui::DockBuilderDockWindow("Console", bottom_id);
+
 
         ImGui::DockBuilderFinish(dockspace_id);
         docked = true;
@@ -894,6 +895,61 @@ void Renderer::InitRuntime() {
     UnloadRenderTexture(target);
     target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     RedirectCoutToLogger();
+    Renderer::lightSystem.SetShader(&shader);
+    
+    ShadowMap = LoadRenderTextureDepthTex(2048, 2048);
+
+    depthShadowMap = ShadowMap.depth;
+
+    Shader depthShader = LoadShader(0, TextFormat("project/shaders/depth_render.fs", 330));
+    int depthLoc = GetShaderLocation(depthShader, "depthTexture");
+    int flipTextureLoc = GetShaderLocation(depthShader, "flipY");
+    SetShaderValue(depthShader, flipTextureLoc, str, SHADER_UNIFORM_INT);
+    
+    if (ShadowMap.id == 0 || ShadowMap.texture.id == 0) {
+        std::cout << "Failed to create shadow map render texture!" << std::endl;
+    } else {
+        std::cout << "Shadow map created successfully. ID: " << ShadowMap.texture.id << std::endl;
+    }
+
+    Mesh cubeMesh = GenMeshCube(1.0f, 1.0f, 1.0f);
+    depthShader = LoadShader("project/shaders/shadowmap.vs", "project/shaders/shadowmap.fs");
+    lightVPLoc = GetShaderLocation(depthShader, "lightVP");
+    shadowMapLoc = GetShaderLocation(depthShader, "shadowMap");
+    
+    shadowShader = LoadShader(TextFormat("project/shaders/shadowmap.vs", 3.3),
+                                     TextFormat("project/shaders/shadowmap.fs", 3.3));
+    shadowShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shadowShader, "viewPos");
+    lightDir = Vector3Normalize(Vector3{ 0.35f, -1.0f, -0.35f });
+    Color lightColor = WHITE;
+    Vector4 lightColorNormalized = ColorNormalize(lightColor);
+    lightDirLoc = GetShaderLocation(shadowShader, "lightDir");
+    int lightColLoc = GetShaderLocation(shadowShader, "lightColor");
+    SetShaderValue(shadowShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+    SetShaderValue(shadowShader, lightColLoc, &lightColorNormalized, SHADER_UNIFORM_VEC4);
+    int ambientLoc = GetShaderLocation(shadowShader, "ambient");
+    float ambient[4] = {0.1f, 0.1f, 0.1f, 1.0f};
+    SetShaderValue(shadowShader, ambientLoc, ambient, SHADER_UNIFORM_VEC4);
+    int lightVPLoc = GetShaderLocation(shadowShader, "lightVP");
+    int shadowMapLoc = GetShaderLocation(shadowShader, "shadowMap");
+    int shadowMapResolution = 1024;
+    SetShaderValue(shadowShader, GetShaderLocation(shadowShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
+    cube = LoadModelFromMesh(cubeMesh);
+    cube.materials[0].shader = shadowShader;
+
+    lightCamera = { 0 };
+    lightCamera.position = Vector3Scale(lightDir, -15.0f);
+    lightCamera.target = Vector3Zero();
+    lightCamera.projection = CAMERA_ORTHOGRAPHIC;
+    lightCamera.up = Vector3{ 0.0f, 1.0f, 0.0f };
+    lightCamera.fovy = 20.0f;
+
+    lightView = { 0 };
+    lightProj = { 0 };
+    lightViewProj = { 0 };
+    textureActiveSlot = 10;
+    UploadMesh(&cubeMesh, false);
+    cubeMaterial = LoadMaterialDefault();
 }
 
 void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
@@ -902,36 +958,63 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
         target = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     }
 
+
+    Vector3 cameraPos = EditorCamera::playCamera.position;
+    SetShaderValue(shadowShader, shadowShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
+    
+    lightDir = Vector3Normalize(lightDir);
+    lightCamera.position = Vector3Scale(lightDir, -15.0f);
+    SetShaderValue(shadowShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+
+    BeginTextureMode(ShadowMap);
+            ClearBackground(WHITE);
+            
+            BeginMode3D(lightCamera);
+                lightView = rlGetMatrixModelview();
+                lightProj = rlGetMatrixProjection();
+                DrawSceneObjects(EditorCamera::playCamera, rects);
+            EndMode3D();
+            
+    EndTextureMode();
+    lightViewProj = MatrixMultiply(lightView, lightProj);
+
     BeginTextureMode(target);
         ClearBackground(BLACK);
+        SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
+        rlEnableShader(shadowShader.id);
+            
+        rlActiveTextureSlot(textureActiveSlot);
+        rlEnableTexture(ShadowMap.depth.id);
+        rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
+        DrawTexture(ShadowMap.depth, 0, 0, WHITE);
         
         BeginMode3D(EditorCamera::playCamera);
         rlDisableDepthTest();
         skybox.Draw(EditorCamera::playCamera);
         rlEnableDepthTest();
-            
-        if (Application::currentMode == MODE_EDIT) {
-            DrawCube(EditorCamera::playCamera.position, 1, 1, 1, BLUE);
-        }
-        
-        Renderer::lightSystem.UpdateLights(EditorCamera::playCamera);
-        
-        BeginShaderMode(depthShader);
-            for (auto& r : rects) {
-                Matrix transform = MatrixTranslate(r.position.x, r.position.y, r.position.z);
-                SetShaderValueMatrix(depthShader, GetShaderLocation(depthShader, "matModel"), transform);
-                
-                Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
-                SetShaderValueMatrix(depthShader, GetShaderLocation(depthShader, "matNormal"), matNormal);
 
-                DrawCube(r.position, r.size.x, r.size.y, r.size.z, r.color);
+        if (shader.id != 0) {
+            BeginShaderMode(shader);
+
+            int shadowMapLoc = GetShaderLocation(shader, "shadowMap");
+            int textureSlot = 10;
+            rlActiveTextureSlot(textureSlot);
+            rlEnableTexture(ShadowMap.depth.id);
+            SetShaderValue(shader, shadowMapLoc, &textureSlot, SHADER_UNIFORM_INT);
+
+            for (auto& light : Renderer::lightSystem.lights) {
+                Matrix lightVP = Renderer::lightSystem.GetLightMatrix(light, 512, 512);
+                int lightVPLoc = GetShaderLocation(shader, "lightVP");
+                SetShaderValueMatrix(shader, lightVPLoc, lightVP);
             }
 
-            for (auto& s : sphere) {
-                DrawSphere(s.position, s.radius, RED);
-            }
+            DrawSceneObjects(EditorCamera::playCamera, rects);
+
+            Renderer::lightSystem.UpdateLights(EditorCamera::playCamera);
 
             EndShaderMode();
+        }
+                
         EndMode3D();
     EndTextureMode();
 

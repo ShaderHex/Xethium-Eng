@@ -18,7 +18,7 @@ RectangleObject* GetRectangleByName(std::vector<RectangleObject>& rects, const s
 
 void Application::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
-    InitWindow(1200, 800, "Xethium");
+    InitWindow(1200, 800, "Xethium Engine Early Build - Debug");
     rlImGuiSetup(true);
 
     currentMode = MODE_EDIT;
