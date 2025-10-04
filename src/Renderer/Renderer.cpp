@@ -903,7 +903,6 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
     }
 
     BeginTextureMode(target);
-        //BeginDrawing();
         ClearBackground(BLACK);
         
         BeginMode3D(EditorCamera::playCamera);
@@ -934,7 +933,6 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
 
             EndShaderMode();
         EndMode3D();
-        //EndDrawing();
     EndTextureMode();
 
     ApplyPostProcessing();
