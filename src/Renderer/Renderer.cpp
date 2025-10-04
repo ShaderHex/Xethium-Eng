@@ -31,7 +31,7 @@ Vector3 playCamPos = EditorCamera::playCamera.position;
 Skybox skybox;
 
 RenderTexture2D target;
-
+const char* str = "1";
 void DrawEngineGrid(int slices = 1000, float spacing = 1.0f) {
     int halfSlices = slices / 2;
 
@@ -118,7 +118,7 @@ void Renderer::Init() {
     Shader depthShader = LoadShader(0, TextFormat("project/shaders/depth_render.fs", 330));
     int depthLoc = GetShaderLocation(depthShader, "depthTexture");
     int flipTextureLoc = GetShaderLocation(depthShader, "flipY");
-    SetShaderValue(depthShader, flipTextureLoc, (int[]){ 1 }, SHADER_UNIFORM_INT);
+    SetShaderValue(depthShader, flipTextureLoc, str, SHADER_UNIFORM_INT);
     
     if (ShadowMap.id == 0 || ShadowMap.texture.id == 0) {
         std::cout << "Failed to create shadow map render texture!" << std::endl;
@@ -134,7 +134,7 @@ void Renderer::Init() {
     shadowShader = LoadShader(TextFormat("project/shaders/shadowmap.vs", 3.3),
                                      TextFormat("project/shaders/shadowmap.fs", 3.3));
     shadowShader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shadowShader, "viewPos");
-    lightDir = Vector3Normalize((Vector3){ 0.35f, -1.0f, -0.35f });
+    lightDir = Vector3Normalize(Vector3{ 0.35f, -1.0f, -0.35f });
     Color lightColor = WHITE;
     Vector4 lightColorNormalized = ColorNormalize(lightColor);
     lightDirLoc = GetShaderLocation(shadowShader, "lightDir");
@@ -155,7 +155,7 @@ void Renderer::Init() {
     lightCamera.position = Vector3Scale(lightDir, -15.0f);
     lightCamera.target = Vector3Zero();
     lightCamera.projection = CAMERA_ORTHOGRAPHIC;
-    lightCamera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    lightCamera.up = Vector3{ 0.0f, 1.0f, 0.0f };
     lightCamera.fovy = 20.0f;
 
     lightView = { 0 };
@@ -236,7 +236,14 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 
 void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
     for (auto& r : rects) {
-        DrawCube(r.position, r.size.x, r.size.y, r.size.z, WHITE);
+        cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = r.color;
+            Matrix transform = MatrixMultiply(
+            MatrixScale(r.size.x, r.size.y, r.size.z),
+            MatrixTranslate(r.position.x, r.position.y, r.position.z)
+        );
+
+        DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, r.color);
+
     }
 
     Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
@@ -284,7 +291,7 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
             MatrixTranslate(r.position.x, r.position.y, r.position.z)
         );
 
-        DrawModelEx(cube, Vector3Zero(), (Vector3) r.position, 0.0f, (Vector3) { 10.0f, 1.0f, 10.0f }, r.color);
+        DrawModelEx(cube, Vector3Zero(), r.position, 0.0f, Vector3 { 10.0f, 1.0f, 10.0f }, r.color);
 
         if (Application::currentMode == MODE_EDIT) {
             BoundingBox box = {
@@ -340,8 +347,8 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
         }
     }
 
-    DrawModelEx(cube, Vector3Zero(), (Vector3) { 0.0f, 1.0f, 0.0f }, 0.0f, (Vector3) { 10.0f, 1.0f, 10.0f }, BLUE);
-    DrawModelEx(cube, (Vector3) { 1.5f, 1.0f, -1.5f }, (Vector3) { 0.0f, 1.0f, 0.0f }, 0.0f, Vector3One(), WHITE);
+    DrawModelEx(cube, Vector3Zero(), Vector3 { 0.0f, 1.0f, 0.0f }, 0.0f, Vector3 { 10.0f, 1.0f, 10.0f }, BLUE);
+    DrawModelEx(cube, Vector3 { 1.5f, 1.0f, -1.5f }, Vector3 { 0.0f, 1.0f, 0.0f }, 0.0f, Vector3One(), WHITE);
 }
 
 
@@ -643,6 +650,35 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             std::cout << "Sphere UiD " << spheres.UiD << '\n';
         }
         ImGui::EndPopup();
+    }
+
+    for (auto& rect : rects) {
+        if (rect.UiD == selectedUiD) {
+            //GizmoManager gizmo;
+            //gizmo.transform.translation = rect.position;
+            //izmo.transform.scale = rect.size;
+
+            //gizmo.Draw(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE);
+
+            //Matrix m = gizmo.GetMatrix();
+            //rect.position.x = m.m12;
+            //rect.position.y = m.m13;
+            //rect.position.z = m.m14;
+            //rect.size.x = gizmo.transform.scale.x;
+            //rect.size.y = gizmo.transform.scale.y;
+            //rect.size.z = gizmo.transform.scale.z;
+
+            ImGui::Text("Modify Object: %d", rect.UiD);
+            ImGui::DragFloat3("Position", &rect.position.x);
+            ImGui::DragFloat3("Size", &rect.size.x);
+
+            float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
+            if (ImGui::ColorEdit3("Color", tempColor)) {
+                rect.color.r = static_cast<unsigned char>(tempColor[0] * 255);
+                rect.color.g = static_cast<unsigned char>(tempColor[1] * 255);
+                rect.color.b = static_cast<unsigned char>(tempColor[2] * 255);
+            }
+        }
     }
 
     for (auto& s : sphere) {
