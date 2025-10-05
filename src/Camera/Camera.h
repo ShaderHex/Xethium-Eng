@@ -7,10 +7,12 @@ class EditorCamera {
 public:
     static Camera3D editorCamera;
     static Camera3D playCamera;
+    static bool canMove;
 
     static void InitCam();
     static void InitPlayCam();
     static void UpdateEditorCamera();
     static void UpdatePlayCamera();
     static Camera3D LoadCam(const std::string& filePath);
+private:
 };

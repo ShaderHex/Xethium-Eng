@@ -6,6 +6,7 @@
 
 #include "raylib.h"
 #include "Core/UiDgenerator.h"
+#include "Core/Material.h"
 
 struct RectangleObject {
     Vector3 position;
@@ -13,6 +14,7 @@ struct RectangleObject {
     Color color;
     std::string name;
     unsigned int UiD;
+    EngineMaterial material;
 
     RectangleObject() = default;
 

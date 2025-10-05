@@ -17,17 +17,18 @@
 #include "rlgl.h"
 #include "rlights.h"
 #include "nlohmann/json.hpp"
+#include "imgui_impl_raylib.h"
 
 #include "Camera/Camera.h"
-#include "Entities/Rectangle.h"
 #include "Core/FileManager.h"
 #include "Core/EngineState.h"
 #include "Core/GizmoManager.h"
 #include "Core/SkyBox.h"
+#include "Core/Console.h"
+#include "Entities/Rectangle.h"
 #include "Entities/AreaLight.h"
 #include "Entities/Sphere.h"
-#include "Core/Console.h"
-#include "imgui_impl_raylib.h"
+#include "Entities/MeshComponent.h"
 
 class Renderer {
 public:
@@ -87,4 +88,8 @@ private:
     RenderTexture2D bloomTarget;
     RenderTexture2D sceneTarget;
     ImFont* font;
+    std::vector<MeshObject> meshes;
+    RenderTexture2D playCamView;
+    char mesh_dir[256];
+    char texture_dir[256];
 };

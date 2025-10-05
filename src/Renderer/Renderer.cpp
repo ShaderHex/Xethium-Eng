@@ -159,6 +159,7 @@ void Renderer::Init() {
     SetShaderValue(shadowShader, GetShaderLocation(shadowShader, "shadowMapResolution"), &shadowMapResolution, SHADER_UNIFORM_INT);
     cube = LoadModelFromMesh(cubeMesh);
     cube.materials[0].shader = shadowShader;
+    SetTextureFilter(ShadowMap.texture, RL_TEXTURE_FILTER_LINEAR);
 
     lightCamera = { 0 };
     lightCamera.position = Vector3Scale(lightDir, -15.0f);
@@ -182,6 +183,7 @@ void Renderer::Init() {
     }
     bloomTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+    playCamView = LoadRenderTexture(256, 256);
 }
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
@@ -254,13 +256,13 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 
 void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
     for (auto& r : rects) {
-        cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = r.color;
+        cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = r.material.albedoTexture;
             Matrix transform = MatrixMultiply(
             MatrixScale(r.size.x, r.size.y, r.size.z),
             MatrixTranslate(r.position.x, r.position.y, r.position.z)
         );
 
-        DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, r.color);
+        DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, r.material.albedoColor);
 
     }
 
@@ -301,37 +303,7 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
         }
     }
 
-    for (auto& r : rects) {
-        cubeMaterial.maps[MATERIAL_MAP_DIFFUSE].color = r.color;
-
-        Matrix transform = MatrixMultiply(
-            MatrixScale(r.size.x, r.size.y, r.size.z),
-            MatrixTranslate(r.position.x, r.position.y, r.position.z)
-        );
-
-        DrawModelEx(cube, Vector3Zero(), r.position, 0.0f, Vector3 { 10.0f, 1.0f, 10.0f }, r.color);
-
-        if (Application::currentMode == MODE_EDIT) {
-            BoundingBox box = {
-                Vector3Subtract(r.position, Vector3Scale(r.size, 0.5f)),
-                Vector3Add(r.position, Vector3Scale(r.size, 0.5f))
-            };
-
-            if (CheckCollisionRayBox(ray, box)) {
-                hoveredUiD = r.UiD;
-                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, YELLOW);
-
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    selectedUiD = r.UiD;
-                    Renderer::selectedLightUiD = -1;
-                }
-            }
-
-            if (selectedUiD == r.UiD) {
-                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, WHITE);
-            }
-        }
-    }
+    
 
     for (auto& s : sphere) {
         Matrix transform = MatrixTranslate(s.position.x, s.position.y, s.position.z);
@@ -365,10 +337,63 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
         }
     }
 
-    DrawModelEx(cube, Vector3Zero(), Vector3 { 0.0f, 1.0f, 0.0f }, 0.0f, Vector3 { 10.0f, 1.0f, 10.0f }, BLUE);
-    DrawModelEx(cube, Vector3 { 1.5f, 1.0f, -1.5f }, Vector3 { 0.0f, 1.0f, 0.0f }, 0.0f, Vector3One(), WHITE);
-}
+    for (auto& m : meshes) {
+        if (!m.isLoaded) m.Load();
 
+        Matrix transform = MatrixIdentity();
+        transform = MatrixMultiply(transform, MatrixRotateXYZ(Vector3{
+            DEG2RAD * m.rotation.x,
+            DEG2RAD * m.rotation.y,
+            DEG2RAD * m.rotation.z
+        }));
+        transform = MatrixMultiply(transform, MatrixScale(m.scale.x, m.scale.y, m.scale.z));
+        transform = MatrixMultiply(transform, MatrixTranslate(m.position.x, m.position.y, m.position.z));
+
+        DrawModel(m.model, m.position, 1.0, m.color);
+
+        DrawSphere(m.position, 0.05f, RED);
+
+        if (Application::currentMode == MODE_EDIT) {
+            BoundingBox box = GetModelBoundingBox(m.model);
+            BoundingBox transformedBox = {
+                Vector3Add(box.min, m.position),
+                Vector3Add(box.max, m.position)
+            };
+            
+            Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
+            if (CheckCollisionRayBox(ray, transformedBox)) {
+                DrawBoundingBox(transformedBox, YELLOW);
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedUiD = m.UiD;
+                }
+            }
+
+            if (selectedUiD == m.UiD) {
+                static Transform gizmoTransform = GizmoIdentity();
+                gizmoTransform.translation = m.position;
+
+                gizmoTransform.rotation = QuaternionFromEuler(
+                    DEG2RAD * m.rotation.x,
+                    DEG2RAD * m.rotation.y,
+                    DEG2RAD * m.rotation.z
+                );
+
+                gizmoTransform.scale = m.scale;
+
+                DrawGizmo3D(GIZMO_TRANSLATE |  GIZMO_SCALE, &gizmoTransform);
+
+                m.position = gizmoTransform.translation;
+
+                Vector3 euler = QuaternionToEuler(gizmoTransform.rotation);
+                m.rotation = Vector3Scale(euler, RAD2DEG);
+
+                m.scale = gizmoTransform.scale;
+            }
+
+        }
+    }
+
+}
 
 
 void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects) {
@@ -437,16 +462,15 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     BeginMode3D(currentCamera);
 
     EndMode3D();
-    
     BeginTextureMode(sceneTarget);
-        ClearBackground(BLACK);
-        SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
-        rlEnableShader(shadowShader.id);
-            
-        rlActiveTextureSlot(textureActiveSlot);
-        rlEnableTexture(ShadowMap.depth.id);
-        rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
-        BeginMode3D(currentCamera);
+    ClearBackground(BLACK);
+    SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
+    rlEnableShader(shadowShader.id);
+    
+    rlActiveTextureSlot(textureActiveSlot);
+    rlEnableTexture(ShadowMap.depth.id);
+    rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
+    BeginMode3D(currentCamera);
 
         DrawEngineGrid();
 
@@ -655,6 +679,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
         ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
         ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
+        ImGuiID left_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.25f, nullptr, &dockspace_id);
         ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
         ImGuiID bottom_right_id = ImGui::DockBuilderSplitNode(bottom_id, ImGuiDir_Right, 0.5f, &bottom_id, nullptr);
 
@@ -664,6 +689,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         ImGui::DockBuilderDockWindow("Lights", right_id);
         ImGui::DockBuilderDockWindow("Console", bottom_id);
         ImGui::DockBuilderDockWindow("Shadow Map Debug", bottom_right_id);
+        ImGui::DockBuilderDockWindow("Scene Hierarchy", left_id);
 
 
         ImGui::DockBuilderFinish(dockspace_id);
@@ -678,7 +704,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         RectangleObject obj;
         obj.position = {0.0f, 1.0f, 0.0f};
         obj.size = {1.0f, 1.0f, 1.0f};
-        obj.color = RED;
+        obj.material.SetAlbedo(WHITE);
         obj.UiD = GenerateUniqueUiD();
         obj.name = "Cube" + std::to_string(CubeNumber);
         CubeNumber++;
@@ -696,6 +722,13 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         SphereNumber++;
         sphere.push_back(obj);
         std::cout << "Created Sphere with name: " << obj.name << std::endl;
+    }
+
+    if (ImGui::Button("Create Mesh")) {
+        MeshObject obj("project/assets/models/car.glb", {0,1,0});
+        obj.Load();
+        meshes.push_back(obj);
+        std::cout << "Created Mesh: " << obj.name << std::endl;
     }
 
     if (ImGui::Button("Select Object")) ImGui::OpenPopup("Select UiD");
@@ -718,29 +751,22 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     for (auto& rect : rects) {
         if (rect.UiD == selectedUiD) {
-            //GizmoManager gizmo;
-            //gizmo.transform.translation = rect.position;
-            //izmo.transform.scale = rect.size;
 
-            //gizmo.Draw(GIZMO_TRANSLATE | GIZMO_ROTATE | GIZMO_SCALE);
+            if(ImGui::CollapsingHeader("Properties")) {
+                ImGui::Text("Modify Object: %d", rect.UiD);
+                ImGui::DragFloat3("Position", &rect.position.x);
+                ImGui::DragFloat3("Size", &rect.size.x);
+            }
 
-            //Matrix m = gizmo.GetMatrix();
-            //rect.position.x = m.m12;
-            //rect.position.y = m.m13;
-            //rect.position.z = m.m14;
-            //rect.size.x = gizmo.transform.scale.x;
-            //rect.size.y = gizmo.transform.scale.y;
-            //rect.size.z = gizmo.transform.scale.z;
-
-            ImGui::Text("Modify Object: %d", rect.UiD);
-            ImGui::DragFloat3("Position", &rect.position.x);
-            ImGui::DragFloat3("Size", &rect.size.x);
-
-            float tempColor[3] = {rect.color.r / 255.0f, rect.color.g / 255.0f, rect.color.b / 255.0f};
-            if (ImGui::ColorEdit3("Color", tempColor)) {
-                rect.color.r = static_cast<unsigned char>(tempColor[0] * 255);
-                rect.color.g = static_cast<unsigned char>(tempColor[1] * 255);
-                rect.color.b = static_cast<unsigned char>(tempColor[2] * 255);
+            if (ImGui::CollapsingHeader("Material")) {
+                float tempColor[3] = {rect.material.albedoColor.r / 255.0f, rect.material.albedoColor.g / 255.0f, rect.material.albedoColor.b / 255.0f};
+                if (ImGui::ColorEdit3("Color", tempColor)) {
+                    rect.material.albedoColor.r = static_cast<unsigned char>(tempColor[0] * 255);
+                    rect.material.albedoColor.g = static_cast<unsigned char>(tempColor[1] * 255);
+                    rect.material.albedoColor.b = static_cast<unsigned char>(tempColor[2] * 255);
+                }
+                ImGui::InputText("Texture Directory", texture_dir, sizeof(texture_dir));
+                if (ImGui::Button("Reload")) rect.material.Reload(texture_dir);
             }
         }
     }
@@ -787,7 +813,67 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             }
         }
     }
-    
+
+    for (auto& m : meshes) {
+        if (m.UiD == selectedUiD) {
+            ImGui::Text("Modify Mesh: %s (UiD: %d)", m.name.c_str(), m.UiD);
+            ImGui::DragFloat3("Position", &m.position.x, 0.1f);
+            ImGui::DragFloat3("Rotation", &m.rotation.x, 0.1f);
+            ImGui::DragFloat3("Scale", &m.scale.x, 0.1f);
+            ImGui::InputText("Mesh Dir", mesh_dir, IM_ARRAYSIZE(mesh_dir));
+
+            float tempColor[3] = { m.color.r / 255.f, m.color.g / 255.f, m.color.b / 255.f };
+            if (ImGui::ColorEdit3("Color", tempColor)) {
+                m.color.r = static_cast<unsigned char>(tempColor[0]*255);
+                m.color.g = static_cast<unsigned char>(tempColor[1]*255);
+                m.color.b = static_cast<unsigned char>(tempColor[2]*255);
+            }
+
+            if (ImGui::Button("Reload Model")) m.Reload();
+        }
+    }
+
+    for (auto& light : Renderer::lightSystem.lights) {
+        if (light.UiD == Renderer::selectedLightUiD) {
+            ImGui::Text("Editing Light: %s", light.name.c_str());
+            
+            ImGui::Checkbox("Enabled", &light.enabled);
+            ImGui::InputText("Name", &light.name[0], 128);
+            ImGui::DragFloat3("Position", &light.position.x, 0.1f);
+            
+            if (light.type == XE_LIGHT_DIRECTIONAL) {
+                ImGui::DragFloat3("Direction", &light.target.x, 0.1f);
+            }
+            
+            float colorFloat[3] = {
+                light.color.r / 255.0f,
+                light.color.g / 255.0f,
+                light.color.b / 255.0f
+            };
+            
+            if (ImGui::ColorEdit3("Color", colorFloat)) {
+                light.color.r = static_cast<unsigned char>(colorFloat[0] * 255);
+                light.color.g = static_cast<unsigned char>(colorFloat[1] * 255);
+                light.color.b = static_cast<unsigned char>(colorFloat[2] * 255);
+            }
+            
+            ImGui::DragFloat("Intensity", &light.intensity, 0.1f, 0.0f, 10.0f);
+            
+            const char* lightTypes[] = { "Directional", "Point" };
+            ImGui::Combo("Type", &light.type, lightTypes, 2);
+            
+            if (ImGui::Button("Delete Light")) {
+                for (auto it = Renderer::lightSystem.lights.begin(); it != Renderer::lightSystem.lights.end(); ++it) {
+                    if (it->UiD == Renderer::selectedLightUiD) {
+                        Renderer::lightSystem.lights.erase(it);
+                        Renderer::selectedLightUiD = -1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
 
     if (ImGui::Button("Save Scene") && !fileNameWrite.empty()) {
         SceneManager::SaveScene(rects, Renderer::lightSystem.lights, *editorCam, *playCam, currentPathWrite + "/" + fileNameWrite);
@@ -832,46 +918,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         ImGui::EndPopup();
     }
     
-    for (auto& light : Renderer::lightSystem.lights) {
-        if (light.UiD == Renderer::selectedLightUiD) {
-            ImGui::Text("Editing Light: %s", light.name.c_str());
-            
-            ImGui::Checkbox("Enabled", &light.enabled);
-            ImGui::InputText("Name", &light.name[0], 128);
-            ImGui::DragFloat3("Position", &light.position.x, 0.1f);
-            
-            if (light.type == XE_LIGHT_DIRECTIONAL) {
-                ImGui::DragFloat3("Direction", &light.target.x, 0.1f);
-            }
-            
-            float colorFloat[3] = {
-                light.color.r / 255.0f,
-                light.color.g / 255.0f,
-                light.color.b / 255.0f
-            };
-            
-            if (ImGui::ColorEdit3("Color", colorFloat)) {
-                light.color.r = static_cast<unsigned char>(colorFloat[0] * 255);
-                light.color.g = static_cast<unsigned char>(colorFloat[1] * 255);
-                light.color.b = static_cast<unsigned char>(colorFloat[2] * 255);
-            }
-            
-            ImGui::DragFloat("Intensity", &light.intensity, 0.1f, 0.0f, 10.0f);
-            
-            const char* lightTypes[] = { "Directional", "Point" };
-            ImGui::Combo("Type", &light.type, lightTypes, 2);
-            
-            if (ImGui::Button("Delete Light")) {
-                for (auto it = Renderer::lightSystem.lights.begin(); it != Renderer::lightSystem.lights.end(); ++it) {
-                    if (it->UiD == Renderer::selectedLightUiD) {
-                        Renderer::lightSystem.lights.erase(it);
-                        Renderer::selectedLightUiD = -1;
-                        break;
-                    }
-                }
-            }
-        }
-    }
     
     ImGui::End();
 
@@ -922,6 +968,60 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         }
     }
     ImGui::End();
+
+    if(ImGui::Begin("Camera View")) {
+        rlImGuiImage(&playCamView.texture);
+    }
+    ImGui::End();
+
+    ImGui::Begin("Scene Hierarchy");
+
+    for (auto& obj : rects)
+    {
+        ImGuiTreeNodeFlags flags = 0;
+        if (obj.UiD == selectedUiD) flags |= ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx(
+            (void*)(intptr_t)obj.UiD,
+            flags,
+            "%s", obj.name.c_str()
+        );
+
+        if (ImGui::IsItemClicked())
+        {
+            selectedUiD = obj.UiD;
+        }
+
+        if (node_open)
+        {
+            ImGui::TreePop();
+        }
+    }
+
+    for (auto& obj : Renderer::lightSystem.lights)
+    {
+        ImGuiTreeNodeFlags flags = 0;
+        if (obj.UiD == selectedLightUiD) flags |= ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx(
+            (void*)(intptr_t)obj.UiD,
+            flags,
+            "%s", obj.name.c_str()
+        );
+
+        if (ImGui::IsItemClicked())
+        {
+            selectedUiD = selectedLightUiD;
+        }
+
+        if (node_open)
+        {
+            ImGui::TreePop();
+        }
+    }
+
+    ImGui::End();
+
 
     g_Logger.DrawWindow();
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
@@ -1171,12 +1271,14 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
         ImGuiID top_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.08f, nullptr, &dockspace_id);
         ImGuiID right_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Right, 0.25f, nullptr, &dockspace_id);
         ImGuiID bottom_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Down, 0.30f, nullptr, &dockspace_id);
+        ImGuiID left_id = ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Left, 0.25f, nullptr, &dockspace_id);
 
         ImGui::DockBuilderDockWindow("Play", top_id);
         ImGui::DockBuilderDockWindow("Inspector", right_id);
         ImGui::DockBuilderDockWindow("File Explorer", bottom_id);
         ImGui::DockBuilderDockWindow("Lights", right_id);
         ImGui::DockBuilderDockWindow("Console", bottom_id);
+        ImGui::DockBuilderDockWindow("Scene Hierarchy", left_id);
 
         ImGui::DockBuilderFinish(dockspace_id);
         docked = true;
@@ -1244,6 +1346,54 @@ void Renderer::ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& re
             }
         }
     }
+    ImGui::End();
+
+    ImGui::Begin("Scene Hierarchy");
+
+    for (auto& obj : rects)
+    {
+        ImGuiTreeNodeFlags flags = 0;
+        if (obj.UiD == selectedUiD) flags |= ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx(
+            (void*)(intptr_t)obj.UiD,
+            flags,
+            "%s", obj.name.c_str()
+        );
+
+        if (ImGui::IsItemClicked())
+        {
+            selectedUiD = obj.UiD;
+        }
+
+        if (node_open)
+        {
+            ImGui::TreePop();
+        }
+    }
+
+    for (auto& obj : Renderer::lightSystem.lights)
+    {
+        ImGuiTreeNodeFlags flags = 0;
+        if (obj.UiD == selectedLightUiD) flags |= ImGuiTreeNodeFlags_Selected;
+
+        bool node_open = ImGui::TreeNodeEx(
+            (void*)(intptr_t)obj.UiD,
+            flags,
+            "%s", obj.name.c_str()
+        );
+
+        if (ImGui::IsItemClicked())
+        {
+            selectedUiD = selectedLightUiD;
+        }
+
+        if (node_open)
+        {
+            ImGui::TreePop();
+        }
+    }
+
     ImGui::End();
 
     g_Logger.DrawWindow();

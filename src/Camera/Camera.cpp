@@ -6,6 +6,7 @@ using json = nlohmann::json;
 
 Camera3D EditorCamera::editorCamera = {0};
 Camera3D EditorCamera::playCamera   = {0};
+bool EditorCamera::canMove = false;
 
 static bool isPanning = false;
 static Vector2 panOrigin = {0};
@@ -60,6 +61,7 @@ void EditorCamera::UpdateEditorCamera() {
     float speed = 10.0f * GetFrameTime();
     
     if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON)) {
+        canMove = true;
         HideCursor();
         Vector2 delta = GetMouseDelta();
         yaw   -= delta.x * 0.003f;
@@ -69,6 +71,7 @@ void EditorCamera::UpdateEditorCamera() {
         if (pitch < -1.5f) pitch = -1.5f;
     }
     else {
+        canMove = false;
         ShowCursor();
     }
 
@@ -82,17 +85,19 @@ void EditorCamera::UpdateEditorCamera() {
     Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, worldUp));
     Vector3 up    = Vector3Normalize(Vector3CrossProduct(right, forward));
 
-    if (IsKeyDown(KEY_W)) {
-        editorCamera.position = Vector3Add(editorCamera.position, Vector3Scale(forward, speed));
-    }
-    if (IsKeyDown(KEY_S)) {
-        editorCamera.position = Vector3Subtract(editorCamera.position, Vector3Scale(forward, speed));
-    }
-    if (IsKeyDown(KEY_A)) {
-        editorCamera.position = Vector3Subtract(editorCamera.position, Vector3Scale(right, speed));
-    }
-    if (IsKeyDown(KEY_D)) {
-        editorCamera.position = Vector3Add(editorCamera.position, Vector3Scale(right, speed));
+    if(canMove) {
+        if (IsKeyDown(KEY_W)) {
+            editorCamera.position = Vector3Add(editorCamera.position, Vector3Scale(forward, speed));
+        }
+        if (IsKeyDown(KEY_S)) {
+            editorCamera.position = Vector3Subtract(editorCamera.position, Vector3Scale(forward, speed));
+        }
+        if (IsKeyDown(KEY_A)) {
+            editorCamera.position = Vector3Subtract(editorCamera.position, Vector3Scale(right, speed));
+        }
+        if (IsKeyDown(KEY_D)) {
+            editorCamera.position = Vector3Add(editorCamera.position, Vector3Scale(right, speed));
+        }
     }
 
     editorCamera.target = Vector3Add(editorCamera.position, forward);
