@@ -86,7 +86,7 @@ static RenderTexture2D LoadRenderTextureDepthTex(int width, int height) {
     return target;
 }
 
-void Renderer::Init() {
+void Renderer::Init(MaterialManager& matManager) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -106,7 +106,8 @@ void Renderer::Init() {
         std::cout << "Post-processing shader loaded!\n";
     }
 
-    skybox.Load("project/assets/skybox/default/default.hdr", true);
+    strcpy(skyboxDir, "project/assets/skybox/default/default.hdr");
+    skybox.Load(skyboxDir, true);
     target = LoadRenderTexture(1200, 800);
     
     shader = LoadShader("project/shaders/lighting.vs", "project/shaders/lighting.fs");
@@ -184,6 +185,21 @@ void Renderer::Init() {
     bloomTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     sceneTarget = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
     playCamView = LoadRenderTexture(256, 256);
+    //bloomQualityUniformLoc = GetShaderLocation(bloomShader, "quality");
+    //bloomSampleUniformLoc = GetShaderLocation(bloomShader, "sample");
+    sunDirection = { -0.3f, -1.0f, -0.2f };
+
+    whiteImg = GenImageColor(1, 1, WHITE);
+    whiteTex = LoadTextureFromImage(whiteImg);
+    UnloadImage(whiteImg);
+
+    sharedDefaultMat = matManager.GetByName("DefaultWhite");
+    if (!sharedDefaultMat) {
+        sharedDefaultMat = matManager.CreateMaterial("DefaultWhite", "", WHITE);
+        sharedDefaultMat->albedoTexture = whiteTex;
+        sharedDefaultMat->isLoaded = true;
+    }
+    isTexFound = false;
 }
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
@@ -254,15 +270,18 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
     }
 }
 
-void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
+void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager) {
     for (auto& r : rects) {
-        cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = r.material.albedoTexture;
-            Matrix transform = MatrixMultiply(
-            MatrixScale(r.size.x, r.size.y, r.size.z),
-            MatrixTranslate(r.position.x, r.position.y, r.position.z)
-        );
+EngineMaterial* mat = matManager.GetById(r.materialID);
 
-        DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, r.material.albedoColor);
+if (!mat || mat->albedoTexture.id == 0) {
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = whiteTex;
+    DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, WHITE);
+} else {
+    cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = mat->albedoTexture;
+    DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, mat->albedoColor);
+}
+
 
     }
 
@@ -337,7 +356,7 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
         }
     }
 
-    for (auto& m : meshes) {
+for (auto& m : meshes) {
         if (!m.isLoaded) m.Load();
 
         Matrix transform = MatrixIdentity();
@@ -392,7 +411,6 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
 
         }
     }
-
 }
 
 
@@ -432,7 +450,7 @@ void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleO
     EndTextureMode();
 }
 
-void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects) {
+void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager) {
     if (IsWindowResized()) {
         UnloadRenderTexture(target);
         UnloadRenderTexture(bloomTarget);
@@ -444,26 +462,36 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     Vector3 cameraPos = currentCamera.position;
     SetShaderValue(shadowShader, shadowShader.locs[SHADER_LOC_VECTOR_VIEW], &cameraPos, SHADER_UNIFORM_VEC3);
     
-    lightDir = Vector3Normalize(lightDir);
+    lightDir = Vector3Normalize(sunDirection);
     lightCamera.position = Vector3Scale(lightDir, -15.0f);
     SetShaderValue(shadowShader, lightDirLoc, &lightDir, SHADER_UNIFORM_VEC3);
+
+    lightView = MatrixLookAt(lightCamera.position, camPosTarget, (Vector3){0, 1, 0});
+    lightProj = MatrixOrtho(-150, 150, -150, 150, 1.0f, 400.0f);
+    lightViewProj = MatrixMultiply(lightProj, lightView);
+
+    //SetShaderValue(bloomShader, bloomSampleUniformLoc, "100.0", SHADER_UNIFORM_FLOAT);
     
     BeginTextureMode(ShadowMap);
             ClearBackground(WHITE);
             
             BeginMode3D(lightCamera);
-                lightView = rlGetMatrixModelview();
-                lightProj = rlGetMatrixProjection();
-                DrawSceneObjects(currentCamera, rects);
+            lightView = rlGetMatrixModelview();
+            lightProj = rlGetMatrixProjection();
+
+            DrawSceneObjects(currentCamera, rects, matManager);
             EndMode3D();
             
-    EndTextureMode();
-    lightViewProj = MatrixMultiply(lightView, lightProj);
-    BeginMode3D(currentCamera);
-
-    EndMode3D();
-    BeginTextureMode(sceneTarget);
-    ClearBackground(BLACK);
+            EndTextureMode();
+            lightViewProj = MatrixMultiply(lightView, lightProj);
+            BeginMode3D(currentCamera);
+            
+            EndMode3D();
+            BeginTextureMode(sceneTarget);
+            ClearBackground(BLACK);
+            rlDisableDepthTest();
+            skybox.Draw(currentCamera);
+            rlEnableDepthTest();
     SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
     rlEnableShader(shadowShader.id);
     
@@ -489,7 +517,7 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 SetShaderValueMatrix(shader, lightVPLoc, lightVP);
             }
 
-            DrawSceneObjects(currentCamera, rects);
+            DrawSceneObjects(currentCamera, rects, matManager);
 
             Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
             hoveredUiD = -1;
@@ -565,6 +593,7 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         ClearBackground(BLACK);
             BeginMode3D(currentCamera);
                 rlDisableDepthTest();
+                
                 skybox.Draw(currentCamera);
                 rlEnableDepthTest();
 
@@ -595,7 +624,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
 
     ApplyPostProcessing();
     
- //   DrawRectangle(0, 9, 580, 30, Fade(LIGHTGRAY, 0.7f));
 }
 
 void Renderer::ApplyPostProcessing() {
@@ -639,7 +667,7 @@ long long GenerateUniqueUiD() {
     return newUiD;
 }
 
-void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam) {
+void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam, MaterialManager& matManager) {
     rlImGuiBegin();
     imguiTheme();
     ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -704,10 +732,12 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         RectangleObject obj;
         obj.position = {0.0f, 1.0f, 0.0f};
         obj.size = {1.0f, 1.0f, 1.0f};
-        obj.material.SetAlbedo(WHITE);
         obj.UiD = GenerateUniqueUiD();
         obj.name = "Cube" + std::to_string(CubeNumber);
         CubeNumber++;
+    
+        obj.materialID = sharedDefaultMat->id;
+
         rects.push_back(obj);
         std::cout << "Created cube with name: " << obj.name << std::endl;
     }
@@ -725,7 +755,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
     }
 
     if (ImGui::Button("Create Mesh")) {
-        MeshObject obj("project/assets/models/car.glb", {0,1,0});
+        MeshObject obj("project/assets/models/sponza_gltf/scene.gltf", {0,1,0});
         obj.Load();
         meshes.push_back(obj);
         std::cout << "Created Mesh: " << obj.name << std::endl;
@@ -759,17 +789,89 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             }
 
             if (ImGui::CollapsingHeader("Material")) {
-                float tempColor[3] = {rect.material.albedoColor.r / 255.0f, rect.material.albedoColor.g / 255.0f, rect.material.albedoColor.b / 255.0f};
-                if (ImGui::ColorEdit3("Color", tempColor)) {
-                    rect.material.albedoColor.r = static_cast<unsigned char>(tempColor[0] * 255);
-                    rect.material.albedoColor.g = static_cast<unsigned char>(tempColor[1] * 255);
-                    rect.material.albedoColor.b = static_cast<unsigned char>(tempColor[2] * 255);
+                EngineMaterial* mat = matManager.GetById(rect.materialID);
+
+                if (mat) {
+                    ImGui::Text("Material: %s", mat->name.c_str());
+                    ImGui::Separator();
+
+                    float tempColor[3] = {
+                        mat->albedoColor.r / 255.0f,
+                        mat->albedoColor.g / 255.0f,
+                        mat->albedoColor.b / 255.0f
+                    };
+
+                    if (ImGui::ColorEdit3("Albedo Color", tempColor)) {
+                        mat->albedoColor = {
+                            static_cast<unsigned char>(tempColor[0] * 255),
+                            static_cast<unsigned char>(tempColor[1] * 255),
+                            static_cast<unsigned char>(tempColor[2] * 255),
+                            255
+                        };
+                    }
+
+                    ImGui::SliderFloat("Roughness", &mat->roughness, 0.0f, 1.0f);
+                    ImGui::SliderFloat("Metallic", &mat->metallic, 0.0f, 1.0f);
+
+                    static char textureDir[256];
+                    strncpy(textureDir, mat->albedoPath.c_str(), sizeof(textureDir));
+
+                    if (ImGui::InputText("Texture Path", textureDir, sizeof(textureDir))) {
+                        mat->albedoPath = textureDir;
+                    }
+
+                    if (ImGui::Button("Reload Texture")) {
+                        if (!mat->albedoPath.empty()) {
+                            if (mat->isLoaded) UnloadTexture(mat->albedoTexture);
+
+                            Image img = LoadImage(mat->albedoPath.c_str());
+                            if (img.data) {
+                                mat->albedoTexture = LoadTextureFromImage(img);
+                                UnloadImage(img);
+                                mat->isLoaded = true;
+                            } else {
+                                Image fallback = GenImageColor(1, 1, WHITE);
+                                mat->albedoTexture = LoadTextureFromImage(fallback);
+                                UnloadImage(fallback);
+                                mat->isLoaded = true;
+                                std::cout << "WARNING: File not found, using fallback white texture.\n";
+                            }
+                        } else {
+                            if (mat->isLoaded) UnloadTexture(mat->albedoTexture);
+                            Image fallback = GenImageColor(1, 1, WHITE);
+                            mat->albedoTexture = LoadTextureFromImage(fallback);
+                            UnloadImage(fallback);
+                            mat->isLoaded = true;
+                        }
+                    }
+
+
+                    if (ImGui::Button("Save Material")) {
+                        matManager.SaveToFile(*mat);
+                    }
                 }
-                ImGui::InputText("Texture Directory", texture_dir, sizeof(texture_dir));
-                if (ImGui::Button("Reload")) rect.material.Reload(texture_dir);
+                else {
+                    ImGui::TextColored(ImVec4(1, 0, 0, 1), "No material assigned.");
+                }
+
+                if (ImGui::Button("Create & Assign Material")) {
+                    EngineMaterial* newMat = matManager.CreateMaterial(
+                        "NewMaterial",
+                        "",
+                        WHITE
+                    );
+
+                    if (newMat) {
+                        rect.materialID = newMat->id;
+                        std::cout << "Assigned material " << newMat->name
+                                << " to cube UiD " << rect.UiD << std::endl;
+                    }
+                }
             }
+
         }
     }
+
 
     for (auto& s : sphere) {
         if (s.UiD == selectedUiD) {
@@ -1022,6 +1124,14 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     ImGui::End();
 
+    ImGui::Begin("Scene Settings");
+        ImGui::Text("Skybox directory");
+        ImGui::InputText("SkyboxDir", skyboxDir, sizeof(skyboxDir));
+        if (ImGui::Button("ReloadSkybox")) {
+            skybox.Reload(skyboxDir, true);
+        }
+    ImGui::End();
+
 
     g_Logger.DrawWindow();
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
@@ -1131,7 +1241,7 @@ void Renderer::InitRuntime() {
 
 }
 
-void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
+void Renderer::RenderRuntime(std::vector<RectangleObject>& rects, MaterialManager& matManager) {
     if (IsWindowResized()) {
         UnloadRenderTexture(target);
         UnloadRenderTexture(bloomTarget);
@@ -1154,7 +1264,7 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
             BeginMode3D(lightCamera);
                 lightView = rlGetMatrixModelview();
                 lightProj = rlGetMatrixProjection();
-                DrawSceneObjects(EditorCamera::playCamera, rects);
+                DrawSceneObjects(EditorCamera::playCamera, rects, matManager);
             EndMode3D();
             
     EndTextureMode();
@@ -1186,7 +1296,7 @@ void Renderer::RenderRuntime(std::vector<RectangleObject>& rects) {
                 SetShaderValueMatrix(shader, lightVPLoc, lightVP);
             }
 
-            DrawSceneObjects(EditorCamera::playCamera, rects);
+            DrawSceneObjects(EditorCamera::playCamera, rects, matManager);
 
             Renderer::lightSystem.UpdateLights(EditorCamera::playCamera);
 

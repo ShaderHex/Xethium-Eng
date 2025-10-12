@@ -14,7 +14,7 @@ struct RectangleObject {
     Color color;
     std::string name;
     unsigned int UiD;
-    EngineMaterial material;
+    unsigned int materialID;
 
     RectangleObject() = default;
 

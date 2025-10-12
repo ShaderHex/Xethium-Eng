@@ -1,52 +1,50 @@
 #pragma once
 #include "raylib.h"
+#include <string>
+
 struct EngineMaterial {
+    std::string name;
     Color albedoColor;
     Texture2D albedoTexture;
+    std::string albedoPath;
     float roughness;
     float metallic;
-    bool isLoaded = false;
+    bool isLoaded;
+    unsigned int id;
 
-    EngineMaterial() {
-        albedoColor = WHITE;
-        albedoTexture = {0};
-        roughness = 0.5f;
-        metallic = 0.0f;
-        
-        Image img = GenImageColor(1, 1, albedoColor);
-        albedoTexture = LoadTextureFromImage(img);
-        UnloadImage(img);
-    }
+    EngineMaterial()
+        : id(0),
+          name("Default"),
+          albedoColor(WHITE),
+          albedoTexture({0}),
+          roughness(0.5f),
+          metallic(0.0f),
+          isLoaded(false) {}
 
-    void SetAlbedo(Color color) {
-        albedoColor = color;
-    }
+    bool LoadTextureFromFile(const std::string& path) {
+        if (isLoaded) UnloadTexture(albedoTexture);
 
-    void SetTexture(const char* imageDir) {
-        Image image = LoadImage(imageDir);
-        Texture2D texture = LoadTextureFromImage(image);
-        UnloadImage(image);
-
-        if (texture.id > 0)
-        {
-            printf("Texture loaded\n");
-            albedoTexture = texture;
-        }
-        else
-        {
-            printf("Failed to load texture\n");
-            Image img = GenImageColor(1, 1, albedoColor);
-            Texture2D tex = LoadTextureFromImage(img);
-            UnloadImage(img);
-            albedoTexture = tex;
+        Image image = LoadImage(path.c_str());
+        if (image.data) {
+            albedoTexture = LoadTextureFromImage(image);
+            UnloadImage(image);
+            isLoaded = true;
+            return true;
+        } else {
+            Image fallback = GenImageColor(1, 1, albedoColor);
+            albedoTexture = LoadTextureFromImage(fallback);
+            UnloadImage(fallback);
+            isLoaded = true;
+            std::cout << "WARNING: Texture not found, using fallback color.\n";
+            return false;
         }
     }
 
-    void Reload(const char* imageDir) {
+
+    void Unload() {
         if (isLoaded) {
             UnloadTexture(albedoTexture);
+            isLoaded = false;
         }
-        SetTexture(imageDir);
     }
-
 };

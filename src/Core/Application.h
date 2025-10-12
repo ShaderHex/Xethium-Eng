@@ -16,6 +16,7 @@
 #include "EngineState.h"
 #include "Core/Scripting.h"
 #include "Entities/Sphere.h"
+#include "Core/MaterialManager.h"
 
 class Application {
 public:
@@ -26,6 +27,7 @@ public:
 
     static Mode currentMode;
     Scripting scripting;
+    MaterialManager materialManager;
 private:
     Renderer renderer;
     EditorCamera cam;

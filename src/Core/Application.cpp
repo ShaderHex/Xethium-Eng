@@ -19,6 +19,7 @@ RectangleObject* GetRectangleByName(std::vector<RectangleObject>& rects, const s
 void Application::Init() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);
     InitWindow(1200, 800, "Xethium Engine Early Build - Debug");
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     rlImGuiSetup(true);
 
     currentMode = MODE_EDIT;
@@ -29,7 +30,7 @@ void Application::Init() {
     currentCamera = &EditorCamera::editorCamera;
 
     rlImGuiSetup(true);
-    renderer.Init();
+    renderer.Init(materialManager);
     SetTargetFPS(60);
 }
 
@@ -49,13 +50,14 @@ void Application::Run() {
         BeginDrawing();
         if (currentMode == MODE_EDIT) {
             isRuntimeInit = false;
-            renderer.RenderFrame(*currentCamera, rectangles);
+            renderer.RenderFrame(*currentCamera, rectangles, materialManager);
             renderer.ImGuiRender(
                 true,
                 rectangles,
                 currentCamera,
                 &EditorCamera::editorCamera,
-                &EditorCamera::playCamera
+                &EditorCamera::playCamera,
+                materialManager
             );
         } 
         else if (currentMode == MODE_PLAY) {
@@ -89,7 +91,7 @@ void Application::Run() {
                 luaUpdate(dt);
             }
 
-            renderer.RenderRuntime(rectangles);
+            renderer.RenderRuntime(rectangles, materialManager);
             renderer.ImGuiRenderRuntime(
                 false,
                 rectangles,

@@ -23,11 +23,12 @@ struct MeshObject {
         name = "Mesh" + std::to_string(UiD);
     }
 
-    void Load() {
-        if (isLoaded) Unload();
-        model = LoadModel(modelPath.c_str());
-        isLoaded = true;
-    }
+void Load() {
+    if (isLoaded) Unload();
+    model = LoadModel(modelPath.c_str());
+    isLoaded = true;
+}
+
 
     void Reload() {
         Load();

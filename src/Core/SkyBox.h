@@ -65,6 +65,11 @@ public:
         }
     }
 
+    void Reload(const char* path, bool hdr = false) {
+        Unload();
+        Load(path, hdr);
+    }
+
     void Draw(Camera3D& cam) {
         rlDisableBackfaceCulling();
         rlDisableDepthMask();

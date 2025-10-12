@@ -29,17 +29,18 @@
 #include "Entities/AreaLight.h"
 #include "Entities/Sphere.h"
 #include "Entities/MeshComponent.h"
+#include "Core/MaterialManager.h"
 
 class Renderer {
 public:
-    void Init();
-    void DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
+    void Init(MaterialManager& matManager);
+    void DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager);
     void RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects);
-    void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects);
-    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
+    void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager);
+    void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam, MaterialManager& matManager);
     void HandleInput(std::vector<RectangleObject>& rects, Camera2D camera);
     void ApplyPostProcessing();
-    void RenderRuntime(std::vector<RectangleObject>& rects);
+    void RenderRuntime(std::vector<RectangleObject>& rects, MaterialManager& matManager);
     void InitRuntime();
     void ImGuiRenderRuntime(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam);
 
@@ -92,4 +93,13 @@ private:
     RenderTexture2D playCamView;
     char mesh_dir[256];
     char texture_dir[256];
+    int bloomQualityUniformLoc;
+    int bloomSampleUniformLoc;
+    Vector3 sunDirection;
+    Vector3 camPosTarget;
+    char skyboxDir[2048];
+    EngineMaterial* sharedDefaultMat;
+    Image whiteImg;
+    Texture2D whiteTex;
+    bool isTexFound;
 };
