@@ -44,7 +44,9 @@ void Application::Run() {
         float dt = GetFrameTime();
 
         if (currentMode == MODE_EDIT) {
-            EditorCamera::UpdateEditorCamera();
+            if(!io->WantCaptureMouse) {
+                EditorCamera::UpdateEditorCamera();
+            }
         }
 
         BeginDrawing();

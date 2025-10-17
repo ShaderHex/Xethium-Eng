@@ -30,6 +30,7 @@
 #include "Entities/Sphere.h"
 #include "Entities/MeshComponent.h"
 #include "Core/MaterialManager.h"
+#include "Core/Global.h"
 
 class Renderer {
 public:
@@ -103,4 +104,5 @@ private:
     Texture2D whiteTex;
     bool isTexFound;
     char matDir[2048];
+    bool isScenePropertyOn;
 };

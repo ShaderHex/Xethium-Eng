@@ -89,15 +89,15 @@ static RenderTexture2D LoadRenderTextureDepthTex(int width, int height) {
 void Renderer::Init(MaterialManager& matManager) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io = &ImGui::GetIO();
+    io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     font = ImGui::GetIO().Fonts->AddFontFromFileTTF("Roboto.ttf", 18.0f);
     if (!font) {
         CloseWindow();
     }
     IM_ASSERT(font != nullptr);
     ImGui_ImplRaylib_BuildFontAtlas();
-    io.FontDefault = font;
+    io->FontDefault = font;
 
     postShader = LoadShader(0, "project/shaders/postProcessing.fs");
     if (postShader.id == 0) {
@@ -200,6 +200,7 @@ void Renderer::Init(MaterialManager& matManager) {
         sharedDefaultMat->isLoaded = true;
     }
     isTexFound = false;
+    isScenePropertyOn = false;
 }
 
 bool CheckCollisionRayBox(Ray ray, BoundingBox box) {
@@ -726,40 +727,33 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     ImGui::End();
 
+
+
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("File"))
+        {
+            if (ImGui::MenuItem("Open Scene")) { }
+            if (ImGui::MenuItem("Save Scene")) { }
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Edit"))
+        {
+            if (ImGui::MenuItem("Scene Properties")) { 
+                if (isScenePropertyOn) {
+                    isScenePropertyOn = false;
+                } else if (!isScenePropertyOn) {
+                    isScenePropertyOn = true;
+                }
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
+
+
     ImGui::Begin("Inspector");
 
-    if (ImGui::Button("Create Cube") && CanEdit) {
-        RectangleObject obj;
-        obj.position = {0.0f, 1.0f, 0.0f};
-        obj.size = {1.0f, 1.0f, 1.0f};
-        obj.UiD = GenerateUniqueUiD();
-        obj.name = "Cube" + std::to_string(CubeNumber);
-        CubeNumber++;
-    
-        obj.materialID = sharedDefaultMat->id;
-
-        rects.push_back(obj);
-        std::cout << "Created cube with name: " << obj.name << std::endl;
-    }
-
-    if (ImGui::Button("Create Sphere") && CanEdit) {
-        SphereObject obj;
-        obj.position = {0.0f, 1.0f, 0.0f};
-        obj.radius = {1};
-        obj.color = RED;
-        obj.UiD = GenerateUniqueUiD();
-        obj.name = "Sphere" + std::to_string(SphereNumber);
-        SphereNumber++;
-        sphere.push_back(obj);
-        std::cout << "Created Sphere with name: " << obj.name << std::endl;
-    }
-
-    if (ImGui::Button("Create Mesh")) {
-        MeshObject obj("project/assets/models/sponza_gltf/scene.gltf", {0,1,0});
-        obj.Load();
-        meshes.push_back(obj);
-        std::cout << "Created Mesh: " << obj.name << std::endl;
-    }
 
     if (ImGui::Button("Select Object")) ImGui::OpenPopup("Select UiD");
 
@@ -1014,10 +1008,6 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
 
     ImGui::Begin("Lights");
     
-    if (ImGui::Button("Create Light") && CanEdit) {
-        Renderer::lightSystem.CreateDefaultLight(ShadowMap);
-    }
-    
     if (ImGui::Button("Select Light")) ImGui::OpenPopup("Select Light UiD");
     
     if (ImGui::BeginPopup("Select Light UiD")) {
@@ -1132,16 +1122,65 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
         }
     }
 
-    ImGui::End();
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup) &&
+        ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+    {
+        ImGui::OpenPopup("context_menu");
+    }
 
-    ImGui::Begin("Scene Settings");
-        ImGui::Text("Skybox directory");
-        ImGui::InputText("SkyboxDir", skyboxDir, sizeof(skyboxDir));
-        if (ImGui::Button("ReloadSkybox")) {
-            skybox.Reload(skyboxDir, true);
+    if (ImGui::BeginPopup("context_menu"))
+    {
+        if (ImGui::MenuItem("Add Cube")) { 
+            RectangleObject obj;
+            obj.position = {0.0f, 1.0f, 0.0f};
+            obj.size = {1.0f, 1.0f, 1.0f};
+            obj.UiD = GenerateUniqueUiD();
+            obj.name = "Cube" + std::to_string(CubeNumber);
+            CubeNumber++;
+        
+            obj.materialID = sharedDefaultMat->id;
+
+            rects.push_back(obj);
+            std::cout << "Created cube with name: " << obj.name << std::endl;
         }
+
+        if (ImGui::MenuItem("Add Sphere")) { 
+            SphereObject obj;
+            obj.position = {0.0f, 1.0f, 0.0f};
+            obj.radius = {1};
+            obj.color = RED;
+            obj.UiD = GenerateUniqueUiD();
+            obj.name = "Sphere" + std::to_string(SphereNumber);
+            SphereNumber++;
+            sphere.push_back(obj);
+            std::cout << "Created Sphere with name: " << obj.name << std::endl;
+        }
+
+        if (ImGui::MenuItem("Add Mesh")) {
+            MeshObject obj("project/assets/models/sponza_gltf/scene.gltf", {0,1,0});
+            obj.Load();
+            meshes.push_back(obj);
+            std::cout << "Created Mesh: " << obj.name << std::endl;
+        }
+
+        if (ImGui::MenuItem("Add Light")) { 
+            Renderer::lightSystem.CreateDefaultLight(ShadowMap);
+         }
+        ImGui::EndPopup();
+    }
+    
+
     ImGui::End();
 
+    if (isScenePropertyOn) {
+        ImGui::Begin("Scene Settings");
+            ImGui::Text("Skybox directory");
+            ImGui::InputText("SkyboxDir", skyboxDir, sizeof(skyboxDir));
+            if (ImGui::Button("ReloadSkybox")) {
+                skybox.Reload(skyboxDir, true);
+            }
+        ImGui::End();
+    }
 
     g_Logger.DrawWindow();
     RenderFileManagerPanel("project/", rects, *editorCam, *playCam);
