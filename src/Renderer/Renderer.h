@@ -102,4 +102,5 @@ private:
     Image whiteImg;
     Texture2D whiteTex;
     bool isTexFound;
+    char matDir[2048];
 };

@@ -845,6 +845,16 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
                         }
                     }
 
+                    ImGui::InputText("Material Path", matDir, sizeof(matDir));
+
+                    if(ImGui::Button("Load Material")) {
+                        unsigned int matID = matManager.LoadMaterialFromFile(matDir);
+                        if (matID != 0) {
+                            rect.materialID = matID;
+                        } else {
+                            rect.materialID = 0;
+                        }
+                    }
 
                     if (ImGui::Button("Save Material")) {
                         matManager.SaveToFile(*mat);

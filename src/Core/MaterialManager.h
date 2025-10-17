@@ -28,7 +28,6 @@ public:
 
         materials[mat.id] = mat;
 
-        // Save to .mat file automatically
         SaveToFile(mat);
 
         return &materials[mat.id];
@@ -49,9 +48,9 @@ public:
         }
     }
 
-    void LoadMaterialFromFile(const std::string& filePath) {
+    unsigned int LoadMaterialFromFile(const std::string& filePath) {
         std::ifstream file(filePath);
-        if (!file.is_open()) return;
+        if (!file.is_open()) return 1;
 
         json j;
         file >> j;
@@ -76,6 +75,8 @@ public:
         mat.isLoaded = true;
 
         materials[mat.id] = mat;
+
+        return mat.id;
     }
 
     EngineMaterial* GetById(unsigned int id) {
