@@ -36,6 +36,7 @@ class Renderer {
 public:
     void Init(MaterialManager& matManager);
     void DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager);
+    void DrawSceneObjectsNoBloom(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager);
     void RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects);
     void RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager);
     void ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Camera3D*& currentCamera, Camera3D* editorCam, Camera3D* playCam, MaterialManager& matManager);

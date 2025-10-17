@@ -15,6 +15,7 @@ struct RectangleObject {
     std::string name;
     unsigned int UiD;
     unsigned int materialID;
+    bool isEmissive;
 
     RectangleObject() = default;
 

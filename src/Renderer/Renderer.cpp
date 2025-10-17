@@ -273,17 +273,156 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 
 void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager) {
     for (auto& r : rects) {
-EngineMaterial* mat = matManager.GetById(r.materialID);
+        EngineMaterial* mat = matManager.GetById(r.materialID);
 
-if (!mat || mat->albedoTexture.id == 0) {
-    cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = whiteTex;
-    DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, WHITE);
-} else {
-    cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = mat->albedoTexture;
-    DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, mat->albedoColor);
+        if (!mat || mat->albedoTexture.id == 0) {
+            cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = whiteTex;
+            DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, WHITE);
+        } else {
+            cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = mat->albedoTexture;
+            DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, mat->albedoColor);
+        }
+    }
+
+    Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
+
+    if (!ImGui::GetIO().WantCaptureMouse) {
+        for (auto& r : rects) {
+            BoundingBox box = { r.position - r.size / 2, r.position + r.size / 2 };
+            if (CheckCollisionRayBox(ray, box)) {
+                hoveredUiD = r.UiD;
+                DrawCubeWires(r.position, r.size.x, r.size.y, r.size.z, RED);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedUiD = r.UiD;
+                    Renderer::selectedLightUiD = -1;
+                }
+            }
+        }
+    }
+
+    if (Application::currentMode == MODE_EDIT && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        float closestDist = FLT_MAX;
+        for (auto& light : Renderer::lightSystem.lights) {
+            if (!light.enabled) continue;
+
+            Vector3 diff = Vector3Subtract(light.position, ray.position);
+            float t = Vector3DotProduct(diff, ray.direction);
+            Vector3 closestPoint = Vector3Add(ray.position, Vector3Scale(ray.direction, t));
+            float dist = Vector3Distance(closestPoint, light.position);
+
+            if (dist < 0.3f && t > 0) {
+                if (t < closestDist) {
+                    closestDist = t;
+                    Renderer::selectedLightUiD = light.UiD;
+                    selectedUiD = -1;
+                }
+            }
+        }
+    }
+
+    
+
+    for (auto& s : sphere) {
+        Matrix transform = MatrixTranslate(s.position.x, s.position.y, s.position.z);
+        SetShaderValueMatrix(shader, GetShaderLocation(shader, "matModel"), transform);
+
+        Matrix matNormal = MatrixTranspose(MatrixInvert(transform));
+        SetShaderValueMatrix(shader, GetShaderLocation(shader, "matNormal"), matNormal);
+
+        DrawSphere(s.position, s.radius, s.color); 
+
+        if (Application::currentMode == MODE_EDIT) {
+            Vector3 half = { s.radius, s.radius, s.radius };
+            BoundingBox box = {
+                Vector3Subtract(s.position, half),
+                Vector3Add(s.position, half)
+            };
+
+            if (CheckCollisionRayBox(ray, box)) {
+                hoveredUiD = s.UiD;
+                DrawSphereWires(s.position, s.radius, 16, 16, YELLOW);
+
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    selectedUiD = s.UiD;
+                    Renderer::selectedLightUiD = -1;
+                }
+            }
+
+            if (selectedUiD == s.UiD) {
+                DrawSphereWires(s.position, s.radius, 16, 16, WHITE);
+            }
+        }
+    }
+
+    for (auto& m : meshes) {
+            if (!m.isLoaded) m.Load();
+
+            Matrix transform = MatrixIdentity();
+            transform = MatrixMultiply(transform, MatrixRotateXYZ(Vector3{
+                DEG2RAD * m.rotation.x,
+                DEG2RAD * m.rotation.y,
+                DEG2RAD * m.rotation.z
+            }));
+            transform = MatrixMultiply(transform, MatrixScale(m.scale.x, m.scale.y, m.scale.z));
+            transform = MatrixMultiply(transform, MatrixTranslate(m.position.x, m.position.y, m.position.z));
+
+            DrawModel(m.model, m.position, 1.0, m.color);
+
+            DrawSphere(m.position, 0.05f, RED);
+
+            if (Application::currentMode == MODE_EDIT) {
+                BoundingBox box = GetModelBoundingBox(m.model);
+                BoundingBox transformedBox = {
+                    Vector3Add(box.min, m.position),
+                    Vector3Add(box.max, m.position)
+                };
+                
+                Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
+                if (CheckCollisionRayBox(ray, transformedBox)) {
+                    DrawBoundingBox(transformedBox, YELLOW);
+                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        selectedUiD = m.UiD;
+                    }
+                }
+
+                if (selectedUiD == m.UiD) {
+                    static Transform gizmoTransform = GizmoIdentity();
+                    gizmoTransform.translation = m.position;
+
+                    gizmoTransform.rotation = QuaternionFromEuler(
+                        DEG2RAD * m.rotation.x,
+                        DEG2RAD * m.rotation.y,
+                        DEG2RAD * m.rotation.z
+                    );
+
+                    gizmoTransform.scale = m.scale;
+
+                    DrawGizmo3D(GIZMO_TRANSLATE |  GIZMO_SCALE, &gizmoTransform);
+
+                    m.position = gizmoTransform.translation;
+
+                    Vector3 euler = QuaternionToEuler(gizmoTransform.rotation);
+                    m.rotation = Vector3Scale(euler, RAD2DEG);
+
+                    m.scale = gizmoTransform.scale;
+                }
+
+            }
+    }
 }
 
+void Renderer::DrawSceneObjectsNoBloom(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager) {
+    for (auto& r : rects) {
+        EngineMaterial* mat = matManager.GetById(r.materialID);
 
+        if (!mat || mat->albedoTexture.id == 0) {
+            cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = whiteTex;
+            DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, WHITE);
+        } else {
+            cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = mat->albedoTexture;
+            DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, mat->albedoColor);
+        }
     }
 
     Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
@@ -414,7 +553,6 @@ for (auto& m : meshes) {
     }
 }
 
-
 void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects) {
     lightCam = {0};
     
@@ -473,6 +611,26 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
 
     //SetShaderValue(bloomShader, bloomSampleUniformLoc, "100.0", SHADER_UNIFORM_FLOAT);
     
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+        BeginMode3D(currentCamera);
+        rlDisableDepthTest();
+        
+        skybox.Draw(currentCamera);
+        rlEnableDepthTest();
+        
+        DrawEngineGrid();
+        DrawSceneObjects(currentCamera, rects, matManager);
+                DrawTextureRec(
+                    sceneTarget.texture,
+                    Rectangle{ 0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height },
+                    Vector2{ 0, 0 },
+                    WHITE
+                );
+
+            EndMode3D();
+    EndTextureMode();
+
     BeginTextureMode(ShadowMap);
             ClearBackground(WHITE);
             
@@ -490,9 +648,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
             EndMode3D();
             BeginTextureMode(sceneTarget);
             ClearBackground(BLACK);
-            rlDisableDepthTest();
-            skybox.Draw(currentCamera);
-            rlEnableDepthTest();
     SetShaderValueMatrix(shadowShader, lightVPLoc, lightViewProj);
     rlEnableShader(shadowShader.id);
     
@@ -501,7 +656,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     rlSetUniform(shadowMapLoc, &textureActiveSlot, SHADER_UNIFORM_INT, 1);
     BeginMode3D(currentCamera);
 
-        DrawEngineGrid();
 
         if (shader.id != 0) {
             BeginShaderMode(shader);
@@ -588,24 +742,6 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
         }
 
         EndMode3D();
-    EndTextureMode();
-
-    BeginTextureMode(target);
-        ClearBackground(BLACK);
-            BeginMode3D(currentCamera);
-                rlDisableDepthTest();
-                
-                skybox.Draw(currentCamera);
-                rlEnableDepthTest();
-
-                DrawTextureRec(
-                    sceneTarget.texture,
-                    Rectangle{ 0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height },
-                    Vector2{ 0, 0 },
-                    WHITE
-                );
-
-            EndMode3D();
     EndTextureMode();
 
     BeginTextureMode(bloomTarget);
