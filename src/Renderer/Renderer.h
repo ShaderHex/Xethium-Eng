@@ -106,4 +106,5 @@ private:
     bool isTexFound;
     char matDir[2048];
     bool isScenePropertyOn;
+    std::vector<RectangleObject> normalCubeObjects;
 };

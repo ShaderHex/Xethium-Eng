@@ -9,6 +9,7 @@ struct MeshObject {
     unsigned int UiD;
     std::string name;
     std::string modelPath;
+    bool enableBloom = false;
     Model model{};
     bool isLoaded = false;
 

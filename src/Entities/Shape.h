@@ -8,6 +8,7 @@ public:
     std::string name;
     Vector2 position;
     Color color;
+    bool enableBloom = false;
     virtual void Draw() const = 0;
     virtual ~Shape() {}
 };

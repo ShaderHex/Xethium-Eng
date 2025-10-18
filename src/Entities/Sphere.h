@@ -10,4 +10,5 @@ struct SphereObject {
     Vector3 position;
     float radius;
     Color color;    
+    bool enableBloom = false;
 };

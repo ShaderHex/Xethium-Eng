@@ -273,8 +273,9 @@ void RenderFileManagerPanel(const std::string& projectDir, std::vector<Rectangle
 
 void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager) {
     for (auto& r : rects) {
-        EngineMaterial* mat = matManager.GetById(r.materialID);
+        if (!r.enableBloom) continue;
 
+        EngineMaterial* mat = matManager.GetById(r.materialID);
         if (!mat || mat->albedoTexture.id == 0) {
             cube.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = whiteTex;
             DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, WHITE);
@@ -283,6 +284,7 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
             DrawModelEx(cube, r.position, Vector3{0,1,0}, 0.0f, r.size, mat->albedoColor);
         }
     }
+
 
     Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
 
@@ -413,6 +415,16 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
 }
 
 void Renderer::DrawSceneObjectsNoBloom(Camera3D& currentCamera, std::vector<RectangleObject>& rects, MaterialManager& matManager) {
+
+    BeginTextureMode(target);
+        ClearBackground(BLACK);
+        BeginMode3D(currentCamera);
+        rlDisableDepthTest();
+        
+        skybox.Draw(currentCamera);
+        rlEnableDepthTest();
+        
+        DrawEngineGrid();
     for (auto& r : rects) {
         EngineMaterial* mat = matManager.GetById(r.materialID);
 
@@ -551,6 +563,15 @@ for (auto& m : meshes) {
 
         }
     }
+                DrawTextureRec(
+                    sceneTarget.texture,
+                    Rectangle{ 0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height },
+                    Vector2{ 0, 0 },
+                    WHITE
+                );
+
+            EndMode3D();
+    EndTextureMode();
 }
 
 void Renderer::RenderShadowPass(const LightEntity& light, std::vector<RectangleObject>& rects) {
@@ -609,28 +630,11 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     lightProj = MatrixOrtho(-150, 150, -150, 150, 1.0f, 400.0f);
     lightViewProj = MatrixMultiply(lightProj, lightView);
 
-    //SetShaderValue(bloomShader, bloomSampleUniformLoc, "100.0", SHADER_UNIFORM_FLOAT);
+    SetShaderValue(bloomShader, bloomSampleUniformLoc, "100.0", SHADER_UNIFORM_FLOAT);
     
-    BeginTextureMode(target);
-        ClearBackground(BLACK);
-        BeginMode3D(currentCamera);
-        rlDisableDepthTest();
-        
-        skybox.Draw(currentCamera);
-        rlEnableDepthTest();
-        
-        DrawEngineGrid();
-        DrawSceneObjects(currentCamera, rects, matManager);
-                DrawTextureRec(
-                    sceneTarget.texture,
-                    Rectangle{ 0, 0, (float)sceneTarget.texture.width, -(float)sceneTarget.texture.height },
-                    Vector2{ 0, 0 },
-                    WHITE
-                );
-
-            EndMode3D();
-    EndTextureMode();
-
+    
+    
+    DrawSceneObjectsNoBloom(currentCamera, rects, matManager);
     BeginTextureMode(ShadowMap);
             ClearBackground(WHITE);
             
@@ -672,7 +676,12 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 SetShaderValueMatrix(shader, lightVPLoc, lightVP);
             }
 
-            DrawSceneObjects(currentCamera, rects, matManager);
+            for (auto& r : rects) {
+                if (r.enableBloom) {
+                    DrawSceneObjects(currentCamera, rects, matManager);
+                }
+            }
+
 
             Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
             hoveredUiD = -1;
@@ -916,6 +925,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
                 ImGui::Text("Modify Object: %d", rect.UiD);
                 ImGui::DragFloat3("Position", &rect.position.x);
                 ImGui::DragFloat3("Size", &rect.size.x);
+                ImGui::Checkbox("Emisive", &rect.enableBloom);
             }
 
             if (ImGui::CollapsingHeader("Material")) {
