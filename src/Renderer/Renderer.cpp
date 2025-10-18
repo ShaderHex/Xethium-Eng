@@ -359,6 +359,7 @@ void Renderer::DrawSceneObjects(Camera3D& currentCamera, std::vector<RectangleOb
 
     for (auto& m : meshes) {
             if (!m.isLoaded) m.Load();
+            if (!m.enableBloom) continue;
 
             Matrix transform = MatrixIdentity();
             transform = MatrixMultiply(transform, MatrixRotateXYZ(Vector3{
@@ -630,9 +631,7 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
     lightProj = MatrixOrtho(-150, 150, -150, 150, 1.0f, 400.0f);
     lightViewProj = MatrixMultiply(lightProj, lightView);
 
-    SetShaderValue(bloomShader, bloomSampleUniformLoc, "100.0", SHADER_UNIFORM_FLOAT);
-    
-    
+    //SetShaderValue(bloomShader, bloomSampleUniformLoc, "100.0", SHADER_UNIFORM_FLOAT);
     
     DrawSceneObjectsNoBloom(currentCamera, rects, matManager);
     BeginTextureMode(ShadowMap);
@@ -675,13 +674,8 @@ void Renderer::RenderFrame(Camera3D& currentCamera, std::vector<RectangleObject>
                 int lightVPLoc = GetShaderLocation(shader, "lightVP");
                 SetShaderValueMatrix(shader, lightVPLoc, lightVP);
             }
-
-            for (auto& r : rects) {
-                if (r.enableBloom) {
-                    DrawSceneObjects(currentCamera, rects, matManager);
-                }
-            }
-
+                       
+            DrawSceneObjects(currentCamera, rects, matManager);
 
             Ray ray = GetMouseRay(GetMousePosition(), currentCamera);
             hoveredUiD = -1;
@@ -1082,6 +1076,7 @@ void Renderer::ImGuiRender(bool CanEdit, std::vector<RectangleObject>& rects, Ca
             }
 
             if (ImGui::Button("Reload Model")) m.Reload();
+            ImGui::Checkbox("Emisive", &m.enableBloom);
         }
     }
 

@@ -9,9 +9,9 @@ struct MeshObject {
     unsigned int UiD;
     std::string name;
     std::string modelPath;
-    bool enableBloom = false;
     Model model{};
     bool isLoaded = false;
+    bool enableBloom = false;
 
     Vector3 position{0,0,0};
     Vector3 rotation{0,0,0};
