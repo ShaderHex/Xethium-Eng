@@ -1,0 +1,1 @@
+g++ src/main.cpp -L../build -lengine -I../engine/include -o ../build/testbed -Wl,-rpath,'$ORIGIN'
