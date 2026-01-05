@@ -24,10 +24,17 @@ g++ -std=c++20 -c src/platform.cpp \
     -Wall -fPIC \
     -o ../build/platform.o
 
+g++ -std=c++20 -c src/renderer.cpp \
+    -Iheaders \
+    $GLAD_INC \
+    -Wall -fPIC \
+    -o ../build/renderer.o
+
 g++ -shared \
     -o ../build/libengine.so \
     ../build/engine.o \
     ../build/platform.o \
+    ../build/renderer.o \
     ../build/glad.o \
     -lglfw -lGL
 
