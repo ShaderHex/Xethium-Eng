@@ -6,6 +6,8 @@ echo "Building the engine..."
 
 GLAD_INC="-I../vendor/glad/include"
 
+cp -r src/shaders ../build/
+
 gcc -c ../vendor/glad/src/glad.c \
     $GLAD_INC \
     -fPIC \
@@ -30,12 +32,20 @@ g++ -std=c++20 -c src/renderer.cpp \
     -Wall -fPIC \
     -o ../build/renderer.o
 
+g++ -std=c++20 -c src/shader.cpp \
+    -Iheaders \
+    $GLAD_INC \
+    -Wall -fPIC \
+    -o ../build/shader.o
+
+
 g++ -shared \
     -o ../build/libengine.so \
     ../build/engine.o \
     ../build/platform.o \
     ../build/renderer.o \
     ../build/glad.o \
+    ../build/shader.o \
     -lglfw -lGL
 
 

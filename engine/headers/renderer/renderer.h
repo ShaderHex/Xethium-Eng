@@ -1,3 +1,5 @@
+#pragma once
+#include "shader/shader.h"
 
 namespace Renderer {
 
@@ -9,6 +11,7 @@ public:
 private:
     unsigned int shaderProgram;
     unsigned int VBO, VAO;
+    Shader::Shader* defaultShader;
 };
 
 }
