@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Compiling testbed..."
 
 BUILD_DIR="../build"
 mkdir -p $BUILD_DIR
@@ -18,3 +19,4 @@ OUT="$BUILD_DIR/testbed"
 RPATH="-Wl,-rpath,\$ORIGIN"
 
 $CXX $CXXFLAGS $SRC $GLAD_SRC $INCLUDES $ENGINE_LIB $LIBS -o $OUT $RPATH
+echo "Done compiling testbed!"

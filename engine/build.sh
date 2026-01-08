@@ -6,6 +6,8 @@ echo "Building the engine..."
 
 GLAD_INC="-I../vendor/glad/include"
 
+STB_INC="-I../vendor/stb_image/include/"
+
 cp -r src/shaders ../build/
 
 gcc -c ../vendor/glad/src/glad.c \
@@ -17,6 +19,7 @@ g++ -std=c++20 -c src/engine.cpp \
     -Iinclude \
     -Iheaders \
     $GLAD_INC \
+    $STB_INC \
     -Wall \
     -fPIC \
     -o ../build/engine.o
@@ -29,6 +32,7 @@ g++ -std=c++20 -c src/platform.cpp \
 g++ -std=c++20 -c src/renderer.cpp \
     -Iheaders \
     $GLAD_INC \
+    $STB_INC \
     -Wall -fPIC \
     -o ../build/renderer.o
 
@@ -38,6 +42,18 @@ g++ -std=c++20 -c src/shader.cpp \
     -Wall -fPIC \
     -o ../build/shader.o
 
+g++ -std=c++20 -c ../vendor/stb_image/stb_image.cpp \
+    $STB_INC \
+    -fPIC \
+    -o ../build/stb_image.o
+
+g++ -std=c++20 -c src/texture.cpp \
+    -Iheaders \
+    $GLAD_INC \
+    $STB_INC \
+    -fPIC \
+    -o ../build/texture.o
+
 
 g++ -shared \
     -o ../build/libengine.so \
@@ -46,6 +62,8 @@ g++ -shared \
     ../build/renderer.o \
     ../build/glad.o \
     ../build/shader.o \
+    ../build/stb_image.o \
+    ../build/texture.o \
     -lglfw -lGL
 
 
