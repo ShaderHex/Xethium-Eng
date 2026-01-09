@@ -1,6 +1,9 @@
 #include "renderer/renderer.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
 #include <iostream>
 #include <fstream>
@@ -59,17 +62,26 @@ void Renderer::Init() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
-    m_texture = new Texture::Texture("krik.jpg");
+    m_texture = new Texture::Texture("wall.jpg");
     std::cout << "Loaded!\n";
     m_texture->Bind();
-}
+    
+    m_DefaultShader->use();
+    m_DefaultShader->setInt("texture2", 1);
+
+    }
 
 void Renderer::StartDrawing() {
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.29, 0.30, 0.41, 1);
     glfwPollEvents();
     m_DefaultShader->use();
-    m_DefaultShader->setInt("texture2", 1);
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+    trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+    unsigned int transformLoc = glGetUniformLocation(m_DefaultShader->ID, "transform");
+
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
     glUniform1i(glGetUniformLocation(m_DefaultShader->ID, "texture1"), 0);
     glBindVertexArray(VAO);
 }

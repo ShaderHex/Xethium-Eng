@@ -8,6 +8,8 @@ GLAD_INC="-I../vendor/glad/include"
 
 STB_INC="-I../vendor/stb_image/include/"
 
+GLM_INC="-I../vendor/glm/"
+
 cp -r src/shaders ../build/
 
 gcc -c ../vendor/glad/src/glad.c \
@@ -20,6 +22,7 @@ g++ -std=c++20 -c src/engine.cpp \
     -Iheaders \
     $GLAD_INC \
     $STB_INC \
+    $GLM_INC \
     -Wall \
     -fPIC \
     -o ../build/engine.o
