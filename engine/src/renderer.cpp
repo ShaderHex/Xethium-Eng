@@ -5,6 +5,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "stb_image.h"
+#include "platform/platform.h"
 #include <iostream>
 #include <fstream>
 
@@ -118,17 +119,29 @@ void Renderer::Init() {
     //#################################################
     // CAMERA
     //#################################################
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
     
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
     glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-    glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-    
+    cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+    cameraUp = glm::cross(cameraDirection, cameraRight);
     
     
     glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::processInput() {
+    const float cameraSpeed = 0.05f;
+    if(glfwGetKey(Platform::GetNativeWindow(), GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if(glfwGetKey(Platform::GetNativeWindow(), GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if(glfwGetKey(Platform::GetNativeWindow(), GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if(glfwGetKey(Platform::GetNativeWindow(), GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
 void Renderer::StartDrawing() {
@@ -153,9 +166,7 @@ void Renderer::StartDrawing() {
     const float radius = 10.0f;
     float camX = sin(glfwGetTime()) * radius;
     float camZ = cos(glfwGetTime()) * radius;
-    view = glm::lookAt(glm::vec3(camX, 0.0f, camZ),
-                       glm::vec3(0.0f, 0.0f, 0.0f),
-                       glm::vec3(0.0f, 1.0f, 0.0f));
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     int viewLoc = glGetUniformLocation(m_DefaultShader->ID, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 

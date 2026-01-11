@@ -23,6 +23,7 @@ namespace XENGINE {
     }
     
     void StartDrawing() {
+        renderer.processInput();
         renderer.StartDrawing();
     }
     
