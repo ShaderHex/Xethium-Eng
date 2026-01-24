@@ -57,6 +57,12 @@ g++ -std=c++20 -c src/texture.cpp \
     -fPIC \
     -o ../build/texture.o
 
+g++ -std=c++20 -c src/meshFactory.cpp \
+    -Iheaders \
+    $GLAD_INC \
+    $STB_INC \
+    -fPIC \
+    -o ../build/meshFactory.o
 
 g++ -shared \
     -o ../build/libengine.so \
@@ -67,6 +73,7 @@ g++ -shared \
     ../build/shader.o \
     ../build/stb_image.o \
     ../build/texture.o \
+    ../build/meshFactory.o \
     -lglfw -lGL
 
 
