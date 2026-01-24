@@ -64,6 +64,13 @@ g++ -std=c++20 -c src/meshFactory.cpp \
     -fPIC \
     -o ../build/meshFactory.o
 
+g++ -std=c++20 -c src/gameObject.cpp \
+    -Iheaders \
+    $GLAD_INC \
+    $STB_INC \
+    -fPIC \
+    -o ../build/gameObject.o
+
 g++ -shared \
     -o ../build/libengine.so \
     ../build/engine.o \
@@ -74,6 +81,7 @@ g++ -shared \
     ../build/stb_image.o \
     ../build/texture.o \
     ../build/meshFactory.o \
+    ../build/gameObject.o \
     -lglfw -lGL
 
 

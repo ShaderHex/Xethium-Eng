@@ -1,6 +1,7 @@
 #pragma once
 #include "shader/shader.h"
 #include "texture/texture.h"
+#include "gameObject/gameObject.h"
 
 namespace Renderer {
 
@@ -18,6 +19,7 @@ private:
     glm::vec3 cameraPos;
     glm::vec3 cameraFront;
     glm::vec3 cameraUp;
+    GameObject::GameObject gameObject;
 };
 
 }
