@@ -18,7 +18,7 @@ xcopy /E /I /Y src\shaders ..\build\shaders
 REM Compile each source file
 g++ -c ..\vendor\glad\src\glad.c %GLAD_INC% -o ..\build\glad.o
 
-g++ -std=c++20 -c src\engine.cpp -Iinclude -Iheaders %GLAD_INC% %GLFW_INC% %STB_INC% %GLM_INC% -Wall -o ..\build\engine.o
+g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\engine.cpp -Iinclude -Iheaders %GLAD_INC% %GLFW_INC% %STB_INC% %GLM_INC% -Wall -o ..\build\engine.o
 g++ -std=c++20 -c src\platform.cpp -Iheaders %GLFW_INC% -Wall -o ..\build\platform.o
 g++ -std=c++20 -c src\renderer.cpp -Iheaders %GLFW_INC% %GLAD_INC% %STB_INC% %GLM_INC% -Wall -o ..\build\renderer.o
 g++ -std=c++20 -c src\shader.cpp -Iheaders %GLAD_INC% %GLM_INC% -Wall -o ..\build\shader.o
@@ -38,7 +38,9 @@ g++ -shared -o ..\build\engine.dll ^
     ..\build\texture.o ^
     ..\build\meshFactory.o ^
     ..\build\gameObject.o ^
-    -L..\vendor\glfw/lib\ -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 -lkernel32 -g
+    -L..\vendor\glfw/lib\ ^
+    -Wl,--out-implib,..\build\engine.lib ^
+    -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 -lkernel32 -g
 
 echo Engine build complete: ..\build\engine.dll
 pause

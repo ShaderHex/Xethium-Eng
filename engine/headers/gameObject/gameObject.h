@@ -12,7 +12,7 @@ public:
         Transform::Transform transform;
         Mesh::Mesh* mesh;
     };
-    void CreateCube();
+    void CreateCube(float x, float y, float z);
     void Render(Shader::Shader* shader);
 
 private:

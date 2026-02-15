@@ -42,7 +42,7 @@ void Renderer::Init() {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD\n";
     }
-    m_DefaultShader = new Shader::Shader("shaders/vertex.vs", "shaders/fragment.fs");
+    //m_DefaultShader = new Shader::Shader("shaders/vertex.vs", "shaders/fragment.fs");
     std::cout << "CREATED VBO, VAO, EBO VARIABLES" <<std::endl;
     //glGenBuffers(1, &EBO);
 
@@ -55,8 +55,8 @@ void Renderer::Init() {
     std::cout << "Loaded!\n";
     m_texture->Bind();
     
-    m_DefaultShader->use();
-    m_DefaultShader->setInt("texture1", 1);
+    //m_DefaultShader->use();
+    //m_DefaultShader->setInt("texture1", 1);
 
     //#################################################
     // CAMERA
@@ -72,6 +72,8 @@ void Renderer::Init() {
     
     
     glEnable(GL_DEPTH_TEST);
+    //gameObject.CreateCube(5.0f, 0.0f, 0.0f);
+    //gameObject.CreateCube(10.0f, 0.0f, 0.0f);
 }
 
 void Renderer::processInput() {
@@ -86,27 +88,26 @@ void Renderer::processInput() {
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
-void Renderer::StartDrawing() {
+void Renderer::StartDrawing(void* Shader) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glClearColor(0.0, 0.0, 0.0, 1);
     glfwPollEvents();
-    m_DefaultShader->use();
+    // m_DefaultShader->use();
     
     glm::mat4 view;
     view = glm::mat4(1.0f);
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    int viewLoc = glGetUniformLocation(m_DefaultShader->ID, "view");
+    int viewLoc = glGetUniformLocation(static_cast<Shader::Shader*>(Shader)->ID, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    int projectionLoc = glGetUniformLocation(m_DefaultShader->ID, "projection");
+    int projectionLoc = glGetUniformLocation(static_cast<Shader::Shader*>(Shader)->ID, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    glUniform1i(glGetUniformLocation(m_DefaultShader->ID, "texture1"), 0);
+    glUniform1i(glGetUniformLocation(static_cast<Shader::Shader*>(Shader)->ID, "texture1"), 0);
 
-    gameObject.CreateCube();
-    gameObject.Render(m_DefaultShader);
+    gameObject.Render(static_cast<Shader::Shader*>(Shader));
 }
 
 }
