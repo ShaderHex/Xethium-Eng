@@ -9,17 +9,17 @@ class Renderer {
 
 public:  
     void Init();
-    void StartDrawing();
+    void StartDrawing(void* Shader);
     void processInput();
+    GameObject::GameObject gameObject;
 private:
     unsigned int shaderProgram;
     unsigned int VBO, VAO, EBO;
-    Shader::Shader* m_DefaultShader;
     Texture::Texture* m_texture;
     glm::vec3 cameraPos;
     glm::vec3 cameraFront;
     glm::vec3 cameraUp;
-    GameObject::GameObject gameObject;
+    
 };
 
 }

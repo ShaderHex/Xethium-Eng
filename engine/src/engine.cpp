@@ -10,10 +10,10 @@ GLFWwindow* window;
 Renderer::Renderer renderer;
 
 namespace XENGINE {
-    
-    void Init() {
+    // Platform
+    void Init(const char *title, int windowX, int windowY) {
 
-        Platform::CreateWindow("Test", 1200, 800);
+        Platform::CreateWindow(title, windowX, windowY);
         renderer.Init();
 
     }
@@ -22,9 +22,9 @@ namespace XENGINE {
         return Platform::WindowShouldClose();
     }
     
-    void StartDrawing() {
+    void StartDrawing(void* Shader) {
         renderer.processInput();
-        renderer.StartDrawing();
+        renderer.StartDrawing(Shader);
     }
     
     void EndDrawing() {
@@ -33,5 +33,19 @@ namespace XENGINE {
     
     void CloseWindow() {
         glfwDestroyWindow(window);
+    }
+
+    // Shader
+    void* CreateShader(const char* vertexPath, const char* fragmentPath) {
+        return new Shader::Shader(vertexPath, fragmentPath);
+    }
+
+    void useShader(void* shader) {
+        static_cast<Shader::Shader*>(shader)->use();
+    }
+
+    // Game Object
+    void CreateCube(float x, float y, float z) {
+        renderer.gameObject.CreateCube(x, y, z);
     }
 }
