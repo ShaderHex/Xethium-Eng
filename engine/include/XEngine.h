@@ -1,5 +1,6 @@
 #pragma once
 #include "defines.h"
+#include "../headers/gameObject/color.h"
 
 namespace XENGINE {
     // Platform
@@ -14,5 +15,5 @@ namespace XENGINE {
     XAPI void useShader(void* shader);
 
     // Game Object
-    XAPI void CreateCube(float x, float y, float z);
+    XAPI void CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color);
 }

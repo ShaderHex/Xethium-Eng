@@ -1,12 +1,14 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "gameObject/color.h"
 
 namespace Transform {
 struct Transform {
     glm::vec3 position {0.0f};
     glm::vec3 rotation {0.0f};
     glm::vec3 scale    {1.0f};
+    Color color;
     glm::mat4 GetMatrix() const {
         glm::mat4 m(1.0f);
         m = glm::translate(m, position);
