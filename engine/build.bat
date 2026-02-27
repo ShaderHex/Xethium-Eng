@@ -1,4 +1,4 @@
-ECHO @OFF
+@echo off
 REM Build script for Windows using MinGW
 
 REM Create build directory

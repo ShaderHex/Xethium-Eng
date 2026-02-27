@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/glm.hpp"
+#include "gameObject/color.h"
 #include <string>
 
 namespace Shader {
@@ -16,6 +17,7 @@ public:
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
     void setMat4(const std::string &name, const glm::mat4 &mat);
+    void setVec3(const std::string &name, const Color &color);
 };
 
 }

@@ -45,7 +45,7 @@ namespace XENGINE {
     }
 
     // Game Object
-    void CreateCube(float x, float y, float z) {
-        renderer.gameObject.CreateCube(x, y, z);
+    void CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
+        renderer.gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color);
     }
 }
