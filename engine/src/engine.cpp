@@ -22,9 +22,9 @@ namespace XENGINE {
         return Platform::WindowShouldClose();
     }
     
-    void StartDrawing(void* Shader) {
+    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
         renderer.processInput();
-        renderer.StartDrawing(Shader);
+        renderer.StartDrawing(Shader, camera);
     }
     
     void EndDrawing() {
@@ -36,7 +36,7 @@ namespace XENGINE {
     }
 
     // Shader
-    void* CreateShader(const char* vertexPath, const char* fragmentPath) {
+    Shader::Shader* CreateShader(const char* vertexPath, const char* fragmentPath) {
         return new Shader::Shader(vertexPath, fragmentPath);
     }
 
@@ -48,4 +48,11 @@ namespace XENGINE {
     void CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
         renderer.gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color);
     }
-}
+
+    // Camera
+    Camera::Camera CreateCamera() {
+        Camera::Camera camera;
+        
+        return camera;
+    }
+} 

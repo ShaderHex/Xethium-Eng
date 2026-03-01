@@ -32,9 +32,9 @@ void GameObject::Render(Shader::Shader* shader) {
             model = glm::rotate(model, glm::radians(obj.transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
             model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
+            
             shader->use();
             shader->setVec3("objectColor", {obj.transform.color});
-            
             shader->setMat4("model", model);
 
             glBindVertexArray(obj.mesh->VAO);

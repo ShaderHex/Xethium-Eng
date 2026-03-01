@@ -26,6 +26,8 @@ g++ -std=c++20 -c ..\vendor\stb_image\stb_image.cpp %STB_INC% -o ..\build\stb_im
 g++ -std=c++20 -c src\texture.cpp -Iheaders %GLAD_INC% %STB_INC% -o ..\build\texture.o
 g++ -std=c++20 -c src\meshFactory.cpp -Iheaders %GLAD_INC% %STB_INC% -o ..\build\meshFactory.o
 g++ -std=c++20 -c src\gameObject.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% -o ..\build\gameObject.o
+g++ -std=c++20 -c src\camera.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% -o ..\build\camera.o
+
 
 REM Link into a DLL
 g++ -shared -o ..\build\engine.dll ^
@@ -38,9 +40,9 @@ g++ -shared -o ..\build\engine.dll ^
     ..\build\texture.o ^
     ..\build\meshFactory.o ^
     ..\build\gameObject.o ^
+    ..\build\camera.o ^
     -L..\vendor\glfw/lib\ ^
     -Wl,--out-implib,..\build\engine.lib ^
     -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 -lkernel32 -g
 
 echo Engine build complete: ..\build\engine.dll
-pause
