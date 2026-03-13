@@ -12,13 +12,13 @@ int main() {
     XENGINE::CreateCube(0, 1, 0, 0, 0, 0, 10, 1, 1, {255, 255, 255});
     auto camera = XENGINE::CreateCamera();
 
-    camera.position = {0.0f, 0.0f, 25.0f};
     float cameraPosSpeed = 0.05f;
     while (!XENGINE::WindowShouldClose()) {
+        //camera.position.z += cameraPosSpeed;
 
         XENGINE::StartDrawing(shader, camera);
 
-        XENGINE::useShader(shader);
+        //XENGINE::useShader(shader);
         
         XENGINE::EndDrawing();
     }
