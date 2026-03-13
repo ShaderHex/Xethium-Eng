@@ -21,6 +21,8 @@ void CreateWindow(const char* title, int width, int height) {
     }
     
     glfwMakeContextCurrent(s_Window);
+
+    glfwSwapInterval(0);
 }
 
 bool WindowShouldClose() {
