@@ -3,6 +3,8 @@
 #include "../headers/gameObject/color.h"
 #include "../headers/camera/camera.h"
 #include "../headers/shader/shader.h"
+#include "../headers/platform/platform.h"
+#include "../headers/input/input.h"
 
 
 namespace XENGINE {
@@ -12,6 +14,7 @@ namespace XENGINE {
     XAPI void StartDrawing(Shader::Shader* Shader, Camera::Camera Camera);
     XAPI void EndDrawing();
     XAPI void CloseWindow();
+    XAPI float GetDeltaTime();
     
     // Shader
     XAPI Shader::Shader* CreateShader(const char* vertexPath, const char* fragmentPath);
@@ -22,4 +25,10 @@ namespace XENGINE {
 
     // Camera
     XAPI Camera::Camera CreateCamera();
+
+    // Input
+    XAPI bool IsActionPressed(std::string action);
+    XAPI bool IsActionReleased(std::string action);
+    XAPI bool IsActionHeld(std::string action);
+    XAPI void CreateAction(std::string action, int key);
 }

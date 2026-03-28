@@ -3,6 +3,8 @@
 #include <iostream>
 
 static GLFWwindow* s_Window = nullptr;
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 namespace Platform {
 
@@ -39,6 +41,14 @@ void SwapBuffers() {
 
 GLFWwindow* GetNativeWindow() {
     return s_Window;
+}
+
+float GetDeltaTime() {
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    return deltaTime;
 }
 
 void Shutdown() {

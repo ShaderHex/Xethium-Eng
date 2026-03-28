@@ -14,11 +14,11 @@ public:
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera);
     void processInput();
     GameObject::GameObject gameObject;
+    
 private:
     unsigned int shaderProgram;
     unsigned int VBO, VAO, EBO;
     Texture::Texture* m_texture;
-    Platform::Input input;
     // glm::vec3 cameraPos;
     // glm::vec3 cameraFront;
     // glm::vec3 cameraUp;

@@ -1,7 +1,6 @@
 #include "XEngine.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-#include "platform/platform.h"
 #include "renderer/renderer.h"
 #include <iostream>
 
@@ -10,6 +9,8 @@ GLFWwindow* window;
 Renderer::Renderer renderer;
 
 namespace XENGINE {
+    Platform::Input input;
+
     // Platform
     void Init(const char *title, int windowX, int windowY) {
 
@@ -25,6 +26,7 @@ namespace XENGINE {
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
         renderer.processInput();
         renderer.StartDrawing(Shader, camera);
+        input.Update();
     }
     
     void EndDrawing() {
@@ -33,6 +35,10 @@ namespace XENGINE {
     
     void CloseWindow() {
         glfwDestroyWindow(window);
+    }
+
+    float GetDeltaTime() {
+        return Platform::GetDeltaTime();
     }
 
     // Shader
@@ -54,5 +60,22 @@ namespace XENGINE {
         Camera::Camera camera;
         
         return camera;
+    }
+
+    // Input
+    bool IsActionPressed(std::string action) {
+        return input.IsActionPressed(action);
+    }
+
+    bool IsActionReleased(std::string action) {
+       return input.IsActionReleased(action);
+    }
+
+    bool IsActionHeld(std::string action) {
+       return input.IsActionHeld(action);
+    }
+
+    void CreateAction(std::string action, int key) {
+        input.CreateAction(action, key);
     }
 } 
