@@ -5,6 +5,7 @@
 #include "../headers/shader/shader.h"
 #include "../headers/platform/platform.h"
 #include "../headers/input/input.h"
+#include "../headers/gameObject/gameObject.h"
 
 
 namespace XENGINE {
@@ -21,7 +22,7 @@ namespace XENGINE {
     XAPI void useShader(void* shader);
 
     // Game Object
-    XAPI void CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color);
+    XAPI GameObject::GameObject CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath);
 
     // Camera
     XAPI Camera::Camera CreateCamera();

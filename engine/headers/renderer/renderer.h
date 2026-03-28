@@ -11,10 +11,9 @@ class Renderer {
 
 public:  
     void Init();
-    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera);
+    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject);
     void processInput();
-    GameObject::GameObject gameObject;
-    
+    void ClearScreen();
 private:
     unsigned int shaderProgram;
     unsigned int VBO, VAO, EBO;
