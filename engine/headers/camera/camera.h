@@ -7,9 +7,11 @@ namespace Camera {
 class Camera {
 public:
     glm::vec3 position = {0.0f, 0.0f, 5.0f};
-    glm::vec3 target = {0.0f, 0.0f, 0.0f};
+    glm::vec3 front = {0.0f, 0.0f, -1.0f};
     glm::vec3 up = {0.0f, 1.0f, 0.0f};
-
+    
+    float yaw = -90.0f;
+    float pitch = 0.0f;
     float fov = 70.0f;
     float nearPlane = 0.1f;
     float farPlane = 100.0f;
@@ -17,6 +19,7 @@ public:
     glm::mat4 GetViewMatrix();
     glm::mat4 GetProjectionMatrix(float aspect);
 
+    void UpdateVectors();
 }; 
 
 }

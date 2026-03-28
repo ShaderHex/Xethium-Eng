@@ -37,23 +37,15 @@ void Renderer::Init() {
     //m_DefaultShader->setInt("texture1", 1);
     
     glEnable(GL_DEPTH_TEST);
-    
-    input.CreateAction("hi", X_KEY_W);
-    input.CreateAction("bye", X_KEY_S);
+
 }
 
 void Renderer::processInput() {
     const float cameraSpeed = 0.05f;
-    input.Update();
-    if (input.IsActionPressed("hi")) {
-        std::cout << "Hi was pressed!\n";
-    }
-    if (input.IsActionReleased("hi")) {
-        std::cout << "Hi was Released!\n";
-    }
-    if (input.IsActionHeld("bye")) {
-        std::cout << "bye is held\n";
-    }
+    // input.Update();
+    // if (input.IsActionHeld("bye")) {
+    //     std::cout << "bye is held\n";
+    // }
 }
 
 void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
@@ -64,7 +56,8 @@ void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
     Shader->use();
     
     glm::mat4 view;
-    view = glm::lookAt(camera.position, camera.target, camera.up);
+    view = glm::lookAt(camera.position, camera.front + camera.position, camera.up);
+    camera.UpdateVectors();
     //Shader.setMat4();
 
     glm::mat4 projection;

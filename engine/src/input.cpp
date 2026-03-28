@@ -21,13 +21,16 @@ void Input::Update() {
 bool Input::IsActionPressed(std::string action) {
     auto it = keymap.find(action);
 
+
     if(it == keymap.end()) {
         std::cout<< "keymap " << action << " is not found";
         return false;
     }
 
     int key = it->second;
+
     return currentFrame[key] && !lastFrame[key];
+
 }
 
 bool Input::IsActionReleased(std::string action) {
@@ -39,6 +42,7 @@ bool Input::IsActionReleased(std::string action) {
     }
 
     int key = it->second;
+
     return !currentFrame[key] && lastFrame[key];
 }
 

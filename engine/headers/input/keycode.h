@@ -42,7 +42,7 @@
 #define X_KEY_V                     GLFW_KEY_V                  
 #define X_KEY_W                     GLFW_KEY_W                  
 #define X_KEY_X                     GLFW_KEY_X                  
-#define X_KEY_U                     GLFW_KEY_Y                  
+#define X_KEY_Y                     GLFW_KEY_Y                  
 #define X_KEY_Z                     GLFW_KEY_Z                  
 #define X_KEY_LEFT_BRACKET          GLFW_KEY_LEFT_BRACKET       
 #define X_KEY_BACKSLAH              GLFW_KEY_BACKSLASH          
