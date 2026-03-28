@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "renderer/renderer.h"
 #include <iostream>
+#include <vector>
 
 GLFWwindow* window;
 
@@ -10,6 +11,7 @@ Renderer::Renderer renderer;
 
 namespace XENGINE {
     Platform::Input input;
+    std::vector<GameObject::GameObject> v_gameObject;
 
     // Platform
     void Init(const char *title, int windowX, int windowY) {
@@ -25,7 +27,10 @@ namespace XENGINE {
     
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
         renderer.processInput();
-        renderer.StartDrawing(Shader, camera);
+        renderer.ClearScreen();
+        for (auto& gameObject : v_gameObject) {
+            renderer.StartDrawing(Shader, camera, gameObject);
+        }
         input.Update();
     }
     
@@ -51,8 +56,13 @@ namespace XENGINE {
     }
 
     // Game Object
-    void CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
-        renderer.gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color);
+    GameObject::GameObject CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath) {
+        GameObject::GameObject gameObject;
+
+        gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color, texturePath);
+        v_gameObject.push_back(gameObject);
+
+        return gameObject;
     }
 
     // Camera

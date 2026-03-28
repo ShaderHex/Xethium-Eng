@@ -14,18 +14,25 @@ namespace Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);  
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glGenTextures(1, &m_Texture);
 
     }
 
     void Texture::Bind() {
-        glGenTextures(1, &m_Texture);
+        // std::cout << "Started binding\n";
         glBindTexture(GL_TEXTURE_2D, m_Texture);
+        // std::cout<<"Checking if image data is valid\n";
         if (m_Data) {
+            // std::cout<<"Image data is valid\n";
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_Data);
             glGenerateMipmap(GL_TEXTURE_2D);       
+            // std::cout<<"Texture Image and MipMap genertated\n";
         } else {
-            std::cout<<"Failed to load the texture\n";
+            // std::cout<<"Failed to load the texture\n";
         }
-        stbi_image_free(m_Data);
+
+        //stbi_image_free(m_Data);
+        
+        // std::cout<<"Unloaded the image data\n";
     }
 }

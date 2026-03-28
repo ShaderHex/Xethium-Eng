@@ -3,11 +3,14 @@
 #include "mesh/meshFactory.h"
 #include "gameObject/gameObject.h"
 #include "glad/glad.h"
+#include <iostream>
 
 namespace GameObject {
 
-void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
+void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath) {
+    std::cout<< "Creating Cube\n";
     cubeMesh = MeshFactory::MeshFactory::CreateCube();
+    m_texture = new Texture::Texture(texturePath);
     
     GameObject::Object cubeObject;
 
@@ -17,11 +20,13 @@ void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, f
     cubeObject.transform.rotation = {rotX, rotY, rotZ};
     cubeObject.transform.scale = {scaleX, scaleY, scaleZ};
     cubeObject.transform.color = {color};
+    cubeObject.texture = m_texture;
 
     m_cubeObjects.push_back(cubeObject);
+    std::cout<< "Cube created\n";
 } 
 
-void GameObject::Render(Shader::Shader* shader) {
+void GameObject::Render(Shader::Shader* shader, Texture::Texture* texture) {
     for (auto& obj : m_cubeObjects) {
         if (obj.mesh) {
             glm::mat4 model = glm::mat4(1.0f);
@@ -33,8 +38,18 @@ void GameObject::Render(Shader::Shader* shader) {
 
             model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
             
-            shader->use();
+            // if (obj.texture = NULL) {
+            //     std::cout << "obj texture is null\n";
+                
+            // } else {
+            //     std::cout << "obj texture is not null\n";
+            //     std::cout << "finished binding\n";
+            // }
+
+            obj.texture->Bind();
             shader->setVec3("objectColor", {obj.transform.color});
+            shader->use();
+            //shader->setInt("texture1", 1);
             shader->setMat4("model", model);
 
             glBindVertexArray(obj.mesh->VAO);
