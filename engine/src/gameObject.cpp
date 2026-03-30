@@ -10,7 +10,9 @@ namespace GameObject {
 void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath) {
     std::cout<< "Creating Cube\n";
     cubeMesh = MeshFactory::MeshFactory::CreateCube();
-    m_texture = new Texture::Texture(texturePath);
+    if (texturePath != nullptr) {
+        m_texture = new Texture::Texture(texturePath);
+    }
     
     GameObject::Object cubeObject;
 
@@ -20,13 +22,19 @@ void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, f
     cubeObject.transform.rotation = {rotX, rotY, rotZ};
     cubeObject.transform.scale = {scaleX, scaleY, scaleZ};
     cubeObject.transform.color = {color};
-    cubeObject.texture = m_texture;
+    if (texturePath == nullptr) {
+        cubeObject.texture = 0;
+    } else {
+        cubeObject.texture = m_texture;
+    }
 
     m_cubeObjects.push_back(cubeObject);
     std::cout<< "Cube created\n";
 } 
 
 void GameObject::Render(Shader::Shader* shader, Texture::Texture* texture) {
+    shader->use();
+
     for (auto& obj : m_cubeObjects) {
         if (obj.mesh) {
             glm::mat4 model = glm::mat4(1.0f);
@@ -46,9 +54,16 @@ void GameObject::Render(Shader::Shader* shader, Texture::Texture* texture) {
             //     std::cout << "finished binding\n";
             // }
 
-            obj.texture->Bind();
+      
+            std::cout << obj.texture << "\n";
+            if (obj.texture == 0) {
+                shader->setBool("useTexture", false);
+                std::cout << "Cube has no texture!\n";
+            } else {
+                shader->setBool("useTexture", true);
+                obj.texture->Bind();
+            }
             shader->setVec3("objectColor", {obj.transform.color});
-            shader->use();
             //shader->setInt("texture1", 1);
             shader->setMat4("model", model);
 
