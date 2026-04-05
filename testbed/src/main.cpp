@@ -59,6 +59,7 @@ int main() {
 
     while (!XENGINE::WindowShouldClose()) {
         dt = XENGINE::GetDeltaTime();
+        cube1->transform.position.x += 0.1 * dt;
 
         UpdateInput();
         

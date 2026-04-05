@@ -7,7 +7,7 @@
 
 namespace GameObject {
 
-void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath) {
+GameObject::Object& GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath) {
     std::cout<< "Creating Cube\n";
     cubeMesh = MeshFactory::MeshFactory::CreateCube();
     if (texturePath != nullptr) {
@@ -30,9 +30,11 @@ void GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, f
 
     m_cubeObjects.push_back(cubeObject);
     std::cout<< "Cube created\n";
+
+    return m_cubeObjects.back();
 } 
 
-void GameObject::Render(Shader::Shader* shader, Texture::Texture* texture) {
+void GameObject::Render(Shader::Shader* shader) {
     shader->use();
 
     for (auto& obj : m_cubeObjects) {
