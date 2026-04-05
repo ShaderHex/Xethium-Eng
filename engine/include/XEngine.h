@@ -22,7 +22,7 @@ namespace XENGINE {
     XAPI void useShader(void* shader);
 
     // Game Object
-    XAPI GameObject::GameObject CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath = nullptr);
+    XAPI GameObject::GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath = nullptr);
 
     // Camera
     XAPI Camera::Camera CreateCamera();

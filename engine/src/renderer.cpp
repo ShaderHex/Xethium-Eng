@@ -71,7 +71,7 @@ void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameO
     
     //glUniform1i(glGetUniformLocation(Shader->ID, "texture1"), 0);
     
-    gameObject.Render(Shader, m_texture);
+    gameObject.Render(Shader);
     //Shader->setInt("texture1", 1);
     //m_texture->Bind();
 }

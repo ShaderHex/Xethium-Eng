@@ -15,11 +15,11 @@ public:
         Mesh::Mesh* mesh;
         Texture::Texture* texture;
     };
-    void CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath = nullptr);
-    void Render(Shader::Shader* shader, Texture::Texture* texture);
-
-private:
+    GameObject::Object& CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath = nullptr);
+    void Render(Shader::Shader* shader);
+    
     std::vector<Object> m_cubeObjects;
+private:
     Mesh::Mesh* cubeMesh;
     Texture::Texture* m_texture;
 };
