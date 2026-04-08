@@ -28,7 +28,8 @@ namespace Texture {
             glGenerateMipmap(GL_TEXTURE_2D);       
             // std::cout<<"Texture Image and MipMap genertated\n";
         } else {
-            std::cout<<"Failed to load the texture\n";
+            std::cout<<"[Texture] Failed to load the texture\n";
+            std::cout<< "[Texture] Data: " << m_Data << "\n";
         }
 
         //stbi_image_free(m_Data);

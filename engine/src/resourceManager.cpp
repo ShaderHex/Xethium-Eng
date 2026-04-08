@@ -1,12 +1,27 @@
 #include "resourceManager/resourceManager.h"
-#include "texture/texture.h"
+#include <iostream>
+
 namespace XENGINE {
 
 namespace ResourceManager {
+Texture::Texture* texture = nullptr;
 
-void LoadTexture(const char* texturePath) {
-    Texture::Texture texture(texturePath);
+Texture::Texture* LoadTexture(const char* texturePath) {
+    if (texture != nullptr) {
+        delete texture;
+    }
+    texture = new Texture::Texture(texturePath);
     
+    if (!texture) {
+        std::cout << "[ResourceManager] Failed to load " << texturePath << " texture ID: " << texture << "\n"; 
+    }
+    std::cout << "[ResourceManager] Loaded " << texturePath << " with texture ID: " << texture << "\n"; 
+    
+    return texture;
+}
+
+void Test() {
+    // std::cout<<"Test";
 }
 
 }

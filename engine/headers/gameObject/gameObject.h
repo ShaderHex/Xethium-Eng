@@ -15,7 +15,7 @@ public:
         Mesh::Mesh* mesh;
         Texture::Texture* texture;
     };
-    GameObject::Object& CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath = nullptr);
+    GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color);
     void Render(Shader::Shader* shader);
     
     std::vector<Object> m_cubeObjects;

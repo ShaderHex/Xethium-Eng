@@ -8,9 +8,9 @@ public:
     void Bind(); 
 
 private:
-    int m_Width, m_Height, m_NrChannels;
-    unsigned char *m_Data;
-    unsigned m_Texture;
+    int m_Width = 0, m_Height = 0, m_NrChannels = 0;
+    unsigned char *m_Data = nullptr;
+    unsigned m_Texture = 0;
 };
 
 }
