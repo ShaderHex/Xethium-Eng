@@ -56,12 +56,12 @@ namespace XENGINE {
     }
 
     // Game Object
-    GameObject::GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color, const char* texturePath) {
+    GameObject::GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
         v_gameObject.emplace_back();
 
         GameObject::GameObject& gameObject = v_gameObject.back();
 
-        gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color, texturePath);
+        gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color);
 
         return &gameObject.m_cubeObjects.back();
     }

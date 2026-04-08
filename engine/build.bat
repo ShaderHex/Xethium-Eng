@@ -28,6 +28,7 @@ g++ -std=c++20 -c src\meshFactory.cpp -Iheaders %GLAD_INC% %STB_INC% -o ..\build
 g++ -std=c++20 -c src\gameObject.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% -o ..\build\gameObject.o
 g++ -std=c++20 -c src\camera.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% -o ..\build\camera.o
 g++ -std=c++20 -c src\input.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\input.o
+g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\resourceManager.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\resourceManager.o
 
 
 REM Link into a DLL
@@ -43,6 +44,7 @@ g++ -shared -o ..\build\engine.dll ^
     ..\build\gameObject.o ^
     ..\build\camera.o ^
     ..\build\input.o ^
+    ..\build\resourceManager.o ^
     -L..\vendor\glfw/lib\ ^
     -Wl,--out-implib,..\build\engine.lib ^
     -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 -lkernel32 -g
