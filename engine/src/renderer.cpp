@@ -43,7 +43,6 @@ void Renderer::Init() {
 }
 
 void Renderer::processInput() {
-    const float cameraSpeed = 0.05f;
     // input.Update();
     // if (input.IsActionHeld("bye")) {
     //     std::cout << "bye is held\n";

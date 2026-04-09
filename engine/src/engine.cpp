@@ -46,6 +46,15 @@ namespace XENGINE {
         return Platform::GetDeltaTime();
     }
 
+    GLFWwindow* GetNativeWindow() {
+        // std::cout << "[Engine] Window allocation " << Platform::GetNativeWindow() << "\n";
+        return Platform::GetNativeWindow();
+    }
+
+    void ChangeNativeWindowTitle(const char* title) {
+        return Platform::ChangeNativeWindowTitle(title);
+    } 
+
     // Shader
     Shader::Shader* CreateShader(const char* vertexPath, const char* fragmentPath) {
         return new Shader::Shader(vertexPath, fragmentPath);

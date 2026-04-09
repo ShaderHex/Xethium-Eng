@@ -4,6 +4,7 @@
 #include "input/keycode.h"
 #include "texture/texture.h"
 #include "resourceManager/resourceManager.h" 
+#include "platform/platform.h"
 
 #include <iostream>
 
@@ -18,6 +19,7 @@ void CreateInputKeys() {
     XENGINE::CreateAction("up", X_KEY_Q);
     XENGINE::CreateAction("down", X_KEY_E);
     XENGINE::CreateAction("change_texture", X_KEY_F);
+    XENGINE::CreateAction("unload_texture", X_KEY_X);
 }
 
 void UpdateInput() {
@@ -48,6 +50,23 @@ void UpdateInput() {
     }
 }
 
+void UpdateFPSTitle(GLFWwindow* window, float dt) {
+    static float timer = 0.0f;
+    static int frames = 0;
+
+    timer += dt;
+    frames++;
+
+    if (timer >= 1.0f) {
+        float fps = frames / timer;
+        
+        std::string title = "testbed - FPS: " + std::to_string((int)fps);
+        XENGINE::ChangeNativeWindowTitle(title.c_str());
+        
+        timer -= 1.0f; 
+        frames = 0;
+    }
+}
 
 
 int main() {
@@ -55,21 +74,21 @@ int main() {
 
     auto shader = XENGINE::CreateShader("shaders/vertex.vs", "shaders/fragment.fs");
     auto* cube1 = XENGINE::CreateCube(0, 1.5f, 0, 0, 0, 0, 1, 1, 1, {255, 255, 255});
-    auto* cube2 = XENGINE::CreateCube(0, 0, 0, 0, 0, 0, 1, 1, 1, {255, 0, 0});
+    XENGINE::CreateCube(0, 0, 0, 0, 0, 0, 1, 1, 1, {255, 0, 0});
     XENGINE::CreateCube(1.5f, 0, 0, 0, 0, 0, 1, 1, 1, {255, 255, 0});
 
-    Texture::Texture* wall = XENGINE::ResourceManager::LoadTexture("wall.jpg");
-    Texture::Texture* tex = XENGINE::ResourceManager::LoadTexture("texture.png");
+    std::shared_ptr<Texture::Texture> wall = XENGINE::ResourceManager::LoadTexture("wall.jpg");
+    std::shared_ptr<Texture::Texture> tex = XENGINE::ResourceManager::LoadTexture("texture.png");
 
     CreateInputKeys();
 
-    cube1->texture = wall;
+    cube1->texture = tex;
 
-    float test = 0;
     bool wall_tex = true;
 
     while (!XENGINE::WindowShouldClose()) {
         dt = XENGINE::GetDeltaTime();
+        UpdateFPSTitle(XENGINE::GetNativeWindow(), dt);
 
         if (XENGINE::IsActionPressed("change_texture")) {
             wall_tex = !wall_tex;

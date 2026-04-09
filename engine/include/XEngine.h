@@ -10,6 +10,8 @@
 
 
 namespace XENGINE {
+    // XAPI using Texture = std::shared_ptr<Texture::Texture>;
+
     // Platform
     XAPI void Init(const char* title, int windowX, int windowY);
     XAPI bool WindowShouldClose();
@@ -17,6 +19,8 @@ namespace XENGINE {
     XAPI void EndDrawing();
     XAPI void CloseWindow();
     XAPI float GetDeltaTime();
+    XAPI GLFWwindow* GetNativeWindow();
+    XAPI void ChangeNativeWindowTitle(const char* title);
     
     // Shader
     XAPI Shader::Shader* CreateShader(const char* vertexPath, const char* fragmentPath);

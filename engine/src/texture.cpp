@@ -36,4 +36,8 @@ namespace Texture {
         
         // std::cout<<"Unloaded the image data\n";
     }
+
+    Texture::~Texture() {
+        glDeleteTextures(1, &m_Texture);
+    }
 }

@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 
+
 namespace Platform {
 
 class Input {

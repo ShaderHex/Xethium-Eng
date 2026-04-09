@@ -1,10 +1,12 @@
 #pragma once
+#include "glad/glad.h"
 
 namespace Texture {
 
 class Texture {
 public:
     Texture(const char* path);
+    ~Texture();
     void Bind(); 
 
 private:

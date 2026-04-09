@@ -8,6 +8,7 @@ namespace Platform {
     void PollEvents();
     void SwapBuffers();
     GLFWwindow* GetNativeWindow();
+    void ChangeNativeWindowTitle(const char* title);
     float GetDeltaTime();
     void Shutdown();
 }
