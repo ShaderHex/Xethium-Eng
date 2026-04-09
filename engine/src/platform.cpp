@@ -25,6 +25,7 @@ void CreateWindow(const char* title, int width, int height) {
     glfwMakeContextCurrent(s_Window);
 
     glfwSwapInterval(0);
+    std::cout << "[Platform] Created window: " << s_Window << "\n";
 }
 
 bool WindowShouldClose() {
@@ -40,7 +41,12 @@ void SwapBuffers() {
 }
 
 GLFWwindow* GetNativeWindow() {
+    
     return s_Window;
+}
+
+void ChangeNativeWindowTitle(const char* title) {
+    glfwSetWindowTitle(s_Window, title);
 }
 
 float GetDeltaTime() {
