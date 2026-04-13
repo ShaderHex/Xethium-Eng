@@ -62,7 +62,7 @@ void GameObject::Render(Shader::Shader* shader) {
 
             
             
-            if (obj.texture == 0) {
+            if (!obj.texture) {
                 shader->setBool("useTexture", false);
                 // std::cout << "Cube has no texture!\n";
             } else {
