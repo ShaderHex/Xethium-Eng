@@ -4,11 +4,12 @@
 #include "renderer/renderer.h"
 #include <iostream>
 #include <vector>
+#include "framebuffer/framebuffer.h"
 
 GLFWwindow* window;
 
 Renderer::Renderer renderer;
-
+XENGINE::framebuffer::Framebuffer fb;
 namespace XENGINE {
     Platform::Input input;
     std::vector<GameObject::GameObject> v_gameObject;
@@ -18,7 +19,11 @@ namespace XENGINE {
 
         Platform::CreateWindow(title, windowX, windowY);
         renderer.Init();
-
+        XENGINE::framebuffer::FramebufferSpec fbSpec;
+        fbSpec.width = windowX;
+        fbSpec.height = windowY;
+        
+        fb.Initialize(fbSpec);
     }
     
     bool WindowShouldClose() {
@@ -26,6 +31,7 @@ namespace XENGINE {
     }
     
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
+        fb.Bind();
         renderer.processInput();
         renderer.ClearScreen();
         for (auto& gameObject : v_gameObject) {
@@ -35,6 +41,7 @@ namespace XENGINE {
     }
     
     void EndDrawing() {
+        fb.Unbind();
         Platform::SwapBuffers();
     }
     
