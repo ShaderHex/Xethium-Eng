@@ -132,22 +132,26 @@ int main() {
 
     std::shared_ptr<Texture::Texture> wall = XENGINE::ResourceManager::LoadTexture("wall.jpg");
     std::shared_ptr<Texture::Texture> tex = XENGINE::ResourceManager::LoadTexture("texture.png");
+    std::shared_ptr<Texture::Texture> customTex = XENGINE::ResourceManager::CreateBlankTexture(512, 512);
 
 
-    cube1->texture = tex;
+    cube1->texture = customTex;
 
     bool wall_tex = true;
 
-    float fpsData[] = {5.0, 3.0, 5.4, 3.7, 10};
     std::vector<float> fpsHistory = {0};
     int i = 0;
     
+    float samples[100];
+    int fpsPlotLineValue = fpsHistory.size();
     while (!XENGINE::WindowShouldClose()) {
         dt = XENGINE::GetDeltaTime();
         UpdateFPSTitle(XENGINE::GetNativeWindow(), dt);
+        for (int n = 0; n < 100; n++)
+            samples[n] = sinf(n * 0.2f + ImGui::GetTime() * 1.5f);
         
-        fpsHistory.erase(fpsHistory.begin());
-        if(*fpsHistory.data() >= 15.0) {
+        if(fpsHistory.size() >= 100.0) {
+            fpsHistory.erase(fpsHistory.begin());
         }
         float currentFPS = 1.0f / dt;
         fpsHistory.push_back(currentFPS);
@@ -159,7 +163,7 @@ int main() {
         cube1->transform.position.x += 0.1 * dt;
 
         if (wall_tex == true) {
-            cube1->texture = wall;
+            cube1->texture = customTex;
         } else {
             cube1->texture = tex;
         }
@@ -176,7 +180,8 @@ int main() {
         ImGui::Begin("Debug");
         ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
         ImGui::Text("Cubes created: %.i", i);
-        ImGui::PlotLines("##fps", fpsHistory.data(), fpsHistory.size(), 0, nullptr, 0.0f, 1.0f, ImVec2(0, 150));
+        ImGui::PlotLines("##fps", fpsHistory.data(), fpsPlotLineValue, 0, nullptr, 0.0f, 5000.0f, ImVec2(0, 150));
+        ImGui::DragInt("##plot", &fpsPlotLineValue, 0.5);
         ImGui::End();
         
         ImGuiEndFrame();

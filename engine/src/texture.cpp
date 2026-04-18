@@ -45,15 +45,15 @@ namespace Texture {
     void Texture::CreateTexture(int width, int height) {
         std::cout << "[Texture] Creating custom texture\n";
 
-            std::vector<unsigned char> data(width * height * 4);
+        std::vector<unsigned char> data(width * height * 4);
 
             // This is a test code, the data will be feed by well the user (perhaps the fb)
-            for (int i = 0; i < width * height; i++) {
-                data[i * 4 + 0] = 255;
-                data[i * 4 + 1] = 0;
-                data[i * 4 + 2] = 255;
-                data[i * 4 + 3] = 255;
-            }
+        for (int i = 0; i < width * height; i++) {
+            data[i * 4 + 0] = 255;
+            data[i * 4 + 1] = 255;
+            data[i * 4 + 2] = 255;
+            data[i * 4 + 3] = 255;
+        }
 
         glGenTextures(1, &m_Texture);
         glBindTexture(GL_TEXTURE_2D, m_Texture);

@@ -11,7 +11,7 @@ public:
     ~Texture();
     void Bind();
     void CreateTexture(int width, int height);
-
+    unsigned int GetID() const { return m_Texture; }
 private:
     int m_Width = 0, m_Height = 0, m_NrChannels = 0;
     unsigned char *m_Data = nullptr;

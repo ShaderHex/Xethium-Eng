@@ -9,6 +9,7 @@
 #include "mesh/meshFactory.h"
 #include "gameObject/gameObject.h"
 #include "input/keycode.h"
+#include "framebuffer/framebuffer.h"
 #include <iostream>
 #include <fstream>
 
@@ -31,13 +32,6 @@ void Renderer::Init() {
     glEnableVertexAttribArray(1);
 
     glEnable(GL_DEPTH_TEST);
-    
-    // m_texture = new Texture::Texture("wall.jpg");
-    std::cout << "Loaded!\n";
-    // m_texture->Bind();
-    
-    //m_DefaultShader->use();
-    //m_DefaultShader->setInt("texture1", 1);
     
 
 }
