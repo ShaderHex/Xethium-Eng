@@ -7,6 +7,7 @@
 #include "../headers/input/input.h"
 #include "../headers/gameObject/gameObject.h"
 #include "../headers/resourceManager/resourceManager.h"
+#include "../headers/scene/scene.h"
 
 
 namespace XENGINE {
@@ -15,7 +16,7 @@ namespace XENGINE {
     // Platform
     XAPI void Init(const char* title, int windowX, int windowY);
     XAPI bool WindowShouldClose();
-    XAPI void StartDrawing(Shader::Shader* Shader, Camera::Camera Camera);
+    XAPI void StartDrawing(Shader::Shader* Shader, Camera::Camera Camera, XENGINE::Scene activeScene);
     XAPI void EndDrawing();
     XAPI void CloseWindow();
     XAPI float GetDeltaTime();
@@ -27,7 +28,7 @@ namespace XENGINE {
     XAPI void useShader(void* shader);
 
     // Game Object
-    XAPI GameObject::GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color);
+    // XAPI GameObject::GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color);
 
     // Camera
     XAPI Camera::Camera CreateCamera();

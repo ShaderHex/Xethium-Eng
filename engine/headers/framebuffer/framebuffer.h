@@ -21,7 +21,7 @@ public:
 
 private:
     unsigned int m_fbo = 0;
-    unsigned int m_textureColorBuffer = 0;
+    unsigned int m_rbo = 0;
     std::shared_ptr<Texture::Texture> m_texture;
     FramebufferSpec m_fbSpec;
 };

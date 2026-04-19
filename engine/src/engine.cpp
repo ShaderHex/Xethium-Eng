@@ -2,9 +2,10 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "renderer/renderer.h"
+#include "framebuffer/framebuffer.h"
+#include "scene/scene.h"
 #include <iostream>
 #include <vector>
-#include "framebuffer/framebuffer.h"
 
 GLFWwindow* window;
 
@@ -12,7 +13,7 @@ Renderer::Renderer renderer;
 XENGINE::framebuffer::Framebuffer fb;
 namespace XENGINE {
     Platform::Input input;
-    std::vector<GameObject::GameObject> v_gameObject;
+    
 
     // Platform
     void Init(const char *title, int windowX, int windowY) {
@@ -30,11 +31,11 @@ namespace XENGINE {
         return Platform::WindowShouldClose();
     }
     
-    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
+    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGINE::Scene activeScene) {
         fb.Bind();
         renderer.processInput();
         renderer.ClearScreen();
-        for (auto& gameObject : v_gameObject) {
+        for (auto& gameObject : activeScene.GetGameObject()) {
             renderer.StartDrawing(Shader, camera, gameObject);
         }
         input.Update();
@@ -69,17 +70,6 @@ namespace XENGINE {
 
     void useShader(void* shader) {
         static_cast<Shader::Shader*>(shader)->use();
-    }
-
-    // Game Object
-    GameObject::GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
-        v_gameObject.emplace_back();
-
-        GameObject::GameObject& gameObject = v_gameObject.back();
-
-        gameObject.CreateCube(x, y, z, rotX, rotY, rotZ, scaleX, scaleY, scaleZ, color);
-
-        return &gameObject.m_cubeObjects.back();
     }
 
     // Camera

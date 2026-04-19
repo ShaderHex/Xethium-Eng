@@ -47,7 +47,7 @@ namespace Texture {
 
         std::vector<unsigned char> data(width * height * 4);
 
-            // This is a test code, the data will be feed by well the user (perhaps the fb)
+        // This is a test code, the data will be feed by well the user (perhaps the fb)
         for (int i = 0; i < width * height; i++) {
             data[i * 4 + 0] = 255;
             data[i * 4 + 1] = 255;

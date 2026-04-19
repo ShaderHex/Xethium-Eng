@@ -30,7 +30,7 @@ g++ -std=c++20 -c src\camera.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% -o ..\
 g++ -std=c++20 -c src\input.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\input.o
 g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\resourceManager.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\resourceManager.o
 g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\framebuffer.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\framebuffer.o
-
+g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\scene.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\scene.o
 
 REM Link into a DLL
 g++ -shared -o ..\build\engine.dll ^
@@ -47,6 +47,7 @@ g++ -shared -o ..\build\engine.dll ^
     ..\build\input.o ^
     ..\build\resourceManager.o ^
     ..\build\framebuffer.o ^
+    ..\build\scene.o ^
     -L..\vendor\glfw/lib\ ^
     -Wl,--out-implib,..\build\engine.lib ^
     -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 -lkernel32 -g

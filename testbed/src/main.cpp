@@ -6,6 +6,7 @@
 #include "texture/texture.h"
 #include "resourceManager/resourceManager.h" 
 #include "platform/platform.h"
+#include "scene/scene.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -126,29 +127,44 @@ int main() {
     InitTestbed();
 
     auto shader = XENGINE::CreateShader("shaders/vertex.vs", "shaders/fragment.fs");
-    auto* cube1 = XENGINE::CreateCube(0, 1.5f, 0, 0, 0, 0, 1, 1, 1, {255, 255, 255});
-    XENGINE::CreateCube(0, 0, 0, 0, 0, 0, 1, 1, 1, {255, 0, 0});
-    XENGINE::CreateCube(1.5f, 0, 0, 0, 0, 0, 1, 1, 1, {255, 255, 0});
+    // auto* cube1 = XENGINE::CreateCube(0, 1.5f, 0, 0, 0, 0, 1, 1, 1, {255, 255, 255});
+    // XENGINE::CreateCube(0, 0, 0, 0, 0, 0, 1, 1, 1, {255, 0, 0});
+    // XENGINE::CreateCube(1.5f, 0, 0, 0, 0, 0, 1, 1, 1, {255, 255, 0});
 
     std::shared_ptr<Texture::Texture> wall = XENGINE::ResourceManager::LoadTexture("wall.jpg");
     std::shared_ptr<Texture::Texture> tex = XENGINE::ResourceManager::LoadTexture("texture.png");
     std::shared_ptr<Texture::Texture> customTex = XENGINE::ResourceManager::CreateBlankTexture(512, 512);
 
 
-    cube1->texture = customTex;
+    // cube1->texture = customTex;
 
     bool wall_tex = true;
 
     std::vector<float> fpsHistory = {0};
     int i = 0;
     
-    float samples[100];
-    int fpsPlotLineValue = fpsHistory.size();
+    int fpsPlotLineValue = 100;
+
+    XENGINE::Scene scene;
+    XENGINE::SceneData::CubeSpec Cube;
+    Cube.position.x = 0.0f;
+    Cube.position.y = 1.5f;
+    Cube.position.z = 0.0f;
+
+    Cube.scale.x = 1.0f;
+    Cube.scale.y = 1.0f;
+    Cube.scale.z = 1.0f;
+
+    Cube.rotation.x = 0.0f;
+    Cube.rotation.y = 0.0f;
+    Cube.rotation.z = 0.0f;
+
+    scene.CreateCube(Cube, {255, 255, 255});
+
     while (!XENGINE::WindowShouldClose()) {
         dt = XENGINE::GetDeltaTime();
         UpdateFPSTitle(XENGINE::GetNativeWindow(), dt);
-        for (int n = 0; n < 100; n++)
-            samples[n] = sinf(n * 0.2f + ImGui::GetTime() * 1.5f);
+
         
         if(fpsHistory.size() >= 100.0) {
             fpsHistory.erase(fpsHistory.begin());
@@ -160,19 +176,19 @@ int main() {
             wall_tex = !wall_tex;
         }
 
-        cube1->transform.position.x += 0.1 * dt;
+        // cube1->transform.position.x += 0.1 * dt;
 
-        if (wall_tex == true) {
-            cube1->texture = customTex;
-        } else {
-            cube1->texture = tex;
-        }
+        // if (wall_tex == true) {
+        //     cube1->texture = customTex;
+        // } else {
+        //     cube1->texture = tex;
+        // }
 
 
         UpdateInput();
         
         ImGuiStartFrame();
-        XENGINE::StartDrawing(shader, camera);
+        XENGINE::StartDrawing(shader, camera, scene);
 
 
         //XENGINE::useShader(shader);

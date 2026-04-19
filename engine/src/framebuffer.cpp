@@ -16,9 +16,16 @@ void Framebuffer::Initialize(const FramebufferSpec& spec) {
     m_texture = XENGINE::ResourceManager::CreateBlankTexture(spec.width, spec.height);
     
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture->GetID(), 0); // attach it on to the 
+    
+    glGenRenderbuffers(1, &m_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_fbSpec.width, m_fbSpec.height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
         std::cout << "[Framebuffer] New framebuffer created and initialized with FBO address(memory): " << &m_fbo << " and FBO Value: " << m_fbo <<"\n";
+    } else {
+        std::cout << "[Framebuffer] Failed to initialize framebuffer!"<<"\n";
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Making the framebuffer active

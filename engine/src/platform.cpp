@@ -24,7 +24,7 @@ void CreateWindow(const char* title, int width, int height) {
     
     glfwMakeContextCurrent(s_Window);
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
     std::cout << "[Platform] Created window: " << s_Window << "\n";
 }
 
