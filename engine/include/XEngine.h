@@ -16,7 +16,7 @@ namespace XENGINE {
     // Platform
     XAPI void Init(const char* title, int windowX, int windowY);
     XAPI bool WindowShouldClose();
-    XAPI void StartDrawing(Shader::Shader* Shader, Camera::Camera Camera, XENGINE::Scene activeScene);
+    XAPI void StartDrawing(Shader::Shader* Shader, Camera::Camera Camera);
     XAPI void EndDrawing();
     XAPI void CloseWindow();
     XAPI float GetDeltaTime();
@@ -38,4 +38,7 @@ namespace XENGINE {
     XAPI bool IsActionReleased(std::string action);
     XAPI bool IsActionHeld(std::string action);
     XAPI void CreateAction(std::string action, int key);
+
+    // Scene
+    XAPI void SwitchActiveScene(XENGINE::Scene& scene);
 }

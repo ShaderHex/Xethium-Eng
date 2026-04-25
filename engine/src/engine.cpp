@@ -3,7 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "renderer/renderer.h"
 #include "framebuffer/framebuffer.h"
-#include "scene/scene.h"
+#include "scene/sceneManager.h"
 #include <iostream>
 #include <vector>
 
@@ -11,6 +11,8 @@ GLFWwindow* window;
 
 Renderer::Renderer renderer;
 XENGINE::framebuffer::Framebuffer fb;
+XENGINE::sceneManager g_sceneManager;
+XENGINE::Scene activeScene;
 namespace XENGINE {
     Platform::Input input;
     
@@ -31,13 +33,19 @@ namespace XENGINE {
         return Platform::WindowShouldClose();
     }
     
-    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGINE::Scene activeScene) {
+    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
+        activeScene = g_sceneManager.GetCurrentActiveScene();
         fb.Bind();
         renderer.processInput();
         renderer.ClearScreen();
-        for (auto& gameObject : activeScene.GetGameObject()) {
-            renderer.StartDrawing(Shader, camera, gameObject);
+        // for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
+        //     renderer.StartDrawing(Shader, camera, activeScene.GetGameObject(), gameObject);
+        // }
+
+        for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
+            renderer.StartDrawing(Shader, camera, activeScene.GetGameObject(), gameObject);
         }
+
         input.Update();
     }
     
@@ -94,5 +102,10 @@ namespace XENGINE {
 
     void CreateAction(std::string action, int key) {
         input.CreateAction(action, key);
+    }
+
+    // Scene
+    void SwitchActiveScene(XENGINE::Scene& scene) {
+        g_sceneManager.SwitchActiveScene(scene);
     }
 } 

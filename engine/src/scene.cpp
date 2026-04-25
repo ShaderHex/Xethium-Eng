@@ -2,14 +2,16 @@
 
 namespace XENGINE{
 
-GameObject::GameObject::Object* Scene::CreateCube(SceneData::CubeSpec spec, Color color) {
-    m_gameObject.emplace_back();
+Scene::Scene() {
+    // m_gameObject.emplace_back();
+}
 
-    GameObject::GameObject& gameObject = m_gameObject.back();
+GameObject::GameObject::Object& Scene::CreateCube(GameObject::GameObject::CubeSpec spec, Color color) {
+    // GameObject::GameObject& gameObject = m_gameObject.back();
 
-    gameObject.CreateCube(spec.position.x, spec.position.y, spec.position.z, spec.rotation.x, spec.rotation.y, spec.rotation.z, spec.scale.x, spec.scale.y, spec.scale.z, color);
+    m_ObjectContainer.CreateCube(spec, color);
 
-    return &gameObject.m_cubeObjects.back();
+    return m_ObjectContainer.m_cubeObjects.back();
 }
 
 }

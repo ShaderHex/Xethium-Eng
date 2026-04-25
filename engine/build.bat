@@ -31,6 +31,7 @@ g++ -std=c++20 -c src\input.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_I
 g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\resourceManager.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\resourceManager.o
 g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\framebuffer.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\framebuffer.o
 g++ -std=c++20 -DBUILDING_XETHIUMLIB -c src\scene.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\scene.o
+g++ -std=c++20 -c src\sceneManager.cpp -Iheaders %GLAD_INC% %STB_INC% %GLM_INC% %GLFW_INC% -o ..\build\sceneManager.o
 
 REM Link into a DLL
 g++ -shared -o ..\build\engine.dll ^
@@ -48,6 +49,7 @@ g++ -shared -o ..\build\engine.dll ^
     ..\build\resourceManager.o ^
     ..\build\framebuffer.o ^
     ..\build\scene.o ^
+    ..\build\sceneManager.o ^
     -L..\vendor\glfw/lib\ ^
     -Wl,--out-implib,..\build\engine.lib ^
     -lglfw3 -lopengl32 -lgdi32 -luser32 -lshell32 -lkernel32 -g

@@ -7,7 +7,7 @@
 
 namespace GameObject {
 
-GameObject::Object* GameObject::CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color) {
+GameObject::Object* GameObject::CreateCube(CubeSpec CubeSpec, Color color) {
     std::cout<< "Creating Cube\n";
     m_cubeObjects.emplace_back();
     cubeMesh = MeshFactory::MeshFactory::CreateCube();
@@ -19,11 +19,11 @@ GameObject::Object* GameObject::CreateCube(float x, float y, float z, float rotX
 
     cubeObject.mesh = cubeMesh;
 
-    cubeObject.transform.position = {x, y, z};
-    cubeObject.transform.rotation = {rotX, rotY, rotZ};
-    cubeObject.transform.scale = {scaleX, scaleY, scaleZ};
+    cubeObject.transform.position = {CubeSpec.position.x, CubeSpec.position.y, CubeSpec.position.z};
+    cubeObject.transform.rotation = {CubeSpec.rotation.x, CubeSpec.rotation.y, CubeSpec.rotation.z};
+    cubeObject.transform.scale = {CubeSpec.scale.x, CubeSpec.scale.y, CubeSpec.scale.z};
     cubeObject.transform.color = {color};
-    cubeObject.texture = NULL;
+    cubeObject.texture = CubeSpec.texture;
         
     m_cubeObjects.push_back(cubeObject);
     std::cout<< "Cube created\n";

@@ -16,8 +16,18 @@ public:
         Mesh::Mesh* mesh;
         std::shared_ptr<Texture::Texture> texture;
     };
-    GameObject::Object* CreateCube(float x, float y, float z, float rotX, float rotY, float rotZ, float scaleX, float scaleY, float scaleZ, Color color);
+
+    struct CubeSpec {
+        Transform::Vector3 position = {0,0,0};
+        Transform::Vector3 rotation = {0,0,0};
+        Transform::Vector3 scale = {1, 1, 1};
+
+        std::shared_ptr<Texture::Texture> texture;
+    };
+
+    GameObject::Object* CreateCube(CubeSpec CubeSpec, Color color);
     void Render(Shader::Shader* shader);
+    std::vector<Object> GetCubeObjects() const { return m_cubeObjects; }
     
     std::vector<Object> m_cubeObjects;
 private:

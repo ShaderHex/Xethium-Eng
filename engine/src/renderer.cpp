@@ -43,7 +43,7 @@ void Renderer::processInput() {
     // }
 }
 
-void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject) {
+void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject, GameObject::GameObject::Object object) {
     glfwPollEvents();
 
     Shader->use();

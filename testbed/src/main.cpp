@@ -7,6 +7,7 @@
 #include "resourceManager/resourceManager.h" 
 #include "platform/platform.h"
 #include "scene/scene.h"
+#include "scene/sceneManager.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -16,6 +17,7 @@
 auto camera = XENGINE::CreateCamera();
 float dt;
 float fps;
+bool is_first_scene;
 
 void CreateInputKeys() {
     XENGINE::CreateAction("forward", X_KEY_W);
@@ -26,6 +28,7 @@ void CreateInputKeys() {
     XENGINE::CreateAction("down", X_KEY_E);
     XENGINE::CreateAction("change_texture", X_KEY_F);
     XENGINE::CreateAction("unload_texture", X_KEY_X);
+    XENGINE::CreateAction("change_scene", X_KEY_C);
 }
 
 void UpdateInput() {
@@ -53,6 +56,10 @@ void UpdateInput() {
 
     if(XENGINE::IsActionHeld("down")) {
         camera.position.y -= camSpeed * dt;
+    }
+
+    if (XENGINE::IsActionPressed("change_scene")) {
+        is_first_scene = !is_first_scene;
     }
 }
 
@@ -139,14 +146,16 @@ int main() {
     // cube1->texture = customTex;
 
     bool wall_tex = true;
+    is_first_scene = true;
 
     std::vector<float> fpsHistory = {0};
     int i = 0;
     
     int fpsPlotLineValue = 100;
 
+    // First scene
     XENGINE::Scene scene;
-    XENGINE::SceneData::CubeSpec Cube;
+    GameObject::GameObject::CubeSpec Cube;
     Cube.position.x = 0.0f;
     Cube.position.y = 1.5f;
     Cube.position.z = 0.0f;
@@ -159,9 +168,24 @@ int main() {
     Cube.rotation.y = 0.0f;
     Cube.rotation.z = 0.0f;
 
+    Cube.texture = wall;
+
     scene.CreateCube(Cube, {255, 255, 255});
 
+    // Second Scene
+    XENGINE::Scene scene2;
+    GameObject::GameObject::CubeSpec Cube2;
+    Cube2.texture = tex;
+    scene2.CreateCube(Cube2, {255, 255, 255});
+    scene2.CreateCube(Cube, {255, 255, 255});
+    
     while (!XENGINE::WindowShouldClose()) {
+        if (is_first_scene == true) {
+            XENGINE::SwitchActiveScene(scene);
+        } else {
+            XENGINE::SwitchActiveScene(scene2);
+        }
+        
         dt = XENGINE::GetDeltaTime();
         UpdateFPSTitle(XENGINE::GetNativeWindow(), dt);
 
@@ -188,7 +212,7 @@ int main() {
         UpdateInput();
         
         ImGuiStartFrame();
-        XENGINE::StartDrawing(shader, camera, scene);
+        XENGINE::StartDrawing(shader, camera);
 
 
         //XENGINE::useShader(shader);
