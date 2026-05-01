@@ -9,7 +9,6 @@ namespace GameObject {
 
 GameObject::Object* GameObject::CreateCube(CubeSpec CubeSpec, Color color) {
     std::cout<< "Creating Cube\n";
-    m_cubeObjects.emplace_back();
     cubeMesh = MeshFactory::MeshFactory::CreateCube();
     // if (texturePath != nullptr) {
     //     m_texture = new Texture::Texture(texturePath);
@@ -36,49 +35,48 @@ GameObject::Object* GameObject::CreateCube(CubeSpec CubeSpec, Color color) {
 // }
 
 void GameObject::Render(Shader::Shader* shader) {
-    shader->use();
+    // shader->use();
 
-    for (auto& obj : m_cubeObjects) {
-        if (obj.mesh) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, obj.transform.position);
+    // for (auto& obj : m_cubeObjects) {
+    //     if (obj.mesh) {
+    //         glm::mat4 model = glm::mat4(1.0f);
+    //         model = glm::translate(model, obj.transform.position);
             
-            model = glm::rotate(model, glm::radians(obj.transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(obj.transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(obj.transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    //         model = glm::rotate(model, glm::radians(obj.transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    //         model = glm::rotate(model, glm::radians(obj.transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    //         model = glm::rotate(model, glm::radians(obj.transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-            model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
+    //         model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
             
-            // if (obj.texture = NULL) {
-            //     std::cout << "obj texture is null\n";
+    //         // if (obj.texture = NULL) {
+    //         //     std::cout << "obj texture is null\n";
                 
-            // } else {
-            //     std::cout << "obj texture is not null\n";
-            //     std::cout << "finished binding\n";
-            // }
+    //         // } else {
+    //         //     std::cout << "obj texture is not null\n";
+    //         //     std::cout << "finished binding\n";
+    //         // }
 
       
-            // std::cout << obj.texture << "\n";
+    //         // std::cout << obj.texture << "\n";
 
             
             
-            if (!obj.texture) {
-                shader->setBool("useTexture", false);
-                // std::cout << "Cube has no texture!\n";
-            } else {
-                shader->setBool("useTexture", true);
-                obj.texture->Bind();
-            }
-            shader->setVec3("objectColor", {obj.transform.color});
-            //shader->setInt("texture1", 1);
-            shader->setMat4("model", model);
+    //         if (!obj.texture) {
+    //             shader->setBool("useTexture", false);
+    //             // std::cout << "Cube has no texture!\n";
+    //         } else {
+    //             shader->setBool("useTexture", true);
+    //             obj.texture->Bind();
+    //         }
+    //         shader->setVec3("objectColor", {obj.transform.color});
+    //         //shader->setInt("texture1", 1);
+    //         shader->setMat4("model", model);
 
-            glBindVertexArray(obj.mesh->VAO);
-            glDrawArrays(GL_TRIANGLES, 0, obj.mesh->vertexCount);
-            glBindVertexArray(0);
-
-        }
-    }
+    //         m_vertexCount = obj.mesh->vertexCount;
+    //         m_VAO = obj.mesh->VAO;
+    //         // renderer.Draw(obj.mesh->VAO, obj.mesh->vertexCount);
+    //     }
+    // }
 }
 
 }

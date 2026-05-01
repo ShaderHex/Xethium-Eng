@@ -31,7 +31,7 @@ void CreateInputKeys() {
     XENGINE::CreateAction("change_scene", X_KEY_C);
 }
 
-void UpdateInput() {
+void UpdateInput(XENGINE::Scene scene, XENGINE::Scene scene2) {
     float camSpeed = 5.0f;
 
     if(XENGINE::IsActionHeld("forward")) {
@@ -59,7 +59,14 @@ void UpdateInput() {
     }
 
     if (XENGINE::IsActionPressed("change_scene")) {
-        is_first_scene = !is_first_scene;
+        if (is_first_scene == true) {
+            XENGINE::SwitchActiveScene(scene);
+            is_first_scene = false;
+        } else {
+            std::cout<<"Switching scene to " << &scene2 << "\n";
+            XENGINE::SwitchActiveScene(scene2);
+            is_first_scene = true;
+        }
     }
 }
 
@@ -168,7 +175,7 @@ int main() {
     Cube.rotation.y = 0.0f;
     Cube.rotation.z = 0.0f;
 
-    Cube.texture = wall;
+    // Cube.texture = tex;
 
     scene.CreateCube(Cube, {255, 255, 255});
 
@@ -179,12 +186,11 @@ int main() {
     scene2.CreateCube(Cube2, {255, 255, 255});
     scene2.CreateCube(Cube, {255, 255, 255});
     
+    XENGINE::SwitchActiveScene(scene); // starting the engine with "scene" scene
+
+    // scene2.Update(function)
     while (!XENGINE::WindowShouldClose()) {
-        if (is_first_scene == true) {
-            XENGINE::SwitchActiveScene(scene);
-        } else {
-            XENGINE::SwitchActiveScene(scene2);
-        }
+
         
         dt = XENGINE::GetDeltaTime();
         UpdateFPSTitle(XENGINE::GetNativeWindow(), dt);
@@ -209,7 +215,7 @@ int main() {
         // }
 
 
-        UpdateInput();
+        UpdateInput(scene, scene2);
         
         ImGuiStartFrame();
         XENGINE::StartDrawing(shader, camera);

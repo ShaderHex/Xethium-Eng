@@ -43,6 +43,54 @@ void Renderer::processInput() {
     // }
 }
 
+void Renderer::Draw(GameObject::GameObject& gameObject, Shader::Shader* Shader) {
+
+    for (auto& obj : gameObject.GetCubeObjects()) {
+        glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, obj.transform.position);
+            
+            model = glm::rotate(model, glm::radians(obj.transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(obj.transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(obj.transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+            model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
+            
+            // if (obj.texture = NULL) {
+            //     std::cout << "obj texture is null\n";
+                
+            // } else {
+            //     std::cout << "obj texture is not null\n";
+            //     std::cout << "finished binding\n";
+            // }
+
+      
+            // std::cout << obj.texture << "\n";
+
+            
+            
+            if (!obj.texture) {
+                Shader->setBool("useTexture", false);
+                // std::cout << "Cube has no texture!\n";
+            } else {
+                Shader->setBool("useTexture", true);
+                obj.texture->Bind();
+            }
+            Shader->setVec3("objectColor", {obj.transform.color});
+            //shader->setInt("texture1", 1);
+            Shader->setMat4("model", model);
+
+            if(obj.mesh != nullptr) {
+                // std::cout << "[Renderer] obj mesh VAO ID: " << obj.mesh->VAO << " [Renderer] obj mesh vertexCount:" << obj.mesh->vertexCount << "\n";
+                glBindVertexArray(obj.mesh->VAO);
+                glDrawArrays(GL_TRIANGLES, 0, obj.mesh->vertexCount);
+                glBindVertexArray(0);
+            } else {
+                std::cout << "[Renderer] obj mesh is null!\n";
+            }
+        }
+
+}
+
 void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject, GameObject::GameObject::Object object) {
     glfwPollEvents();
 
@@ -65,6 +113,9 @@ void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameO
     //glUniform1i(glGetUniformLocation(Shader->ID, "texture1"), 0);
     
     gameObject.Render(Shader);
+    this->Draw(gameObject, Shader);
+    
+    
     //Shader->setInt("texture1", 1);
     //m_texture->Bind();
 }

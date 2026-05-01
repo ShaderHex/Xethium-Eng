@@ -41,4 +41,5 @@ namespace XENGINE {
 
     // Scene
     XAPI void SwitchActiveScene(XENGINE::Scene& scene);
+    XENGINE::Scene GetActiveScene();
 }

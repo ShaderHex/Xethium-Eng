@@ -44,8 +44,9 @@ namespace XENGINE {
 
         for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
             renderer.StartDrawing(Shader, camera, activeScene.GetGameObject(), gameObject);
+            // activeScene.GetGameObject().Render(Shader);
         }
-
+        activeScene.GetGameObject().Render(Shader);
         input.Update();
     }
     
@@ -107,5 +108,9 @@ namespace XENGINE {
     // Scene
     void SwitchActiveScene(XENGINE::Scene& scene) {
         g_sceneManager.SwitchActiveScene(scene);
+    }
+
+    XENGINE::Scene GetActiveScene() {
+        return activeScene;
     }
 } 

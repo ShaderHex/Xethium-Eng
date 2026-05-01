@@ -5,6 +5,7 @@
 #include "mesh/mesh.h"
 #include "gameObject/color.h"
 #include "texture/texture.h"
+// #include "renderer/renderer.h"
 #include <memory>
 #include <vector>
 
@@ -27,11 +28,15 @@ public:
 
     GameObject::Object* CreateCube(CubeSpec CubeSpec, Color color);
     void Render(Shader::Shader* shader);
-    std::vector<Object> GetCubeObjects() const { return m_cubeObjects; }
+    std::vector<Object>& GetCubeObjects() { return m_cubeObjects; }
+    unsigned int GetVAO() const { return m_VAO; }
+    unsigned int GetVertexCount() const { return m_vertexCount; }
     
     std::vector<Object> m_cubeObjects;
 private:
     Mesh::Mesh* cubeMesh;
+    unsigned int m_vertexCount;
+    unsigned int m_VAO;
     // Texture::Texture* m_texture;
 };
 }

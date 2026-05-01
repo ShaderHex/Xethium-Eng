@@ -7,24 +7,12 @@
 
 namespace XENGINE {
 
-namespace SceneData {
-
-struct CubeSpec {
-    Transform::Vector3 position;
-    Transform::Vector3 rotation;
-    Transform::Vector3 scale;
-
-    Texture::Texture texture;
-};
-
-}
-
 class Scene {
 public:
     XAPI Scene();
     XAPI GameObject::GameObject::Object& CreateCube(GameObject::GameObject::CubeSpec spec, Color color);
 
-    const GameObject::GameObject& GetGameObject() const { return m_ObjectContainer; } 
+    GameObject::GameObject& GetGameObject() { return m_ObjectContainer; } 
 
 private:
     GameObject::GameObject m_ObjectContainer;

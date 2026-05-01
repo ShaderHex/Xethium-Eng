@@ -11,6 +11,7 @@ class Renderer {
 
 public:  
     void Init();
+    void Draw(GameObject::GameObject& gameObject, Shader::Shader* Shader);
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject, GameObject::GameObject::Object object);
     void processInput();
     void ClearScreen();
