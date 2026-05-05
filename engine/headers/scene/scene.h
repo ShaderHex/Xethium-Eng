@@ -3,6 +3,7 @@
 #include "gameObject/gameObject.h"
 #include "transform/transform.h"
 #include "texture/texture.h"
+#include "EntityManager/EntityManager.h"
 #include <vector>
 
 namespace XENGINE {
@@ -14,6 +15,7 @@ public:
 
     GameObject::GameObject& GetGameObject() { return m_ObjectContainer; } 
 
+    XENGINE::EntityManager ecs;
 private:
     GameObject::GameObject m_ObjectContainer;
 };
