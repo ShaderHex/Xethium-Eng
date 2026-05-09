@@ -10,6 +10,8 @@
 #include "gameObject/gameObject.h"
 #include "input/keycode.h"
 #include "framebuffer/framebuffer.h"
+#include "ECS/componentStorage.h"
+#include "mesh/meshFactory.h"
 #include <iostream>
 #include <fstream>
 
@@ -43,55 +45,87 @@ void Renderer::processInput() {
     // }
 }
 
-void Renderer::Draw(GameObject::GameObject& gameObject, Shader::Shader* Shader) {
+void Renderer::Draw(XENGINE::Scene activeScene, Shader::Shader* Shader) {
 
-    for (auto& obj : gameObject.GetCubeObjects()) {
-        glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, obj.transform.position);
+    // for (auto& obj : gameObject.GetCubeObjects()) {
+    //     glm::mat4 model = glm::mat4(1.0f);
+    //         model = glm::translate(model, );
             
-            model = glm::rotate(model, glm::radians(obj.transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(obj.transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(obj.transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    //         model = glm::rotate(model, glm::radians(obj.transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    //         model = glm::rotate(model, glm::radians(obj.transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    //         model = glm::rotate(model, glm::radians(obj.transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
 
-            model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
+    //         model = glm::scale(model, glm::vec3(obj.transform.scale.x, obj.transform.scale.y, obj.transform.scale.z));
             
-            // if (obj.texture = NULL) {
-            //     std::cout << "obj texture is null\n";
+    //         // if (obj.texture = NULL) {
+    //         //     std::cout << "obj texture is null\n";
                 
-            // } else {
-            //     std::cout << "obj texture is not null\n";
-            //     std::cout << "finished binding\n";
-            // }
+    //         // } else {
+    //         //     std::cout << "obj texture is not null\n";
+    //         //     std::cout << "finished binding\n";
+    //         // }
 
       
-            // std::cout << obj.texture << "\n";
+    //         // std::cout << obj.texture << "\n";
 
             
             
-            if (!obj.texture) {
-                Shader->setBool("useTexture", false);
-                // std::cout << "Cube has no texture!\n";
-            } else {
-                Shader->setBool("useTexture", true);
-                obj.texture->Bind();
-            }
-            Shader->setVec3("objectColor", {obj.transform.color});
-            //shader->setInt("texture1", 1);
+    //         if (!obj.texture) {
+    //             Shader->setBool("useTexture", false);
+    //             // std::cout << "Cube has no texture!\n";
+    //         } else {
+    //             Shader->setBool("useTexture", true);
+    //             obj.texture->Bind();
+    //         }
+    //         Shader->setVec3("objectColor", {obj.transform.color});
+    //         //shader->setInt("texture1", 1);
+    //         Shader->setMat4("model", model);
+
+    //         if(obj.mesh != nullptr) {
+    //             // std::cout << "[Renderer] obj mesh VAO ID: " << obj.mesh->VAO << " [Renderer] obj mesh vertexCount:" << obj.mesh->vertexCount << "\n";
+    //             glBindVertexArray(obj.mesh->VAO);
+    //             glDrawArrays(GL_TRIANGLES, 0, obj.mesh->vertexCount);
+    //             glBindVertexArray(0);
+    //         } else {
+    //             std::cout << "[Renderer] obj mesh is null!\n";
+    //         }
+    //     }
+
+    for (auto& e : activeScene.ecs.GetAllEntity()) {
+        if (activeScene.ecs.HasComponent<XENGINE::TransformComponent>(e)) {
+            auto& transform = activeScene.ecs.GetComponent<XENGINE::TransformComponent>(e);
+
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, transform.position);
+            
+            model = glm::rotate(model, glm::radians(transform.rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(transform.rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::rotate(model, glm::radians(transform.rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+            model = glm::scale(model, glm::vec3(transform.scale.x, transform.scale.y, transform.scale.z));
+
+            Shader->setBool("useTexture", false); // TODO: Texture after material
+
+            Shader->setVec3("objectColor", {1, 0, 1}); // TODO: Color after material
             Shader->setMat4("model", model);
-
-            if(obj.mesh != nullptr) {
-                // std::cout << "[Renderer] obj mesh VAO ID: " << obj.mesh->VAO << " [Renderer] obj mesh vertexCount:" << obj.mesh->vertexCount << "\n";
-                glBindVertexArray(obj.mesh->VAO);
-                glDrawArrays(GL_TRIANGLES, 0, obj.mesh->vertexCount);
-                glBindVertexArray(0);
-            } else {
-                std::cout << "[Renderer] obj mesh is null!\n";
+            
+            if (activeScene.ecs.HasComponent<XENGINE::MeshComponent>(e)) {
+                auto& mesh = activeScene.ecs.GetComponent<XENGINE::MeshComponent>(e);
+                if(mesh.Mesh != nullptr) {
+                    // std::cout << "[Renderer] obj mesh VAO ID: " << obj.mesh->VAO << " [Renderer] obj mesh vertexCount:" << obj.mesh->vertexCount << "\n";
+                    glBindVertexArray(mesh.Mesh->VAO);
+                    glDrawArrays(GL_TRIANGLES, 0, mesh.Mesh->vertexCount);
+                    glBindVertexArray(0);
+                } else {
+                    std::cout << "[Renderer] obj mesh is null!\n";
+                }
             }
         }
+    }
 
 }
 
-void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject, GameObject::GameObject::Object object) {
+void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGINE::Scene activeScene) {
     glfwPollEvents();
 
     Shader->use();
@@ -112,8 +146,8 @@ void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameO
     
     //glUniform1i(glGetUniformLocation(Shader->ID, "texture1"), 0);
     
-    gameObject.Render(Shader);
-    this->Draw(gameObject, Shader);
+    // gameObject.Render(Shader);
+    this->Draw(activeScene, Shader);
     
     
     //Shader->setInt("texture1", 1);

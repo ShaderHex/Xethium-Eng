@@ -16,11 +16,13 @@ class EntityManager {
     Entity CreateEntity() {
         if(!m_freeEntities.empty()) {
             Entity freeEntityID = m_freeEntities.back();
+            m_allEntities.push_back(freeEntityID);
             m_freeEntities.pop_back();
             std::cout<< "Reusing ID: " << freeEntityID << "\n";
             return freeEntityID;
         }
         Entity newID = m_entity++;
+        m_allEntities.push_back(newID);
         std::cout<< "No new ID found! Creating new ID: " << newID << "\n";
         return newID;
     }
@@ -34,6 +36,10 @@ class EntityManager {
 
         m_entityComponentTracker.erase(e);
         m_freeEntities.push_back(e);
+    }
+
+    std::vector<Entity> GetAllEntity() {
+        return m_allEntities;
     }
 
     template <typename T>
@@ -79,6 +85,7 @@ private:
     std::vector<Entity> m_freeEntities;
     std::unordered_map<Entity, std::vector<std::type_index>> m_entityComponentTracker;
     std::unordered_map<std::type_index, void(*)(Entity)> m_typeDeleters;
+    std::vector<Entity> m_allEntities;
 
     Entity m_entity = 0;
 };

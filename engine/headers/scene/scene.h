@@ -3,7 +3,7 @@
 #include "gameObject/gameObject.h"
 #include "transform/transform.h"
 #include "texture/texture.h"
-#include "EntityManager/EntityManager.h"
+#include "ecs/entityManager.h"
 #include <vector>
 
 namespace XENGINE {

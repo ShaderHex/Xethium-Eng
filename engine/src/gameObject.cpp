@@ -8,26 +8,29 @@
 namespace GameObject {
 
 GameObject::Object* GameObject::CreateCube(CubeSpec CubeSpec, Color color) {
-    std::cout<< "Creating Cube\n";
-    cubeMesh = MeshFactory::MeshFactory::CreateCube();
-    // if (texturePath != nullptr) {
-    //     m_texture = new Texture::Texture(texturePath);
-    // }
+    // std::cout<< "Creating Cube\n";
+    // cubeMesh = MeshFactory::MeshFactory::CreateCube();
+    // // if (texturePath != nullptr) {
+    // //     m_texture = new Texture::Texture(texturePath);
+    // // }
     
-    GameObject::Object cubeObject;
+    // GameObject::Object cubeObject;
 
-    cubeObject.mesh = cubeMesh;
+    // cubeObject.mesh = cubeMesh;
 
-    cubeObject.transform.position = {CubeSpec.position.x, CubeSpec.position.y, CubeSpec.position.z};
-    cubeObject.transform.rotation = {CubeSpec.rotation.x, CubeSpec.rotation.y, CubeSpec.rotation.z};
-    cubeObject.transform.scale = {CubeSpec.scale.x, CubeSpec.scale.y, CubeSpec.scale.z};
-    cubeObject.transform.color = {color};
-    cubeObject.texture = CubeSpec.texture;
+    // cubeObject.transform.position = {CubeSpec.position.x, CubeSpec.position.y, CubeSpec.position.z};
+    // cubeObject.transform.rotation = {CubeSpec.rotation.x, CubeSpec.rotation.y, CubeSpec.rotation.z};
+    // cubeObject.transform.scale = {CubeSpec.scale.x, CubeSpec.scale.y, CubeSpec.scale.z};
+    // cubeObject.transform.color = {color};
+    // cubeObject.texture = CubeSpec.texture;
         
-    m_cubeObjects.push_back(cubeObject);
-    std::cout<< "Cube created\n";
+    // m_cubeObjects.push_back(cubeObject);
+    // std::cout<< "Cube created\n";
 
-    return &m_cubeObjects.back();
+    // return &m_cubeObjects.back();
+
+    
+
 } 
 
 // void GameObject::setTexture() {

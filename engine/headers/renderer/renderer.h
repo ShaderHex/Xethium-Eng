@@ -4,6 +4,7 @@
 #include "gameObject/gameObject.h"
 #include "camera/camera.h"
 #include "input/input.h"
+#include "scene/scene.h"
 
 namespace Renderer {
 
@@ -11,8 +12,8 @@ class Renderer {
 
 public:  
     void Init();
-    void Draw(GameObject::GameObject& gameObject, Shader::Shader* Shader);
-    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, GameObject::GameObject gameObject, GameObject::GameObject::Object object);
+    void Draw(XENGINE::Scene activeScene, Shader::Shader* Shader);
+    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGINE::Scene activeScene);
     void processInput();
     void ClearScreen();
 private:

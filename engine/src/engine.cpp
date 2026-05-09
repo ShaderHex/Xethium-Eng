@@ -41,11 +41,11 @@ namespace XENGINE {
         // for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
         //     renderer.StartDrawing(Shader, camera, activeScene.GetGameObject(), gameObject);
         // }
-
-        for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
-            renderer.StartDrawing(Shader, camera, activeScene.GetGameObject(), gameObject);
-            // activeScene.GetGameObject().Render(Shader);
-        }
+        renderer.StartDrawing(Shader, camera, activeScene);
+        // for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
+            
+        //     // activeScene.GetGameObject().Render(Shader);
+        // }
         activeScene.GetGameObject().Render(Shader);
         input.Update();
     }
