@@ -34,6 +34,7 @@ class EntityManager {
             m_typeDeleters[type](e);
         }
 
+        m_allEntities.erase(std::remove(m_allEntities.begin(), m_allEntities.end(), e));
         m_entityComponentTracker.erase(e);
         m_freeEntities.push_back(e);
     }

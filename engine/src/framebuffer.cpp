@@ -31,6 +31,24 @@ void Framebuffer::Initialize(const FramebufferSpec& spec) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Making the framebuffer active
 }
 
+void Framebuffer::Update(const FramebufferSpec& spec) {
+    std::cout << "[Framebuffer] Resize called!\n";
+    m_fbSpec = spec;
+
+    // Clearing up so leaks and random flashes don't happen
+    if (m_fbo) {
+        glDeleteFramebuffers(1, &m_fbo);
+        m_fbo = 0;
+    }
+    if (m_rbo) {
+        glDeleteRenderbuffers(1, &m_rbo);
+        m_rbo = 0;
+    }
+
+    Initialize(spec);
+    Bind();
+}
+
 void Framebuffer::Bind() {
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     glViewport(0, 0, m_fbSpec.width, m_fbSpec.height);
@@ -41,9 +59,10 @@ void Framebuffer::Unbind() {
     
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     
-    glBlitFramebuffer(0, 0, m_fbSpec.width, m_fbSpec.height, 
-                      0, 0, m_fbSpec.width, m_fbSpec.height, 
-                      GL_COLOR_BUFFER_BIT, GL_NEAREST); // for now we will copy the framebuffer and render from the copy not the actualy framebuffer itself as it requires external function that renders on quad mesh which i don't have right now
+    // TODO: Draw the framebuffer to a quadmesh
+    // glBlitFramebuffer(0, 0, m_fbSpec.width, m_fbSpec.height, 
+    //                   0, 0, m_fbSpec.width, m_fbSpec.height, 
+    //                   GL_COLOR_BUFFER_BIT, GL_NEAREST); // for now we will copy the framebuffer and render from the copy not the actualy framebuffer itself as it requires external function that renders on quad mesh which i don't have right now
                       
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

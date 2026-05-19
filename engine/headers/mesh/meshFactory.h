@@ -5,5 +5,6 @@ namespace MeshFactory {
 class MeshFactory {
 public:
     static Mesh::Mesh* CreateCube();
+    static Mesh::Mesh* CreateQuadMesh();
 };
 }

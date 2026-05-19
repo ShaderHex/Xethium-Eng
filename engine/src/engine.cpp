@@ -13,6 +13,7 @@ Renderer::Renderer renderer;
 XENGINE::framebuffer::Framebuffer fb;
 XENGINE::sceneManager g_sceneManager;
 XENGINE::Scene activeScene;
+XENGINE::framebuffer::FramebufferSpec fbSpec;
 namespace XENGINE {
     Platform::Input input;
     
@@ -21,8 +22,7 @@ namespace XENGINE {
     void Init(const char *title, int windowX, int windowY) {
 
         Platform::CreateWindow(title, windowX, windowY);
-        renderer.Init();
-        XENGINE::framebuffer::FramebufferSpec fbSpec;
+        renderer.Init(fbSpec);
         fbSpec.width = windowX;
         fbSpec.height = windowY;
         
@@ -34,25 +34,25 @@ namespace XENGINE {
     }
     
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
+        // Platform::UpdateWindow(fb, fbSpec);
+        // fb.Update(fbSpec);
         activeScene = g_sceneManager.GetCurrentActiveScene();
+        
         fb.Bind();
-        renderer.processInput();
         renderer.ClearScreen();
-        // for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
-        //     renderer.StartDrawing(Shader, camera, activeScene.GetGameObject(), gameObject);
-        // }
         renderer.StartDrawing(Shader, camera, activeScene);
-        // for (auto& gameObject : activeScene.GetGameObject().GetCubeObjects()) {
-            
-        //     // activeScene.GetGameObject().Render(Shader);
-        // }
-        activeScene.GetGameObject().Render(Shader);
+        fb.Unbind();
+        renderer.ClearScreen();
+        renderer.DrawQuadMesh();
+
         input.Update();
     }
     
     void EndDrawing() {
-        fb.Unbind();
         Platform::SwapBuffers();
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR)
+            std::cout << "GL Error: " << err << "\n";
     }
     
     void CloseWindow() {

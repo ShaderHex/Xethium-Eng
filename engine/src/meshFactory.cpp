@@ -71,4 +71,40 @@ Mesh::Mesh* MeshFactory::CreateCube() {
     return cubeMesh;
 }
 
+Mesh::Mesh* MeshFactory::CreateQuadMesh() {
+    static Mesh::Mesh* quadMesh = nullptr;
+    if (quadMesh) return quadMesh;
+
+    float quadVertices[] = {  
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f
+    };	
+
+    // TODO: PLEASE FOR THE SAKE OF GOD, MAKE THIS A SHARED POINTER
+    quadMesh = new Mesh::Mesh();
+    quadMesh->vertexCount = 6;
+
+    glGenVertexArrays(1, &quadMesh->VAO);
+    glGenBuffers(1, &quadMesh->VBO);
+
+    glBindVertexArray(quadMesh->VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadMesh->VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);   
+
+    glBindVertexArray(0);
+
+    return quadMesh;
+}
+
 }

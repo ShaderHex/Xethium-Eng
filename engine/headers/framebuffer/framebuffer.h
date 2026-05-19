@@ -14,6 +14,7 @@ struct FramebufferSpec {
 class Framebuffer {
 public:
     void Initialize(const FramebufferSpec& spec);
+    void Update(const FramebufferSpec& spec);
     void Bind();
     void Unbind();
 

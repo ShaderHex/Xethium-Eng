@@ -9,7 +9,6 @@
 #include "mesh/meshFactory.h"
 #include "gameObject/gameObject.h"
 #include "input/keycode.h"
-#include "framebuffer/framebuffer.h"
 #include "ECS/componentStorage.h"
 #include "mesh/meshFactory.h"
 #include <iostream>
@@ -23,8 +22,8 @@ float texCoords[] = {
     0.5f, 1.0f    // top-center
 };
 
-
-void Renderer::Init() {
+// TODO: Store framebuffer spec in renderer
+void Renderer::Init(XENGINE::framebuffer::FramebufferSpec fbSpec) {
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD\n";
     }
@@ -35,14 +34,21 @@ void Renderer::Init() {
 
     glEnable(GL_DEPTH_TEST);
     
+    m_textureColorbuffer = XENGINE::ResourceManager::CreateBlankTexture(fbSpec.width, fbSpec.height);
+    m_framebufferShader = std::make_unique<Shader::Shader>("shaders/framebuffer.vs", "shaders/framebuffer.fs");
 
 }
 
-void Renderer::processInput() {
-    // input.Update();
-    // if (input.IsActionHeld("bye")) {
-    //     std::cout << "bye is held\n";
-    // }
+void Renderer::DrawQuadMesh() {
+    static Mesh::Mesh* quad = MeshFactory::MeshFactory::CreateQuadMesh();
+
+    m_framebufferShader->use();
+    glBindVertexArray(quad->VAO);
+    glDisable(GL_DEPTH_TEST);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_textureColorbuffer->GetID());
+    m_framebufferShader->setInt("screenTexture", 0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Renderer::Draw(XENGINE::Scene activeScene, Shader::Shader* Shader) {
@@ -156,6 +162,7 @@ void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGI
 
 void Renderer::ClearScreen() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
     glClearColor(0.0, 0.0, 0.0, 1);
 }
 

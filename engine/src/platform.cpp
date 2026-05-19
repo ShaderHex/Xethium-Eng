@@ -1,8 +1,11 @@
 #include "platform/platform.h"
 #include "GLFW/glfw3.h"
+#include "glad/glad.h"
 #include <iostream>
 
 static GLFWwindow* s_Window = nullptr;
+XENGINE::framebuffer::FramebufferSpec m_fbSpec;
+XENGINE::framebuffer::Framebuffer m_fb;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
@@ -24,7 +27,7 @@ void CreateWindow(const char* title, int width, int height) {
     
     glfwMakeContextCurrent(s_Window);
 
-    glfwSwapInterval(1);
+    glfwSwapInterval(0);
     std::cout << "[Platform] Created window: " << s_Window << "\n";
 }
 
@@ -55,6 +58,20 @@ float GetDeltaTime() {
     lastFrame = currentFrame;
 
     return deltaTime;
+}
+
+void UpdateFramebuffer(GLFWwindow* window, int width, int height) {
+    m_fbSpec.width = width;
+    m_fbSpec.height = height;
+    m_fb.Update(m_fbSpec);
+    glViewport(0, 0, width, height);
+}
+
+void UpdateWindow(XENGINE::framebuffer::Framebuffer& fb, XENGINE::framebuffer::FramebufferSpec& fbSpec) {
+    m_fbSpec = fbSpec;
+    m_fb = fb;
+    // glfwGetWindowSize(s_Window, &fbSpec.width, &fbSpec.height);
+    glfwSetFramebufferSizeCallback(s_Window, UpdateFramebuffer);
 }
 
 void Shutdown() {

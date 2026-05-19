@@ -11,7 +11,7 @@ namespace XENGINE {
 class Scene {
 public:
     XAPI Scene();
-    XAPI GameObject::GameObject::Object& CreateCube(GameObject::GameObject::CubeSpec spec, Color color);
+    XAPI void CreateCube(GameObject::GameObject::CubeSpec spec, Color color);
 
     GameObject::GameObject& GetGameObject() { return m_ObjectContainer; } 
 
