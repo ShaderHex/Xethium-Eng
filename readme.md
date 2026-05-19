@@ -15,13 +15,13 @@ It supports Windows and Linux as of May 2026.
 - [x] Framebuffer
 - [x] ECS
 - [ ] New renderer
-- [ ] Optimize the memory usage for ECS
+- [ ] ECS memory usage optimization
 - [ ] Lighting
 - [ ] Shadow map
 - [ ] CSM
 - [ ] Post-processing support
 - [ ] Bloom
-- [ ] SSAO (after OpenGL 4.5)
+- [ ] SSAO implementation after migrating to OpenGL 4.5
 
 ## Current Features
 - OpenGL renderer
@@ -34,27 +34,39 @@ It supports Windows and Linux as of May 2026.
 ## Known Bugs/Issues
 - Depth test is wrong
 - Linux build scripts are unstable
-- Framebuffer not scaling up correctly with the window
+- Framebuffer does not scale properly to the window size
 
-## How to build
-You have to install these required tools:
+## How to clone and build
+These tools are required to build Xethium:
 - C++20
 - GCC
 
-Run these scripts
+Clone the repository
+SSH:
+```bash
+git clone git@github.com:ShaderHex/Xethium-Eng.git
+```
+
+HTTP:
+
+```bash
+git clone https://github.com/ShaderHex/Xethium-Eng.git
+```
+
+and run the following scripts inside the cloned directory
 ```bash
 ./build-all.bat
 ```
-This builds both the engine and application (in our case testbed)
+to build both the engine and the testing tool (TestBed) 
 
 ```bash
 cd engine
 ./build.bat
 ```
-This builds engine specificly
+To just build the engine:
 
 ```bash
 cd testbed
 ./build.bat
 ```
-This builds testbed (the app built on top of the engine) specificly
+To just build Test Bed:
