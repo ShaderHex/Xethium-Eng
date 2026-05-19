@@ -2,11 +2,11 @@
 
 ## Lightweight cross-platform 3D engine written in C++
 
-**Xethium Engine** is a lightweight, visually rich engine that's still heavly under development.\
+**Xethium Engine** is a lightweight, visually rich engine that's still heavily under development.\
 It supports Windows and Linux as of May 2026.
 
 ## Free and open source
-**Xethium Engine** is Free and open source forever under the [MIT License](https://github.com/ShaderHex/Xethium-Eng/blob/main/LICENSE)
+**Xethium Engine** will stay free and open source forever under the [MIT License](https://github.com/ShaderHex/Xethium-Eng/blob/main/LICENSE)
 ![XETHIUM-SCREENSHOT](screenshots/fps.jpg)
 ![XETHIUM-SCREENSHOT2](screenshots/material-test.jpg)
 ![XETHIUM-SCREENSHOT3](screenshots/xethium-test.png)
@@ -21,7 +21,7 @@ It supports Windows and Linux as of May 2026.
 - [ ] CSM
 - [ ] Post-processing support
 - [ ] Bloom
-- [ ] SSAO (after opengl 4.5)
+- [ ] SSAO (after OpenGL 4.5)
 
 ## Current Features
 - OpenGL renderer
@@ -37,7 +37,7 @@ It supports Windows and Linux as of May 2026.
 - Framebuffer not scaling up correctly with the window
 
 ## How to build
-You have to install these required tools:\
+You have to install these required tools:
 - C++20
 - GCC
 
