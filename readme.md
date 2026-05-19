@@ -1,4 +1,4 @@
-<b><font size="6">Xethium Engine</font></b>
+# Xethium Engine
 
 ## Lightweight cross-platform 3D engine written in C++
 
