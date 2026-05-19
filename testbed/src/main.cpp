@@ -31,7 +31,7 @@ void CreateInputKeys() {
     XENGINE::CreateAction("change_scene", X_KEY_C);
 }
 
-void UpdateInput(XENGINE::Scene scene, XENGINE::Scene scene2) {
+void UpdateInput(XENGINE::Scene& scene, XENGINE::Scene& scene2) {
     float camSpeed = 5.0f;
 
     if(XENGINE::IsActionHeld("forward")) {
@@ -111,7 +111,7 @@ void ShutdownImGui() {
 }
 
 void InitTestbed() {
-    XENGINE::Init("testbed", 1200, 800);
+    XENGINE::Init("testbed", 3440, 1440);
     CreateInputKeys();
     glfwInit();
 
