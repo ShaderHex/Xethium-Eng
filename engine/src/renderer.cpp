@@ -40,7 +40,6 @@ void Renderer::Init(XENGINE::framebuffer::FramebufferSpec fbSpec) {
 }
 
 void Renderer::DrawQuadMesh(GLuint textureID) {
-    std::cout<< "[Renderer] Using the framebuffer: " << textureID << "\n";
     static Mesh::Mesh* quad = MeshFactory::MeshFactory::CreateQuadMesh();
 
     m_framebufferShader->use();
@@ -53,7 +52,7 @@ void Renderer::DrawQuadMesh(GLuint textureID) {
     glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::Draw(XENGINE::Scene activeScene, Shader::Shader* Shader) {
+void Renderer::Draw(XENGINE::Scene& activeScene, Shader::Shader* Shader) {
 
     // for (auto& obj : gameObject.GetCubeObjects()) {
     //     glm::mat4 model = glm::mat4(1.0f);

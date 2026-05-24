@@ -50,7 +50,6 @@ void Framebuffer::Update(const FramebufferSpec& spec) {
 }
 
 void Framebuffer::Bind() {
-    std::cout<< "[Framebuffer] Renderering the scene on the the framebuffer: " << this->GetTextureID() << "\n";
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
