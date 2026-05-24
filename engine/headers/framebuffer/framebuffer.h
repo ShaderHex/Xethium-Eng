@@ -19,6 +19,7 @@ public:
     void Unbind();
 
     unsigned int GetID() const { return m_fbo; }
+    unsigned int GetTextureID() const { return m_texture->GetID(); }
 
 private:
     unsigned int m_fbo = 0;

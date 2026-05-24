@@ -39,16 +39,18 @@ void Renderer::Init(XENGINE::framebuffer::FramebufferSpec fbSpec) {
 
 }
 
-void Renderer::DrawQuadMesh() {
+void Renderer::DrawQuadMesh(GLuint textureID) {
+    std::cout<< "[Renderer] Using the framebuffer: " << textureID << "\n";
     static Mesh::Mesh* quad = MeshFactory::MeshFactory::CreateQuadMesh();
 
     m_framebufferShader->use();
     glBindVertexArray(quad->VAO);
     glDisable(GL_DEPTH_TEST);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_textureColorbuffer->GetID());
+    glBindTexture(GL_TEXTURE_2D, textureID);
     m_framebufferShader->setInt("screenTexture", 0);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void Renderer::Draw(XENGINE::Scene activeScene, Shader::Shader* Shader) {

@@ -22,9 +22,9 @@ namespace XENGINE {
     void Init(const char *title, int windowX, int windowY) {
 
         Platform::CreateWindow(title, windowX, windowY);
-        renderer.Init(fbSpec);
         fbSpec.width = windowX;
         fbSpec.height = windowY;
+        renderer.Init(fbSpec);
         
         fb.Initialize(fbSpec);
     }
@@ -42,8 +42,9 @@ namespace XENGINE {
         renderer.ClearScreen();
         renderer.StartDrawing(Shader, camera, activeScene);
         fb.Unbind();
+
         renderer.ClearScreen();
-        renderer.DrawQuadMesh();
+        renderer.DrawQuadMesh(fb.GetTextureID());
 
         input.Update();
     }

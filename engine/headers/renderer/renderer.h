@@ -17,7 +17,7 @@ public:
     void Init(XENGINE::framebuffer::FramebufferSpec fbSpec);
     void Draw(XENGINE::Scene activeScene, Shader::Shader* Shader);
     void StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGINE::Scene activeScene);
-    void DrawQuadMesh();
+    void DrawQuadMesh(GLuint textureID);
     void ClearScreen();
 private:
     unsigned int shaderProgram;

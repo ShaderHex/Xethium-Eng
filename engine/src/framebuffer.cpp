@@ -50,21 +50,19 @@ void Framebuffer::Update(const FramebufferSpec& spec) {
 }
 
 void Framebuffer::Bind() {
+    std::cout<< "[Framebuffer] Renderering the scene on the the framebuffer: " << this->GetTextureID() << "\n";
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glViewport(0, 0, m_fbSpec.width, m_fbSpec.height);
 }
 
 void Framebuffer::Unbind() {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
-    
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     // TODO: Draw the framebuffer to a quadmesh
     // glBlitFramebuffer(0, 0, m_fbSpec.width, m_fbSpec.height, 
     //                   0, 0, m_fbSpec.width, m_fbSpec.height, 
     //                   GL_COLOR_BUFFER_BIT, GL_NEAREST); // for now we will copy the framebuffer and render from the copy not the actualy framebuffer itself as it requires external function that renders on quad mesh which i don't have right now
-                      
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 }
