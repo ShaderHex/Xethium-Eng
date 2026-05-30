@@ -8,6 +8,10 @@
 #include "platform/platform.h"
 #include "scene/scene.h"
 #include "scene/sceneManager.h"
+#include "ecs/entityManager.h"
+#include "ecs/componentStorage.h"
+#include "mesh/meshFactory.h"
+#include "mesh/mesh.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -111,7 +115,7 @@ void ShutdownImGui() {
 }
 
 void InitTestbed() {
-    XENGINE::Init("testbed", 3440, 1440);
+    XENGINE::Init("testbed", 1200, 800);
     CreateInputKeys();
     glfwInit();
 
@@ -129,7 +133,7 @@ void UpdateFPSTitle(GLFWwindow* window, float dt) {
     if (timer >= 1.0f) {
         fps = frames / timer;
         
-        std::string title = "testbed - FPS: " + std::to_string((int)fps);
+        std::string title = "Testbed - FPS: " + std::to_string((int)fps);
         XENGINE::ChangeNativeWindowTitle(title.c_str());
         
         timer -= 1.0f; 
@@ -162,52 +166,84 @@ int main() {
 
     // First scene
     XENGINE::Scene scene;
-    GameObject::GameObject::CubeSpec Cube;
-    Cube.position.x = 0.0f;
-    Cube.position.y = 1.5f;
-    Cube.position.z = 0.0f;
+    GameObject::GameObject::CubeSpec Cube1;
+    // Cube.position.x = 0.0f;
+    // Cube.position.y = 1.5f;
+    // Cube.position.z = 0.0f;
 
-    Cube.scale.x = 1.0f;
-    Cube.scale.y = 1.0f;
-    Cube.scale.z = 1.0f;
+    // Cube.scale.x = 1.0f;
+    // Cube.scale.y = 1.0f;
+    // Cube.scale.z = 1.0f;
 
-    Cube.rotation.x = 0.0f;
-    Cube.rotation.y = 0.0f;
-    Cube.rotation.z = 0.0f;
+    // Cube.rotation.x = 0.0f;
+    // Cube.rotation.y = 0.0f;
+    // Cube.rotation.z = 0.0f;
 
-    // Cube.texture = tex;
+    // // Cube.texture = tex;
 
-    scene.CreateCube(Cube, {255, 255, 255});
+    // scene.CreateCube(Cube, {255, 255, 255});
 
-    // Second Scene
+    // // Second Scene
     XENGINE::Scene scene2;
-    GameObject::GameObject::CubeSpec Cube2;
-    Cube2.texture = tex;
-    scene2.CreateCube(Cube2, {255, 255, 255});
-    scene2.CreateCube(Cube, {255, 255, 255});
-    
+    // GameObject::GameObject::CubeSpec Cube2;
+    // Cube2.texture = tex;
+    // scene2.CreateCube(Cube2, {255, 255, 255});
+    // scene2.CreateCube(Cube, {255, 255, 255});
     XENGINE::SwitchActiveScene(scene); // starting the engine with "scene" scene
-
+    Entity Cube = scene.ecs.CreateEntity();
+    
+    // the cube mesh
+    static Mesh::Mesh* cubeMesh = MeshFactory::MeshFactory::CreateCube();
+    XENGINE::MeshComponent mesh;
+    mesh.Mesh = cubeMesh;
+    
+    // Transform component (position, scale and rotation)
+    XENGINE::TransformComponent cubeTransform;
+    
+    scene.ecs.AddComponent<XENGINE::TransformComponent>(Cube, cubeTransform);
+    scene.ecs.AddComponent<XENGINE::MeshComponent>(Cube, mesh);
+    
+    std::cout << "[Testbed] Scene ECS allocation: " << &scene.ecs << "\n";
+    
+    if (scene.ecs.HasComponent<XENGINE::TransformComponent>(Cube)) {
+        std::cout << "[Testbed] Cube has Transform component\n";
+    } else {
+        std::cout << "[Testbed] Cube doesnt have Transform component\n";        
+    }
+    
+    if (scene.ecs.HasComponent<XENGINE::MeshComponent>(Cube)) {
+        std::cout << "[Testbed] Cube has Mesh component\n";
+    } else {
+        std::cout << "[Testbed] Cube doesnt have Mesh component\n";
+    }
+    
+    // scene.CreateCube(Cube1, {1,1,1});
+    std::cout << "[Testbed] activeScene allocation: " << &scene << "\n";
+    std::cout << "[Testbed] Entities count: " << scene.ecs.GetEntityCount() << "\n";
+    
     // scene2.Update(function)
     while (!XENGINE::WindowShouldClose()) {
-
+        std::cout << "[Testbed] Transform type hash: "
+              << typeid(XENGINE::TransformComponent).name()
+              << "\n";
         
+        scene.SetActiveCamera(camera);
         dt = XENGINE::GetDeltaTime();
         UpdateFPSTitle(XENGINE::GetNativeWindow(), dt);
-
+        
         
         if(fpsHistory.size() >= 100.0) {
             fpsHistory.erase(fpsHistory.begin());
         }
         float currentFPS = 1.0f / dt;
         fpsHistory.push_back(currentFPS);
-
+        
         if (XENGINE::IsActionPressed("change_texture")) {
             wall_tex = !wall_tex;
         }
-
+        
         // cube1->transform.position.x += 0.1 * dt;
-
+        
         // if (wall_tex == true) {
         //     cube1->texture = customTex;
         // } else {
@@ -218,7 +254,7 @@ int main() {
         UpdateInput(scene, scene2);
         
         ImGuiStartFrame();
-        XENGINE::StartDrawing(shader, camera);
+        XENGINE::StartDrawing(shader);
 
 
         //XENGINE::useShader(shader);
@@ -227,6 +263,9 @@ int main() {
         ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
         ImGui::Text("Cubes created: %.i", i);
         ImGui::PlotLines("##fps", fpsHistory.data(), fpsPlotLineValue, 0, nullptr, 0.0f, 5000.0f, ImVec2(0, 150));
+        ImGui::Text("Camera X: %f", scene.GetActiveCamera().position.x);
+        ImGui::Text("Camera Y: %f", scene.GetActiveCamera().position.y);
+        ImGui::Text("Camera Z: %f", scene.GetActiveCamera().position.z);
         ImGui::DragInt("##plot", &fpsPlotLineValue, 0.5);
         ImGui::End();
         

@@ -4,91 +4,82 @@
 #include <unordered_map>
 #include <vector>
 #include <typeindex>
+#include <any>
 #include <algorithm>
 
 using Entity = uint32_t;
-using Component = uint32_t;
 
 namespace XENGINE {
 
 class EntityManager {
-    public:
+public:
     Entity CreateEntity() {
-        if(!m_freeEntities.empty()) {
-            Entity freeEntityID = m_freeEntities.back();
-            m_allEntities.push_back(freeEntityID);
+        if (!m_freeEntities.empty()) {
+            Entity id = m_freeEntities.back();
             m_freeEntities.pop_back();
-            std::cout<< "Reusing ID: " << freeEntityID << "\n";
-            return freeEntityID;
+            m_allEntities.push_back(id);
+            return id;
         }
-        Entity newID = m_entity++;
-        m_allEntities.push_back(newID);
-        std::cout<< "No new ID found! Creating new ID: " << newID << "\n";
-        return newID;
+        Entity id = m_nextEntity++;
+        m_allEntities.push_back(id);
+        return id;
     }
 
-    void DestroyEntity(Entity& e) {
-        std::cout<< "Destroying ID: " << e << "\n";
-        
-        for (auto& type : m_entityComponentTracker[e]) {
-            m_typeDeleters[type](e);
+    void DestroyEntity(Entity e) {
+        for (auto& [typeIdx, storage] : m_components) {
+            auto& map = std::any_cast<std::unordered_map<Entity, std::any>&>(storage);
+            map.erase(e);
         }
-
-        m_allEntities.erase(std::remove(m_allEntities.begin(), m_allEntities.end(), e));
-        m_entityComponentTracker.erase(e);
+        m_allEntities.erase(std::remove(m_allEntities.begin(), m_allEntities.end(), e), m_allEntities.end());
         m_freeEntities.push_back(e);
-    }
-
-    std::vector<Entity> GetAllEntity() {
-        return m_allEntities;
-    }
-
-    template <typename T>
-    void RemoveComponent(Entity& e) {
-        if (HasComponent<T>(e)) {
-            GetStorage<T>().erase(e);
-            m_entityComponentTracker[e].erase(std::remove(m_entityComponentTracker[e].begin(), m_entityComponentTracker[e].end(), typeid(T)) ,m_entityComponentTracker[e].end());
-        } else
-            std::cout << "Entity: " << e << " does not have the component you just tried to remove\n" << std::endl;
-    }
-
-    Entity GetEntityCount() {
-        return m_entity;
     }
 
     template <typename T>
     void AddComponent(Entity e, const T& component) {
-        GetStorage<T>()[e] = component;
-        m_entityComponentTracker[e].push_back(typeid(T));
-        m_typeDeleters[typeid(T)] = [](Entity id) {
-            GetStorage<T>().erase(id);
-        };
+        auto& storage = getStorage<T>();
+        storage[e] = component;
+        std::cout << "Added a component to Entity ID: " << e << "\n";
     }
 
     template <typename T>
     T& GetComponent(Entity e) {
-        return GetStorage<T>().at(e);
+        return getStorage<T>().at(e);
     }
 
     template <typename T>
     bool HasComponent(Entity e) {
-        return GetStorage<T>().find(e) != GetStorage<T>().end();
+        auto it = m_components.find(typeid(T));
+        if (it == m_components.end()) return false;
+        auto& storage = std::any_cast<std::unordered_map<Entity, T>&>(it->second);
+        return storage.find(e) != storage.end();
     }
 
     template <typename T>
-    static std::unordered_map<Entity, T>& GetStorage() {
-        static std::unordered_map<Entity, T> storage;
-        return storage;
+    void RemoveComponent(Entity e) {
+        auto it = m_components.find(typeid(T));
+        if (it != m_components.end()) {
+            auto& storage = std::any_cast<std::unordered_map<Entity, T>&>(it->second);
+            storage.erase(e);
+        }
     }
-    // template<typename T1, typename T2> T2 AddComponent(T1, T2)
+
+    std::vector<Entity>& GetAllEntity() { return m_allEntities; }
+    Entity GetEntityCount() const { return m_nextEntity; }
 
 private:
-    std::vector<Entity> m_freeEntities;
-    std::unordered_map<Entity, std::vector<std::type_index>> m_entityComponentTracker;
-    std::unordered_map<std::type_index, void(*)(Entity)> m_typeDeleters;
-    std::vector<Entity> m_allEntities;
+    template <typename T>
+    std::unordered_map<Entity, T>& getStorage() {
+        auto it = m_components.find(typeid(T));
+        if (it == m_components.end()) {
+            m_components[typeid(T)] = std::unordered_map<Entity, T>{};
+        }
+        return std::any_cast<std::unordered_map<Entity, T>&>(m_components[typeid(T)]);
+    }
 
-    Entity m_entity = 0;
+    std::unordered_map<std::type_index, std::any> m_components;
+    std::vector<Entity> m_freeEntities;
+    std::vector<Entity> m_allEntities;
+    Entity m_nextEntity = 0;
 };
 
 }

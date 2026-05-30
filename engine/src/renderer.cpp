@@ -99,6 +99,10 @@ void Renderer::Draw(XENGINE::Scene& activeScene, Shader::Shader* Shader) {
     //     }
 
     for (auto& e : activeScene.ecs.GetAllEntity()) {
+        std::cout << "[Renderer] Found entity ID:"<< e << "\n";
+        std::cout << "[Renderer] Transform type hash: "
+                << typeid(XENGINE::TransformComponent).name()
+                << "\n";
         if (activeScene.ecs.HasComponent<XENGINE::TransformComponent>(e)) {
             auto& transform = activeScene.ecs.GetComponent<XENGINE::TransformComponent>(e);
 
@@ -115,31 +119,38 @@ void Renderer::Draw(XENGINE::Scene& activeScene, Shader::Shader* Shader) {
 
             Shader->setVec3("objectColor", {1, 0, 1}); // TODO: Color after material
             Shader->setMat4("model", model);
+            // std::cout << "Entity with transform FOUND! rendering it...\n";
             
-            if (activeScene.ecs.HasComponent<XENGINE::MeshComponent>(e)) {
-                auto& mesh = activeScene.ecs.GetComponent<XENGINE::MeshComponent>(e);
-                if(mesh.Mesh != nullptr) {
-                    // std::cout << "[Renderer] obj mesh VAO ID: " << obj.mesh->VAO << " [Renderer] obj mesh vertexCount:" << obj.mesh->vertexCount << "\n";
-                    glBindVertexArray(mesh.Mesh->VAO);
-                    glDrawArrays(GL_TRIANGLES, 0, mesh.Mesh->vertexCount);
-                    glBindVertexArray(0);
-                } else {
-                    std::cout << "[Renderer] obj mesh is null!\n";
-                }
+        } else {
+            std::cout << "[Renderer]" << e <<  " doesnt have Transform component\n";
+        }
+
+        if (activeScene.ecs.HasComponent<XENGINE::MeshComponent>(e)) {
+            auto& mesh = activeScene.ecs.GetComponent<XENGINE::MeshComponent>(e);
+            if(mesh.Mesh != nullptr) {
+                // std::cout << "[Renderer] obj mesh VAO ID: " << obj.mesh->VAO << " [Renderer] obj mesh vertexCount:" << obj.mesh->vertexCount << "\n";
+                glBindVertexArray(mesh.Mesh->VAO);
+                glDrawArrays(GL_TRIANGLES, 0, mesh.Mesh->vertexCount);
+                glBindVertexArray(0);
+                // std::cout << "Entity with mesh FOUND! rendering it...\n";
+            } else {
+                std::cout << "[Renderer] obj mesh is null!\n";
             }
+        } else {
+            std::cout << "[Renderer]" << e <<  " doesnt have Mesh component\n";
         }
     }
 
 }
 
-void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera camera, XENGINE::Scene activeScene) {
+void Renderer::StartDrawing(Shader::Shader* Shader, Camera::Camera& camera, XENGINE::Scene& activeScene) {
     glfwPollEvents();
 
     Shader->use();
     
     glm::mat4 view;
     view = glm::lookAt(camera.position, camera.front + camera.position, camera.up);
-    camera.UpdateVectors();
+    // camera.UpdateVectors();
     //Shader.setMat4();
     
     glm::mat4 projection;

@@ -4,6 +4,7 @@
 #include "renderer/renderer.h"
 #include "framebuffer/framebuffer.h"
 #include "scene/sceneManager.h"
+#include "ecs/componentStorage.h"
 #include <iostream>
 #include <vector>
 
@@ -12,15 +13,13 @@ GLFWwindow* window;
 Renderer::Renderer renderer;
 XENGINE::framebuffer::Framebuffer fb;
 XENGINE::sceneManager g_sceneManager;
-XENGINE::Scene activeScene;
+XENGINE::Scene* activeScene = nullptr;
 XENGINE::framebuffer::FramebufferSpec fbSpec;
 namespace XENGINE {
     Platform::Input input;
-    
 
     // Platform
     void Init(const char *title, int windowX, int windowY) {
-
         Platform::CreateWindow(title, windowX, windowY);
         fbSpec.width = windowX;
         fbSpec.height = windowY;
@@ -33,15 +32,23 @@ namespace XENGINE {
         return Platform::WindowShouldClose();
     }
     
-    void StartDrawing(Shader::Shader* Shader, Camera::Camera camera) {
+    void StartDrawing(Shader::Shader* Shader) {
         // Platform::UpdateWindow(fb, fbSpec);
         // fb.Update(fbSpec);
-        activeScene = g_sceneManager.GetCurrentActiveScene();
+        activeScene = &g_sceneManager.GetCurrentActiveScene();
+        // std::cout << "[Engine] activeScene allocation: " << activeScene << "\n";
         
         fb.Bind();
         renderer.ClearScreen();
-        renderer.StartDrawing(Shader, camera, activeScene);
+        renderer.StartDrawing(Shader, activeScene->GetActiveCamera(), *activeScene);
         fb.Unbind();
+        activeScene->UpdateScene();
+        std::cout << "[Engine] Scene ECS allocation: " << &activeScene->ecs << "\n";
+        if (activeScene->ecs.HasComponent<XENGINE::TransformComponent>(0)) {
+            std::cout << "[Engine] Cube has Transform component\n";
+        } else {
+            std::cout << "[Engine] Cube doesnt have Transform component\n";        
+        }
 
         renderer.ClearScreen();
         renderer.DrawQuadMesh(fb.GetTextureID());
@@ -109,9 +116,10 @@ namespace XENGINE {
     // Scene
     void SwitchActiveScene(XENGINE::Scene& scene) {
         g_sceneManager.SwitchActiveScene(scene);
+        activeScene = &g_sceneManager.GetCurrentActiveScene();
     }
 
-    XENGINE::Scene GetActiveScene() {
+    XENGINE::Scene* GetActiveScene() {
         return activeScene;
     }
 } 

@@ -1,10 +1,11 @@
 #pragma once
 #include "mesh/mesh.h"
+#include "../../include/defines.h"
 
 namespace MeshFactory {
 class MeshFactory {
 public:
-    static Mesh::Mesh* CreateCube();
+    XAPI static Mesh::Mesh* CreateCube();
     static Mesh::Mesh* CreateQuadMesh();
 };
 }

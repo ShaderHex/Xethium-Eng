@@ -9,9 +9,16 @@ Scene::Scene() {
     std::cout << "[Scene] New Scene created at " << this << "\n";
 }
 
+void Scene::SetActiveCamera(Camera::Camera& activeCamera) {
+    // std::cout << "[Scene] Camera X: " << activeCamera.position.x << " Y: " << activeCamera.position.y << "\n";
+    // std::cout << "[Scene] Scene allocation: " << this << "\n";
+    m_activeCamera = activeCamera;
+}
+
+// These are preset for creating different type of entities!
+
 void Scene::CreateCube(GameObject::GameObject::CubeSpec spec, Color color) {
     static Mesh::Mesh* cubeMesh = MeshFactory::MeshFactory::CreateCube();
-    // GameObject::GameObject& gameObject = m_gameObject.back();
     XENGINE::TransformComponent transform;
     XENGINE::MeshComponent mesh;
 
@@ -22,6 +29,16 @@ void Scene::CreateCube(GameObject::GameObject::CubeSpec spec, Color color) {
     ecs.AddComponent<XENGINE::TransformComponent>(Entity, transform);
     ecs.AddComponent<XENGINE::MeshComponent>(Entity, mesh);
 
+    std::cout << "[Scene] Entities count: " << ecs.GetEntityCount() << "\n";
+}
+
+Entity Scene::CreateEntity() {
+    std::cout << "[Scene] Scene ECS allocation: " << &ecs << "\n";
+    return ecs.CreateEntity();
+}
+
+void Scene::UpdateScene() {
+    m_activeCamera.UpdateVectors();
 }
 
 }
