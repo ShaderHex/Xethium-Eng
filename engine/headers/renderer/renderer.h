@@ -7,7 +7,7 @@
 #include "scene/scene.h"
 #include "resourceManager/resourceManager.h"
 #include "framebuffer/framebuffer.h"
-
+#include "model/model.h"
 
 namespace Renderer {
 
@@ -25,6 +25,7 @@ private:
     Texture::Texture* m_texture;
     std::shared_ptr<Texture::Texture> m_textureColorbuffer;
     std::shared_ptr<Shader::Shader> m_framebufferShader;
+    std::unique_ptr<XENGINE::Model> rabbit;
     // glm::vec3 cameraPos;
     // glm::vec3 cameraFront;
     // glm::vec3 cameraUp;

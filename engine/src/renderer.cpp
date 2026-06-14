@@ -36,6 +36,7 @@ void Renderer::Init(XENGINE::framebuffer::FramebufferSpec fbSpec) {
     
     m_textureColorbuffer = XENGINE::ResourceManager::CreateBlankTexture(fbSpec.width, fbSpec.height);
     m_framebufferShader = std::make_unique<Shader::Shader>("shaders/framebuffer.vs", "shaders/framebuffer.fs");
+    rabbit = std::make_unique<XENGINE::Model>("bunny.obj");
 
 }
 
@@ -99,10 +100,6 @@ void Renderer::Draw(XENGINE::Scene& activeScene, Shader::Shader* Shader) {
     //     }
 
     for (auto& e : activeScene.ecs.GetAllEntity()) {
-        std::cout << "[Renderer] Found entity ID:"<< e << "\n";
-        std::cout << "[Renderer] Transform type hash: "
-                << typeid(XENGINE::TransformComponent).name()
-                << "\n";
         if (activeScene.ecs.HasComponent<XENGINE::TransformComponent>(e)) {
             auto& transform = activeScene.ecs.GetComponent<XENGINE::TransformComponent>(e);
 
@@ -121,8 +118,6 @@ void Renderer::Draw(XENGINE::Scene& activeScene, Shader::Shader* Shader) {
             Shader->setMat4("model", model);
             // std::cout << "Entity with transform FOUND! rendering it...\n";
             
-        } else {
-            std::cout << "[Renderer]" << e <<  " doesnt have Transform component\n";
         }
 
         if (activeScene.ecs.HasComponent<XENGINE::MeshComponent>(e)) {
@@ -136,10 +131,20 @@ void Renderer::Draw(XENGINE::Scene& activeScene, Shader::Shader* Shader) {
             } else {
                 std::cout << "[Renderer] obj mesh is null!\n";
             }
-        } else {
-            std::cout << "[Renderer]" << e <<  " doesnt have Mesh component\n";
         }
     }
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view  = activeScene.GetActiveCamera().GetViewMatrix();
+    glm::mat4 proj  = glm::perspective(glm::radians(45.0f), 800.0f/600.0f, 0.1f, 100.0f);
+
+    // print to confirm they're not identity/garbage
+    std::cout << "view[3]: " << view[3][0] << " " << view[3][1] << " " << view[3][2] << "\n";
+
+    Shader->setMat4("model", model);
+    Shader->setMat4("view", view);
+    Shader->setMat4("projection", proj);
+
+    rabbit->Draw(*Shader);
 
 }
 

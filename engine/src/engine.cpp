@@ -36,19 +36,13 @@ namespace XENGINE {
         // Platform::UpdateWindow(fb, fbSpec);
         // fb.Update(fbSpec);
         activeScene = &g_sceneManager.GetCurrentActiveScene();
-        // std::cout << "[Engine] activeScene allocation: " << activeScene << "\n";
         
         fb.Bind();
         renderer.ClearScreen();
         renderer.StartDrawing(Shader, activeScene->GetActiveCamera(), *activeScene);
         fb.Unbind();
         activeScene->UpdateScene();
-        std::cout << "[Engine] Scene ECS allocation: " << &activeScene->ecs << "\n";
-        if (activeScene->ecs.HasComponent<XENGINE::TransformComponent>(0)) {
-            std::cout << "[Engine] Cube has Transform component\n";
-        } else {
-            std::cout << "[Engine] Cube doesnt have Transform component\n";        
-        }
+
 
         renderer.ClearScreen();
         renderer.DrawQuadMesh(fb.GetTextureID());

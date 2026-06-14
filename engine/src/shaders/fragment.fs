@@ -9,9 +9,10 @@ uniform vec3 objectColor;
 uniform bool useTexture;
 
 void main() {
-    if (useTexture) {
-        FragColor = texture(ourTexture, TexCoord);
-    } else {
-        FragColor = vec4(objectColor, 1.0f);
-    }
+    // if (useTexture) {
+    //     FragColor = texture(ourTexture, TexCoord);
+    // } else {
+    //     FragColor = vec4(objectColor, 1.0f);
+    // }
+    FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 }

@@ -1,3 +1,6 @@
+// linker fixed!! now give the model a position!! wdym you are trying without one lmao crazy shit anyways
+// i hope its not much of work!! goodluck!
+
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "XEngine.h"
 #include "glad/glad.h"
@@ -193,15 +196,15 @@ int main() {
     Entity Cube = scene.ecs.CreateEntity();
     
     // the cube mesh
-    static Mesh::Mesh* cubeMesh = MeshFactory::MeshFactory::CreateCube();
-    XENGINE::MeshComponent mesh;
-    mesh.Mesh = cubeMesh;
+    // static Mesh::Mesh* cubeMesh = MeshFactory::MeshFactory::CreateCube();
+    // XENGINE::MeshComponent mesh;
+    // mesh.Mesh = cubeMesh;
     
     // Transform component (position, scale and rotation)
-    XENGINE::TransformComponent cubeTransform;
+    // XENGINE::TransformComponent cubeTransform;
     
-    scene.ecs.AddComponent<XENGINE::TransformComponent>(Cube, cubeTransform);
-    scene.ecs.AddComponent<XENGINE::MeshComponent>(Cube, mesh);
+    // scene.ecs.AddComponent<XENGINE::TransformComponent>(Cube, cubeTransform);
+    // scene.ecs.AddComponent<XENGINE::MeshComponent>(Cube, mesh);
     
     std::cout << "[Testbed] Scene ECS allocation: " << &scene.ecs << "\n";
     
@@ -223,9 +226,6 @@ int main() {
     
     // scene2.Update(function)
     while (!XENGINE::WindowShouldClose()) {
-        std::cout << "[Testbed] Transform type hash: "
-              << typeid(XENGINE::TransformComponent).name()
-              << "\n";
         
         scene.SetActiveCamera(camera);
         dt = XENGINE::GetDeltaTime();
