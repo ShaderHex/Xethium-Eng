@@ -1,3 +1,7 @@
 /build
 
 /vendor/assimp
+/vendor/glfw
+/vendor/glm
+/vendor/stb
+/vendor/imgui
